@@ -1,0 +1,20 @@
+# application port
+server:
+  port: 8000
+  error:
+    include-stacktrace: never
+
+# spring setting
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: P@ssw0rd
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 5
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
