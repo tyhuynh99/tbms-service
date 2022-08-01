@@ -3,6 +3,8 @@ server:
   port: 8000
   error:
     include-stacktrace: never
+  servlet:
+    context-path: /tbms_service
 
 # spring setting
 spring:
