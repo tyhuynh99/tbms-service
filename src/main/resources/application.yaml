@@ -1,6 +1,6 @@
 # application port
 server:
-  port: 8000
+  port: 8888
   error:
     include-stacktrace: never
   servlet:
