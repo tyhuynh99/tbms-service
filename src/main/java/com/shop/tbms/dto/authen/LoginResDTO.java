@@ -1,4 +1,4 @@
-package com.shop.tbms.dto.response;
+package com.shop.tbms.dto.authen;
 
 import com.shop.tbms.config.security.TbmsUserDetails;
 import lombok.*;
@@ -11,5 +11,6 @@ import lombok.*;
 @Builder
 public class LoginResDTO {
     private String token;
+    private String refreshToken;
     private TbmsUserDetails user;
 }

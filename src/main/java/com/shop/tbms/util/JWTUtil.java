@@ -32,10 +32,10 @@ public class JWTUtil {
     }
 
     public static TbmsUserDetails getUserFromToken(String token, String key) {
-        Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parser().setSigningKey(key.getBytes()).parseClaimsJws(token).getBody();
 
         return TbmsUserDetails.builder()
-                .userId((Long) claims.get(USER_ID))
+                .userId(Long.valueOf((Integer) claims.get(USER_ID)))
                 .username((String) claims.get(USERNAME))
                 .fullname((String) claims.get(FULLNAME))
                 .isActive((Boolean) claims.get(IS_ACTIVE))

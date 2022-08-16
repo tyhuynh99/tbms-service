@@ -4,6 +4,7 @@ import com.shop.tbms.enumerate.Role;
 import lombok.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -17,4 +18,21 @@ public class TbmsUserDetails {
     private String fullname;
     private Role role;
     private Boolean isActive;
+
+    @Override
+    public boolean equals(Object obj) {
+        // if 2 user have the same user id and username -> equals
+        if (!(obj instanceof TbmsUserDetails)) {
+            return false;
+        }
+
+        TbmsUserDetails otherUserDetail = (TbmsUserDetails) obj;
+
+        // compare user id
+        if (!Objects.equals(otherUserDetail.getUserId(), this.getUserId())) return false;
+        // compare username
+        if (!Objects.equals(otherUserDetail.getUsername(), this.getUsername())) return false;
+
+        return true;
+    }
 }

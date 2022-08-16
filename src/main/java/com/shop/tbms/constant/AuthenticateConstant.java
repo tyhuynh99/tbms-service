@@ -28,4 +28,10 @@ public class AuthenticateConstant {
 
     @Value("${type}")
     private String type;
+
+    @Value("${access_token_expired_time}")
+    private Long accessTokenExpiredTime;
+
+    @Value("${refresh_token_expired_time}")
+    private Long refreshTokenExpiredTime;
 }
