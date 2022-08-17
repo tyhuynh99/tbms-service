@@ -1,5 +1,7 @@
 package com.shop.tbms.config.security;
 
+import com.shop.tbms.config.filter.JWTAuthenticateFilter;
+import com.shop.tbms.config.filter.JWTAuthorizationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,6 +16,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class TbmsSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JWTAuthenticateFilter jwtAuthenticateFilter;
+    @Autowired
+    private JWTAuthorizationFilter jwtAuthorizationFilter;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -21,9 +25,10 @@ public class TbmsSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .addFilterBefore(jwtAuthenticateFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/authen/login").permitAll()
-                .antMatchers(HttpMethod.POST, "/authen/refresh").permitAll()
+                .antMatchers(HttpMethod.POST, AuthorizationConfig.LOGIN).permitAll()
+                .antMatchers(HttpMethod.POST, AuthorizationConfig.REFRESH_TOKEN).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

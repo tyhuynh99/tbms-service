@@ -16,4 +16,14 @@ public class TestController {
     public ResponseEntity<Map> getProfile() {
         return ResponseEntity.ok(Map.of("profile", AuthenticationUtil.getUserDetails()));
     }
+
+    @GetMapping("/admin")
+    public ResponseEntity<String> checkAdmin() {
+        return ResponseEntity.ok("Admin ok");
+    }
+
+    @GetMapping("/member")
+    public ResponseEntity<String> checkMember() {
+        return ResponseEntity.ok("Member ok");
+    }
 }

@@ -1,5 +1,6 @@
-package com.shop.tbms.config.security;
+package com.shop.tbms.config.filter;
 
+import com.shop.tbms.config.security.TbmsUserDetails;
 import com.shop.tbms.constant.AuthenticateConstant;
 import com.shop.tbms.util.JWTUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class JWTAuthenticateFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        log.info("Process JWTAuthenticateFilter");
         String jwt = JWTUtil.parseJwt(request);
 
         if (!StringUtils.isBlank(jwt)) {
@@ -35,10 +37,12 @@ public class JWTAuthenticateFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, null);
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
+                log.info("End process JWTAuthenticateFilter");
                 filterChain.doFilter(request, response);
                 return;
             }
         }
+        log.info("End process JWTAuthenticateFilter");
         filterChain.doFilter(request, response);
     }
 }
