@@ -2,11 +2,16 @@ package com.shop.tbms.component;
 
 import com.shop.tbms.config.security.TbmsUserDetails;
 import com.shop.tbms.constant.AuthenticateConstant;
+import com.shop.tbms.dto.authen.LoginReqDTO;
+import com.shop.tbms.entity.Account;
+import com.shop.tbms.util.PasswordUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 
@@ -31,7 +36,24 @@ public class AuthenticateComponent {
                 .claim(USERNAME, userDetails.getUsername())
                 .claim(FULLNAME, userDetails.getFullname())
                 .claim(ROLE, userDetails.getRole())
-                .claim(IS_ACTIVE, userDetails.getIsActive())
+                .claim(IS_ACTIVE, userDetails.getActive())
                 .compact();
+    }
+
+    public void checkValidAccount(Account account, LoginReqDTO loginReqDTO) {
+        // check correct password
+        if (!PasswordUtil.checkPassword(loginReqDTO.getPassword(), account.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid username or password");
+        }
+
+        // check active
+        this.checkActiveAccount(account);
+    }
+
+    public void checkActiveAccount(Account account) {
+        // check active
+        if (!Boolean.TRUE.equals(account.getActive())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account is locked");
+        }
     }
 }

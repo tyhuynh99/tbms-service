@@ -6,9 +6,13 @@ import com.shop.tbms.constant.AuthenticateConstant;
 import com.shop.tbms.dto.authen.LoginReqDTO;
 import com.shop.tbms.dto.authen.LoginResDTO;
 import com.shop.tbms.dto.authen.RefreshTokenReqDTO;
+import com.shop.tbms.entity.Account;
 import com.shop.tbms.enumerate.Role;
+import com.shop.tbms.mapper.AccountToUserDetailsMapper;
+import com.shop.tbms.repository.AccountRepository;
 import com.shop.tbms.service.AuthenticateService;
 import com.shop.tbms.util.JWTUtil;
+import com.shop.tbms.util.PasswordUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,36 +28,46 @@ import org.springframework.web.server.ResponseStatusException;
 public class AuthenticateServiceImpl implements AuthenticateService {
     @Autowired
     private AuthenticateConstant authenticateConstant;
+
+    @Autowired
+    private AccountRepository accountRepository;
+
     @Autowired
     private AuthenticateComponent authenticateComponent;
 
+    @Autowired
+    private AccountToUserDetailsMapper accountToUserDetailsMapper;
+
+
     @Override
     public LoginResDTO login(LoginReqDTO loginReqDTO) {
-        if (!StringUtils.isBlank(loginReqDTO.getUsername()) && !StringUtils.isBlank(loginReqDTO.getPassword())) {
-            TbmsUserDetails userDetails = TbmsUserDetails.builder()
-                    .userId(1L)
-                    .username(loginReqDTO.getUsername())
-                    .role(Role.ADMIN)
-                    .fullname("test fullname")
-                    .isActive(true)
-                    .build();
+        Account account = accountRepository.findFirstByUsername(loginReqDTO.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid username or password"));
 
-            String accessToken = authenticateComponent.generateToken(true, userDetails);
-            String refreshToken = authenticateComponent.generateToken(false, userDetails);
+        // check valid account
+        authenticateComponent.checkValidAccount(account, loginReqDTO);
 
-            return LoginResDTO.builder()
-                    .token(accessToken)
-                    .refreshToken(refreshToken)
-                    .build();
-        }
-        return null;
+        TbmsUserDetails userDetails = accountToUserDetailsMapper.toUserDetails(account);
+
+        String accessToken = authenticateComponent.generateToken(true, userDetails);
+        String refreshToken = authenticateComponent.generateToken(false, userDetails);
+
+        return LoginResDTO.builder()
+                .token(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     @Override
     public LoginResDTO refreshToken(RefreshTokenReqDTO refreshTokenReqDTO) {
         TbmsUserDetails curRefreshTokenUserDetail = JWTUtil.getUserFromToken(refreshTokenReqDTO.getRefreshToken(), authenticateConstant.getKey());
 
-        // TODO: query db to check current data
+        Account account = accountRepository.findFirstByUsername(curRefreshTokenUserDetail.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid username or password"));
+
+        // check account is active
+        authenticateComponent.checkActiveAccount(account);
+
         String newAccessToken = authenticateComponent.generateToken(true, curRefreshTokenUserDetail);
         String newRefreshToken = authenticateComponent.generateToken(false, curRefreshTokenUserDetail);
 

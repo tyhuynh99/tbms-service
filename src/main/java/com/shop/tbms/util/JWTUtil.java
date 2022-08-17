@@ -38,7 +38,7 @@ public class JWTUtil {
                 .userId(Long.valueOf((Integer) claims.get(USER_ID)))
                 .username((String) claims.get(USERNAME))
                 .fullname((String) claims.get(FULLNAME))
-                .isActive((Boolean) claims.get(IS_ACTIVE))
+                .active((Boolean) claims.get(IS_ACTIVE))
                 .role(Role.fromValue((int) claims.get(ROLE)))
                 .build();
     }
