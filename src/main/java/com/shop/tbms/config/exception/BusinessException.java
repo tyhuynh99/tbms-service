@@ -1,4 +1,21 @@
 package com.shop.tbms.config.exception;
 
-public class BusinessException {
+import lombok.*;
+
+import java.util.List;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class BusinessException extends RuntimeException {
+    private String errorMessage;
+    private String errorCode;
+    private List<?> data;
+
+    public BusinessException(String message) {
+        super(message);
+        this.errorMessage = message;
+    }
 }

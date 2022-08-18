@@ -1,5 +1,6 @@
 package com.shop.tbms.component;
 
+import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.config.security.TbmsUserDetails;
 import com.shop.tbms.constant.AuthenticateConstant;
 import com.shop.tbms.dto.authen.LoginReqDTO;
@@ -43,7 +44,7 @@ public class AuthenticateComponent {
     public void checkValidAccount(Account account, LoginReqDTO loginReqDTO) {
         // check correct password
         if (!PasswordUtil.checkPassword(loginReqDTO.getPassword(), account.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid username or password");
+            throw new BusinessException("Invalid username or password");
         }
 
         // check active
@@ -53,7 +54,7 @@ public class AuthenticateComponent {
     public void checkActiveAccount(Account account) {
         // check active
         if (!Boolean.TRUE.equals(account.getActive())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account is locked");
+            throw new BusinessException("Account is locked");
         }
     }
 }
