@@ -1,6 +1,8 @@
 package com.shop.tbms.service.impl;
 
 import com.shop.tbms.component.AuthenticateComponent;
+import com.shop.tbms.config.exception.BusinessException;
+import com.shop.tbms.config.exception.ForbiddenException;
 import com.shop.tbms.config.security.TbmsUserDetails;
 import com.shop.tbms.constant.AuthenticateConstant;
 import com.shop.tbms.dto.authen.LoginReqDTO;
@@ -11,6 +13,7 @@ import com.shop.tbms.enumerate.Role;
 import com.shop.tbms.mapper.AccountToUserDetailsMapper;
 import com.shop.tbms.repository.AccountRepository;
 import com.shop.tbms.service.AuthenticateService;
+import com.shop.tbms.util.AuthenticationUtil;
 import com.shop.tbms.util.JWTUtil;
 import com.shop.tbms.util.PasswordUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -63,7 +68,7 @@ public class AuthenticateServiceImpl implements AuthenticateService {
         TbmsUserDetails curRefreshTokenUserDetail = JWTUtil.getUserFromToken(refreshTokenReqDTO.getRefreshToken(), authenticateConstant.getKey());
 
         Account account = accountRepository.findFirstByUsername(curRefreshTokenUserDetail.getUsername())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid username or password"));
+                .orElseThrow(() -> new BusinessException("Invalid username or password"));
 
         // check account is active
         authenticateComponent.checkActiveAccount(account);
@@ -75,5 +80,20 @@ public class AuthenticateServiceImpl implements AuthenticateService {
                 .token(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .build();
+    }
+
+    @Override
+    public void checkCurrentUserRole(List<Role> listValidRole) {
+        TbmsUserDetails userDetails = AuthenticationUtil.getUserDetails();
+
+        Account account = accountRepository.findFirstByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new BusinessException("Invalid username or password"));
+
+        // check account is active
+        authenticateComponent.checkActiveAccount(account);
+
+        if (!listValidRole.contains(account.getRole())) {
+            throw new ForbiddenException("User cannot access to this feature");
+        }
     }
 }

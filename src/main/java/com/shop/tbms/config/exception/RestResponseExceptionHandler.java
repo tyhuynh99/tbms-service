@@ -16,11 +16,22 @@ public class RestResponseExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(buildErrorResponse(e));
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponseDTO> handleForbiddenException(ForbiddenException e, WebRequest webRequest) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(buildErrorResponse(e));
+    }
+
     private ErrorResponseDTO buildErrorResponse(BusinessException e) {
         return ErrorResponseDTO.builder()
                 .errorCode(e.getErrorCode())
                 .errorMessage(e.getErrorMessage())
                 .data(e.getData())
+                .build();
+    }
+
+    private ErrorResponseDTO buildErrorResponse(ForbiddenException e) {
+        return ErrorResponseDTO.builder()
+                .errorMessage(e.getMessage())
                 .build();
     }
 }
