@@ -1,9 +1,11 @@
 package com.shop.tbms.entity;
 
+import com.shop.tbms.entity.common.AbstractAuditingEntity;
 import com.shop.tbms.enumerate.Role;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "account")
@@ -18,24 +20,24 @@ public class Account extends AbstractAuditingEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "username", length = 50, unique = true)
+    @Column(name = "username", length = 50, unique = true, nullable = false)
     private String username;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "fullname")
     private String fullname;
 
-    @Column(name = "role")
+    @Column(name = "role", nullable = false)
     private Role role;
 
-    @Column(name = "active")
+    @Column(name = "active", nullable = false)
     private Boolean active;
 
     @OneToMany(mappedBy = "account")
-    private List<Device> devices;
+    private List<Device> devices = new ArrayList<>();
 
     @OneToMany(mappedBy = "account")
-    private List<AccountAssignStep> assignedSteps;
+    private List<AccountAssignStep> assignedSteps = new ArrayList<>();
 }

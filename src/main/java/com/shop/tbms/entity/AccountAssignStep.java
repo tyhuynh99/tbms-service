@@ -1,5 +1,6 @@
 package com.shop.tbms.entity;
 
+import com.shop.tbms.entity.common.AbstractAuditingEntity;
 import lombok.*;
 
 import javax.persistence.*;
@@ -16,10 +17,10 @@ public class AccountAssignStep extends AbstractAuditingEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "step", length = 50)
+    @Column(name = "step", length = 50, nullable = false)
     private String step;
 
     @ManyToOne
-    @JoinColumn(name = "account_id")
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 }

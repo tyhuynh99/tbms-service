@@ -1,4 +1,4 @@
-package com.shop.tbms.entity;
+package com.shop.tbms.entity.common;
 
 import lombok.*;
 import org.springframework.data.annotation.CreatedBy;

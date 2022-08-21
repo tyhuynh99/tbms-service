@@ -5,22 +5,22 @@ import lombok.*;
 
 import javax.persistence.*;
 
-@Entity(name = "device")
+@Entity(name = "template_checklist")
 @Setter
 @Getter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class Device extends AbstractAuditingEntity {
+public class TemplateChecklist extends AbstractAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "device_id", nullable = false)
-    private String deviceId;
+    @Column(name = "content", nullable = false, length = 1000)
+    private String content;
 
     @ManyToOne
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
+    @JoinColumn(name = "template_step_id", nullable = false)
+    private TemplateStep templateStep;
 }

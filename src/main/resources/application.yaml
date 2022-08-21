@@ -12,6 +12,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: P@ssw0rd
+    sql-script-encoding: UTF-8
     hikari:
       connectionTimeout: 20000
       maximumPoolSize: 5
