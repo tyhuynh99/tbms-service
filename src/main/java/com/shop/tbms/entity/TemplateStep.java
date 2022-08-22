@@ -50,7 +50,7 @@ public class TemplateStep extends AbstractAuditingEntity {
     private List<TemplateChecklist> listTemplateChecklist = new ArrayList<>();
 
     @OneToMany(mappedBy = "templateStepBefore")
-    private List<TemplateStepSequence> listMainTemplateStepBefore = new ArrayList<>();
+    private List<TemplateStepSequence> listTemplateStepBefore = new ArrayList<>();
 
     @OneToMany(mappedBy = "templateStepAfter")
     private List<TemplateStepSequence> listTemplateStepAfter = new ArrayList<>();

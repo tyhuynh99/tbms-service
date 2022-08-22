@@ -7,23 +7,28 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity(name = "template_procedure")
+@Entity(name = "procedure")
 @Setter
 @Getter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class TemplateProcedure extends AbstractAuditingEntity {
+public class Procedure extends AbstractAuditingEntity {
     @Id
+    @Column(name = "order_id")
+    private Long orderId;
+
     @Column(name = "code", nullable = false)
     private String code;
 
     @Column(name = "name", nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "templateProcedure")
-    private List<TemplateStep> listTemplateStep = new ArrayList<>();
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "purchase_order_id")
+    private PurchaseOrder purchaseOrder;
 
-    @OneToMany(mappedBy = "templateProcedure")
-    private List<TemplateMoldElement> listTemplateMoldElement = new ArrayList<>();
+    @OneToMany(mappedBy = "procedure")
+    private List<Step> listStep = new ArrayList<>();
 }
