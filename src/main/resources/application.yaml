@@ -9,9 +9,9 @@ server:
 # spring setting
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: P@ssw0rd
+    url: jdbc:postgresql://58.84.1.74:5432/tbms
+    username: admin
+    password: 123
     sql-script-encoding: UTF-8
     hikari:
       connectionTimeout: 20000
