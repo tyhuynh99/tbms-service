@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Builder
 public class AbstractAuditingEntity {
     private static final long serialVersionUID = 1L;
 

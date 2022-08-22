@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.stream.Stream;
 
 public enum Role {
-    ADMIN, MEMBER;
+    PRESIDENT, ACCOUNTANT, SECRETARY, EMPLOYEE;
+
 
     @JsonValue
     public int getValue() {return ordinal();}

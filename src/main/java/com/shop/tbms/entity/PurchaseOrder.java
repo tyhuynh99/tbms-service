@@ -27,6 +27,9 @@ public class PurchaseOrder extends AbstractAuditingEntity {
     @Column(name = "customer_name")
     private String customerName;
 
+    @Column(name = "sole_factory_name")
+    private String soleFactoryName;
+
     @Column(name = "delivered_date", nullable = false)
     private LocalDate deliveredDate;
 

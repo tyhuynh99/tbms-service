@@ -1,6 +1,6 @@
 package com.shop.tbms.config.exception;
 
-import com.shop.tbms.dto.ErrorResponseDTO;
+import com.shop.tbms.dto.ErrorRespDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,25 +12,25 @@ import org.springframework.web.context.request.WebRequest;
 @Slf4j
 public class RestResponseExceptionHandler {
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponseDTO> handleBusinessException(BusinessException e, WebRequest webRequest) {
+    public ResponseEntity<ErrorRespDTO> handleBusinessException(BusinessException e, WebRequest webRequest) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(buildErrorResponse(e));
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ErrorResponseDTO> handleForbiddenException(ForbiddenException e, WebRequest webRequest) {
+    public ResponseEntity<ErrorRespDTO> handleForbiddenException(ForbiddenException e, WebRequest webRequest) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(buildErrorResponse(e));
     }
 
-    private ErrorResponseDTO buildErrorResponse(BusinessException e) {
-        return ErrorResponseDTO.builder()
+    private ErrorRespDTO buildErrorResponse(BusinessException e) {
+        return ErrorRespDTO.builder()
                 .errorCode(e.getErrorCode())
                 .errorMessage(e.getErrorMessage())
                 .data(e.getData())
                 .build();
     }
 
-    private ErrorResponseDTO buildErrorResponse(ForbiddenException e) {
-        return ErrorResponseDTO.builder()
+    private ErrorRespDTO buildErrorResponse(ForbiddenException e) {
+        return ErrorRespDTO.builder()
                 .errorMessage(e.getMessage())
                 .build();
     }

@@ -2,7 +2,7 @@ package com.shop.tbms.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shop.tbms.config.security.TbmsUserDetails;
-import com.shop.tbms.dto.ErrorResponseDTO;
+import com.shop.tbms.dto.ErrorRespDTO;
 import com.shop.tbms.enumerate.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -47,11 +47,11 @@ public class JWTUtil {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType(RES_JSON_TYPE);
 
-        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO();
-        errorResponseDTO.setErrorCode("Forbidden to request to system");
-        errorResponseDTO.setErrorMessage("Forbidden to request to system");
+        ErrorRespDTO errorRespDTO = new ErrorRespDTO();
+        errorRespDTO.setErrorCode("Forbidden to request to system");
+        errorRespDTO.setErrorMessage("Forbidden to request to system");
 
         ObjectMapper objectMapper = new ObjectMapper();
-        response.getWriter().write(objectMapper.writeValueAsString(errorResponseDTO));
+        response.getWriter().write(objectMapper.writeValueAsString(errorRespDTO));
     }
 }

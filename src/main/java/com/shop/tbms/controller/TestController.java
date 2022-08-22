@@ -20,13 +20,13 @@ public class TestController {
     }
 
     @GetMapping("/admin")
-    @ValidRole(role = {Role.ADMIN})
+    @ValidRole(role = {Role.PRESIDENT})
     public ResponseEntity<String> checkAdmin() {
         return ResponseEntity.ok("Admin ok");
     }
 
     @GetMapping("/member")
-    @ValidRole(role = {Role.ADMIN, Role.MEMBER})
+    @ValidRole(role = {Role.PRESIDENT, Role.ACCOUNTANT})
     public ResponseEntity<String> checkMember() {
         return ResponseEntity.ok("Member ok");
     }

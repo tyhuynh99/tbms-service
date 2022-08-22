@@ -1,5 +1,5 @@
 package com.shop.tbms.enumerate;
 
 public enum StepStatus {
-    NEW;
+    INIT, IN_PROGRESS, COMPLETED;
 }

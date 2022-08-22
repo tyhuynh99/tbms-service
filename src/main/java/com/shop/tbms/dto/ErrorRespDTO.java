@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ErrorResponseDTO {
+public class ErrorRespDTO {
     private String errorMessage;
     private String errorCode;
     private List<?> data;
