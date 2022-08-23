@@ -8,7 +8,6 @@ import com.shop.tbms.util.StepUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,8 +22,8 @@ public class StepSequenceComponent {
 
         /* Map Step ID to StepSequence */
         return listStepSequence.stream().map(stepSequence -> {
-            Step stepAfter = StepUtil.getIdOfStep(stepSequence.getStepAfter().getCode(), listCurrentStep);
-            Step stepBefore = StepUtil.getIdOfStep(stepSequence.getStepBefore().getCode(), listCurrentStep);
+            Step stepAfter = StepUtil.findStepByStepCode(stepSequence.getStepAfter().getCode(), listCurrentStep);
+            Step stepBefore = StepUtil.findStepByStepCode(stepSequence.getStepBefore().getCode(), listCurrentStep);
 
             stepSequence.setStepAfter(stepAfter);
             stepSequence.setStepBefore(stepBefore);

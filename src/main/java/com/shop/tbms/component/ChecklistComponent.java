@@ -2,7 +2,6 @@ package com.shop.tbms.component;
 
 import com.shop.tbms.entity.Checklist;
 import com.shop.tbms.entity.Step;
-import com.shop.tbms.entity.StepSequence;
 import com.shop.tbms.entity.TemplateChecklist;
 import com.shop.tbms.mapper.procedure.ProcedureFromTemplateMapper;
 import com.shop.tbms.util.StepUtil;
@@ -23,7 +22,7 @@ public class ChecklistComponent {
 
         /* Map Step ID to Checklist */
         return listChecklist.stream().map(checklist -> {
-            Step step = StepUtil.getIdOfStep(checklist.getStep().getCode(), listCurrentStep);
+            Step step = StepUtil.findStepByStepCode(checklist.getStep().getCode(), listCurrentStep);
             checklist.setStep(step);
 
             return checklist;

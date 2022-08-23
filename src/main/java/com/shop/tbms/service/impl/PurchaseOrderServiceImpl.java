@@ -1,25 +1,32 @@
 package com.shop.tbms.service.impl;
 
-import com.shop.tbms.component.ChecklistComponent;
-import com.shop.tbms.component.MoldComponent;
-import com.shop.tbms.component.ProcedureComponent;
-import com.shop.tbms.component.StepSequenceComponent;
+import com.shop.tbms.component.*;
 import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.order.OrderCreateReqDTO;
+import com.shop.tbms.dto.order.OrderDetailRespDTO;
+import com.shop.tbms.dto.order.OrderListRespDTO;
 import com.shop.tbms.entity.*;
+import com.shop.tbms.enumerate.OrderStatus;
 import com.shop.tbms.enumerate.StepStatus;
+import com.shop.tbms.mapper.order.PurchaseOrderDetailMapper;
+import com.shop.tbms.mapper.order.PurchaseOrderListMapper;
 import com.shop.tbms.mapper.order.PurchaseOrderMapper;
 import com.shop.tbms.repository.*;
 import com.shop.tbms.service.PurchaseOrderService;
 import com.shop.tbms.util.MoldProgressUtil;
 import com.shop.tbms.util.TemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -38,10 +45,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private MoldComponent moldComponent;
     @Autowired
     private ChecklistComponent checklistComponent;
+    @Autowired
+    private StepComponent stepComponent;
 
     /* Mapper */
     @Autowired
     private PurchaseOrderMapper purchaseOrderMapper;
+    @Autowired
+    private PurchaseOrderDetailMapper purchaseOrderDetailMapper;
+    @Autowired
+    private PurchaseOrderListMapper purchaseOrderListMapper;
 
     /* Repository */
     @Autowired
@@ -59,6 +72,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     public SuccessRespDTO createOrder(OrderCreateReqDTO orderCreateReqDTO) {
         /* Generate PurchaseOrder entity */
         PurchaseOrder purchaseOrder = purchaseOrderMapper.toOrderEntity(orderCreateReqDTO);
+        purchaseOrder.setStatus(OrderStatus.NEW);
 
         /* Get TemplateProcedure */
         TemplateProcedure templateProcedure = procedureComponent.getTemplateProcedure(orderCreateReqDTO.getProcedureCode());
@@ -116,5 +130,22 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         return SuccessRespDTO.builder()
                 .message(messageConstant.getCreateSuccess())
                 .build();
+    }
+
+    @Override
+    public OrderDetailRespDTO getOrderById(Long orderId) {
+        PurchaseOrder order = purchaseOrderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+        OrderDetailRespDTO respDTO = purchaseOrderDetailMapper.fromEntityToDetailDTO(order);
+
+        respDTO.setListStep(stepComponent.setPercentProgress(respDTO.getListStep(), order.getProcedure().getListStep()));
+
+        Collections.sort(respDTO.getListStep());
+
+        return respDTO;
+    }
+
+    @Override
+    public Page<OrderListRespDTO> getListOrder(Pageable pageable) {
+        return purchaseOrderRepository.findAll(pageable).map(purchaseOrderListMapper::toListResp);
     }
 }

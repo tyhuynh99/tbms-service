@@ -6,9 +6,16 @@ import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 public class StepUtil {
-    public static Step getIdOfStep(String stepCode, List<Step> listStep) {
+    public static Step findStepByStepCode(String stepCode, List<Step> listStep) {
         return listStep.stream()
                 .filter(step -> step.getCode().equals(stepCode))
+                .findFirst()
+                .orElseThrow(EntityNotFoundException::new);
+    }
+
+    public static Step findStepById(Long stepId, List<Step> listStep) {
+        return listStep.stream()
+                .filter(step -> step.getId().equals(stepId))
                 .findFirst()
                 .orElseThrow(EntityNotFoundException::new);
     }
