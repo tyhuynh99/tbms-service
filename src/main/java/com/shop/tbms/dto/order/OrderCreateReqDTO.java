@@ -29,7 +29,7 @@ public class OrderCreateReqDTO {
     private LocalDate deliveredDate;
 
     @NotNull
-    private boolean isUrgent;
+    private Boolean isUrgent;
 
     private List<String> listSize;
 }

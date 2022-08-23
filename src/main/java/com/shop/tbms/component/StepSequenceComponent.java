@@ -1,18 +1,35 @@
 package com.shop.tbms.component;
 
-import com.shop.tbms.entity.PurchaseOrder;
+import com.shop.tbms.entity.Step;
 import com.shop.tbms.entity.StepSequence;
 import com.shop.tbms.entity.TemplateStepSequence;
+import com.shop.tbms.mapper.procedure.ProcedureFromTemplateMapper;
+import com.shop.tbms.util.StepUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class StepSequenceComponent {
-    public List<StepSequence> generateStepSequence(PurchaseOrder currentPurchaseOrder, List<TemplateStepSequence> listTemplateStepSequence) {
+    @Autowired
+    private ProcedureFromTemplateMapper procedureFromTemplateMapper;
+
+    public List<StepSequence> generateStepSequence(List<Step> listCurrentStep, List<TemplateStepSequence> listTemplateStepSequence) {
         /* Generate StepSequence from template */
+        List<StepSequence> listStepSequence = procedureFromTemplateMapper.fromTemplateStepSequence(listTemplateStepSequence);
 
         /* Map Step ID to StepSequence */
-        return null;
+        return listStepSequence.stream().map(stepSequence -> {
+            Step stepAfter = StepUtil.getIdOfStep(stepSequence.getStepAfter().getCode(), listCurrentStep);
+            Step stepBefore = StepUtil.getIdOfStep(stepSequence.getStepBefore().getCode(), listCurrentStep);
+
+            stepSequence.setStepAfter(stepAfter);
+            stepSequence.setStepBefore(stepBefore);
+
+            return stepSequence;
+        }).collect(Collectors.toList());
     }
 }

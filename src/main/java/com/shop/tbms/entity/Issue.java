@@ -26,6 +26,6 @@ public class Issue extends AbstractAuditingEntity {
     @JoinColumn(name = "step_id", nullable = false)
     private Step step;
 
-    @OneToMany(mappedBy = "issue")
+    @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL)
     private List<IssueMoldDetail> listIssueMold = new ArrayList<>();
 }

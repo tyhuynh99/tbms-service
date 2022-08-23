@@ -49,9 +49,9 @@ public class PurchaseOrder extends AbstractAuditingEntity {
     @PrimaryKeyJoinColumn
     private Procedure procedure;
 
-    @OneToMany(mappedBy = "purchaseOrder")
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     private List<MoldElement> listMoldElement = new ArrayList<>();
 
-    @OneToMany(mappedBy = "purchaseOrder")
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     private List<Mold> listMold = new ArrayList<>();
 }

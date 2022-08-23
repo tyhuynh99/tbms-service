@@ -29,6 +29,6 @@ public class Procedure extends AbstractAuditingEntity {
     @JoinColumn(name = "purchase_order_id")
     private PurchaseOrder purchaseOrder;
 
-    @OneToMany(mappedBy = "procedure")
+    @OneToMany(mappedBy = "procedure", cascade = CascadeType.ALL)
     private List<Step> listStep = new ArrayList<>();
 }

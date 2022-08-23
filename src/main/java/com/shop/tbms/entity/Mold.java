@@ -26,9 +26,9 @@ public class Mold extends AbstractAuditingEntity {
     @JoinColumn(name = "purchase_order_id", nullable = false)
     private PurchaseOrder purchaseOrder;
 
-    @OneToMany(mappedBy = "mold")
-    private List<MoldProgress> listMoldProgress = new ArrayList<>();
+    @OneToMany(mappedBy = "mold", cascade = CascadeType.ALL)
+    private List<MoldProgress> listMoldProgresses = new ArrayList<>();
 
-    @OneToMany(mappedBy = "mold")
+    @OneToMany(mappedBy = "mold", cascade = CascadeType.ALL)
     private List<IssueMoldDetail> listIssueMold = new ArrayList<>();
 }
