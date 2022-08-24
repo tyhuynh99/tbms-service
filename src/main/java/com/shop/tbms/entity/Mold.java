@@ -24,11 +24,14 @@ public class Mold extends AbstractAuditingEntity {
 
     @ManyToOne
     @JoinColumn(name = "purchase_order_id", nullable = false)
+    @ToString.Exclude
     private PurchaseOrder purchaseOrder;
 
     @OneToMany(mappedBy = "mold", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<MoldProgress> listMoldProgresses = new ArrayList<>();
 
     @OneToMany(mappedBy = "mold", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<IssueMoldDetail> listIssueMold = new ArrayList<>();
 }

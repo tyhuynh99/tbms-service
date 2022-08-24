@@ -1,6 +1,7 @@
 package com.shop.tbms.entity;
 
 import com.shop.tbms.entity.common.AbstractAuditingEntity;
+import com.shop.tbms.enumerate.OrderPaymentStatus;
 import com.shop.tbms.enumerate.OrderStatus;
 import lombok.*;
 
@@ -45,13 +46,19 @@ public class PurchaseOrder extends AbstractAuditingEntity {
     @Column(name = "status")
     private OrderStatus status;
 
+    @Column(name = "payment_status")
+    private OrderPaymentStatus paymentStatus;
+
     @OneToOne(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
+    @ToString.Exclude
     private Procedure procedure;
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<MoldElement> listMoldElement = new ArrayList<>();
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<Mold> listMold = new ArrayList<>();
 }

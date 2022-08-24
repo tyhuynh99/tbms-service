@@ -19,9 +19,11 @@ public class StepSequence extends AbstractAuditingEntity {
 
     @ManyToOne
     @JoinColumn(name = "step_before_id", nullable = false)
+    @ToString.Exclude
     private Step stepBefore;
 
     @ManyToOne
     @JoinColumn(name = "step_after_id", nullable = false)
+    @ToString.Exclude
     private Step stepAfter;
 }

@@ -23,5 +23,6 @@ public class IssueMoldDetail extends AbstractAuditingEntity {
 
     @ManyToOne
     @JoinColumn(name = "mold_id", nullable = false)
+    @ToString.Exclude
     private Mold mold;
 }

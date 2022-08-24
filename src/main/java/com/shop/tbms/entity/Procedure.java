@@ -24,11 +24,16 @@ public class Procedure extends AbstractAuditingEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "priority", nullable = false)
+    private Integer priority;
+
     @OneToOne
     @MapsId
     @JoinColumn(name = "purchase_order_id")
+    @ToString.Exclude
     private PurchaseOrder purchaseOrder;
 
     @OneToMany(mappedBy = "procedure", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<Step> listStep = new ArrayList<>();
 }

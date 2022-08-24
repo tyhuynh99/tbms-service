@@ -6,6 +6,7 @@ import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.order.OrderCreateReqDTO;
 import com.shop.tbms.dto.order.OrderDetailRespDTO;
+import com.shop.tbms.dto.order.OrderFilterReqDTO;
 import com.shop.tbms.dto.order.OrderListRespDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.OrderStatus;
@@ -47,6 +48,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private ChecklistComponent checklistComponent;
     @Autowired
     private StepComponent stepComponent;
+    @Autowired
+    private PurchaseOrderComponent purchaseOrderComponent;
 
     /* Mapper */
     @Autowired
@@ -72,7 +75,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     public SuccessRespDTO createOrder(OrderCreateReqDTO orderCreateReqDTO) {
         /* Generate PurchaseOrder entity */
         PurchaseOrder purchaseOrder = purchaseOrderMapper.toOrderEntity(orderCreateReqDTO);
-        purchaseOrder.setStatus(OrderStatus.NEW);
+        purchaseOrder.setStatus(OrderStatus.IN_PROGRESS);
 
         /* Get TemplateProcedure */
         TemplateProcedure templateProcedure = procedureComponent.getTemplateProcedure(orderCreateReqDTO.getProcedureCode());
@@ -145,7 +148,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
     @Override
-    public Page<OrderListRespDTO> getListOrder(Pageable pageable) {
-        return purchaseOrderRepository.findAll(pageable).map(purchaseOrderListMapper::toListResp);
+    public Page<OrderListRespDTO> getListOrder(OrderFilterReqDTO filterReqDTO, Pageable pageable) {
+        Specification<PurchaseOrder> specification = purchaseOrderComponent.buildSpecForList(filterReqDTO);
+        return purchaseOrderRepository.findAll(specification, pageable).map(purchaseOrderListMapper::toListResp);
     }
 }

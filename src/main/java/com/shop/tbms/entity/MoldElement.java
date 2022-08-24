@@ -38,5 +38,6 @@ public class MoldElement extends AbstractAuditingEntity {
 
     @ManyToOne
     @JoinColumn(name = "purchase_order_id")
+    @ToString.Exclude
     private PurchaseOrder purchaseOrder;
 }

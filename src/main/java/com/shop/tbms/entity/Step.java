@@ -65,23 +65,30 @@ public class Step extends AbstractAuditingEntity {
 
     @ManyToOne
     @JoinColumn(name = "procedure_id", nullable = false)
+    @ToString.Exclude
     private Procedure procedure;
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<Checklist> listChecklist = new ArrayList<>();
 
     @OneToMany(mappedBy = "stepBefore", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<StepSequence> listStepBefore = new ArrayList<>();
 
     @OneToMany(mappedBy = "stepAfter", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<StepSequence> listStepAfter = new ArrayList<>();
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<Evidence> listEvidence = new ArrayList<>();
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<MoldProgress> listMoldProgresses = new ArrayList<>();
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<Issue> listIssue = new ArrayList<>();
 }

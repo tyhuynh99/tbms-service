@@ -31,5 +31,6 @@ public class TemplateMoldElement extends AbstractAuditingEntity {
 
     @ManyToOne
     @JoinColumn(name = "template_procedure_id", nullable = false)
+    @ToString.Exclude
     private TemplateProcedure templateProcedure;
 }

@@ -22,5 +22,6 @@ public class Device extends AbstractAuditingEntity {
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
+    @ToString.Exclude
     private Account account;
 }

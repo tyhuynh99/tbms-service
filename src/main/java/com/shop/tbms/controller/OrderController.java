@@ -5,13 +5,18 @@ import com.shop.tbms.dto.PageResponse;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.order.OrderCreateReqDTO;
 import com.shop.tbms.dto.order.OrderDetailRespDTO;
+import com.shop.tbms.dto.order.OrderFilterReqDTO;
 import com.shop.tbms.dto.order.OrderListRespDTO;
+import com.shop.tbms.entity.Procedure_;
+import com.shop.tbms.entity.PurchaseOrder_;
 import com.shop.tbms.enumerate.Role;
 import com.shop.tbms.service.PurchaseOrderService;
 import com.shop.tbms.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +40,24 @@ public class OrderController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<PageResponse<OrderListRespDTO>> getDetailOrder(Pageable pageable) {
-        return ResponseUtil.buildPageResponse(purchaseOrderService.getListOrder(pageable));
+    public ResponseEntity<PageResponse<OrderListRespDTO>> getDetailOrder(
+            OrderFilterReqDTO filterReqDTO,
+            @SortDefault.SortDefaults({
+                    @SortDefault(
+                            sort = {
+                                    PurchaseOrder_.IS_LATE,
+                                    PurchaseOrder_.IS_URGENT
+                            },
+                            direction = Sort.Direction.DESC),
+                    @SortDefault(
+                            sort = {
+                                    PurchaseOrder_.STATUS,
+                                    PurchaseOrder_.PROCEDURE + "." + Procedure_.PRIORITY
+                            },
+                            direction = Sort.Direction.ASC)
+            })
+
+            Pageable pageable) {
+        return ResponseUtil.buildPageResponse(purchaseOrderService.getListOrder(filterReqDTO, pageable));
     }
 }

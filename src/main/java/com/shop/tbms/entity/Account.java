@@ -36,8 +36,10 @@ public class Account extends AbstractAuditingEntity {
     private Boolean active;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<Device> devices = new ArrayList<>();
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<AccountAssignStep> assignedSteps = new ArrayList<>();
 }

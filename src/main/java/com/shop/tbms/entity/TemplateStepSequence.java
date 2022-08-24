@@ -19,9 +19,11 @@ public class TemplateStepSequence extends AbstractAuditingEntity {
 
     @ManyToOne
     @JoinColumn(name = "template_step_before_id", nullable = false)
+    @ToString.Exclude
     private TemplateStep templateStepBefore;
 
     @ManyToOne
     @JoinColumn(name = "template_step_after_id", nullable = false)
+    @ToString.Exclude
     private TemplateStep templateStepAfter;
 }

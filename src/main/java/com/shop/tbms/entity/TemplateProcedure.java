@@ -21,9 +21,14 @@ public class TemplateProcedure extends AbstractAuditingEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "priority", nullable = false)
+    private Integer priority;
+
     @OneToMany(mappedBy = "templateProcedure")
+    @ToString.Exclude
     private List<TemplateStep> listTemplateStep = new ArrayList<>();
 
     @OneToMany(mappedBy = "templateProcedure")
+    @ToString.Exclude
     private List<TemplateMoldElement> listTemplateMoldElement = new ArrayList<>();
 }

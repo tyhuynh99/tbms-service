@@ -22,5 +22,6 @@ public class TemplateChecklist extends AbstractAuditingEntity {
 
     @ManyToOne
     @JoinColumn(name = "template_step_id", nullable = false)
+    @ToString.Exclude
     private TemplateStep templateStep;
 }
