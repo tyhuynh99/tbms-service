@@ -25,7 +25,7 @@ public class OrderCreateReqDTO {
 
     private String soleFactoryName;
 
-    @NotBlank
+    @NotNull
     private LocalDate deliveredDate;
 
     @NotNull

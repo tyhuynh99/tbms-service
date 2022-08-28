@@ -6,6 +6,7 @@ import com.shop.tbms.enumerate.StepType;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,8 +49,8 @@ public class Step extends AbstractAuditingEntity {
     @Column(name = "is_end", nullable = false)
     private Boolean isEnd;
 
-    @Column(name = "expected_complete_day")
-    private Integer expectedCompleteDay;
+    @Column(name = "expected_complete_date")
+    private LocalDate expectedCompleteDate;
 
     @Column(name = "status")
     private StepStatus status;

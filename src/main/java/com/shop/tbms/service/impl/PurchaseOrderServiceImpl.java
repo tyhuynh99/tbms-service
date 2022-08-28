@@ -8,6 +8,8 @@ import com.shop.tbms.dto.order.OrderCreateReqDTO;
 import com.shop.tbms.dto.order.OrderDetailRespDTO;
 import com.shop.tbms.dto.order.OrderFilterReqDTO;
 import com.shop.tbms.dto.order.OrderListRespDTO;
+import com.shop.tbms.dto.step.UpdateExpectedCompleteReqDTO;
+import com.shop.tbms.dto.step.UpdateExpectedCompleteRespDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.OrderStatus;
 import com.shop.tbms.enumerate.StepStatus;
@@ -27,8 +29,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -151,5 +157,41 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     public Page<OrderListRespDTO> getListOrder(OrderFilterReqDTO filterReqDTO, Pageable pageable) {
         Specification<PurchaseOrder> specification = purchaseOrderComponent.buildSpecForList(filterReqDTO);
         return purchaseOrderRepository.findAll(specification, pageable).map(purchaseOrderListMapper::toListResp);
+    }
+
+    @Override
+    public List<UpdateExpectedCompleteRespDTO> updateStepExpectedComplete(List<UpdateExpectedCompleteReqDTO> listReqDTO) {
+        List<Step> listStep = stepRepository.findAllById(
+                listReqDTO.stream()
+                        .map(UpdateExpectedCompleteReqDTO::getStepId)
+                        .collect(Collectors.toList()));
+
+        /* Validate request */
+        stepComponent.validateUpdateExpectedCompleteData(listReqDTO, listStep);
+
+        List<Long> listUpdatedId = new ArrayList<>();
+
+        for (Step curStep : listStep) {
+            LocalDate updateExpectDate = listReqDTO.stream()
+                    .filter(reqDTO -> curStep.getId().equals(reqDTO.getStepId()))
+                    .map(UpdateExpectedCompleteReqDTO::getExpectedCompleteDate)
+                    .findFirst()
+                    .orElse(null);
+
+            if (Objects.nonNull(updateExpectDate)) {
+                curStep.setExpectedCompleteDate(updateExpectDate);
+                listUpdatedId.add(curStep.getId());
+            }
+        }
+
+        stepRepository.saveAll(listStep);
+
+        return listUpdatedId.stream()
+                .map(updatedId ->
+                        UpdateExpectedCompleteRespDTO
+                                .builder()
+                                .stepId(updatedId)
+                                .build())
+                .collect(Collectors.toList());
     }
 }
