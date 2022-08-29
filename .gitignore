@@ -35,8 +35,9 @@ lib/
 manifest.yml
 out
 overridedb.*
-target
+target/*
 !target/tbms-0.0.1-SNAPSHOT.jar
+!target/tbms-0.0.1-SNAPSHOT.jar.original
 .flattened-pom.xml
 secrets.yml
 .gradletasknamecache
