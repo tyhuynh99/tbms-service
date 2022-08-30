@@ -5,8 +5,8 @@ import com.shop.tbms.dto.order.OrderCreateReqDTO;
 import com.shop.tbms.dto.order.OrderDetailRespDTO;
 import com.shop.tbms.dto.order.OrderFilterReqDTO;
 import com.shop.tbms.dto.order.OrderListRespDTO;
-import com.shop.tbms.dto.step.UpdateExpectedCompleteReqDTO;
-import com.shop.tbms.dto.step.UpdateExpectedCompleteRespDTO;
+import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
+import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteRespDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
