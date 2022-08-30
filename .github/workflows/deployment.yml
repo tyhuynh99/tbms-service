@@ -28,7 +28,7 @@ jobs:
           password: ${{ secrets.PASSWORD }} 
           port: ${{ secrets.PORT }} 
           script: |
-            sudo sh start-tbms.sh
+            sudo sh stop-tbms.sh
       - name: Upload application
         uses: appleboy/scp-action@master
         with:       
