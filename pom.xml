@@ -109,8 +109,9 @@
 		</dependency>
 
 	</dependencies>
-
+	<packaging>jar</packaging>
 	<build>
+		<finalName>tbms-build</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
