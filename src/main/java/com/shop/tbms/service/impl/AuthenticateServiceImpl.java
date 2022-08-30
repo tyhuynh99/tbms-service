@@ -60,6 +60,7 @@ public class AuthenticateServiceImpl implements AuthenticateService {
         return LoginResDTO.builder()
                 .token(accessToken)
                 .refreshToken(refreshToken)
+                .user(userDetails)
                 .build();
     }
 
