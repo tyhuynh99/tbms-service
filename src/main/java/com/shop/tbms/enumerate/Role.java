@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 public enum Role {
     PRESIDENT, ACCOUNTANT, SECRETARY, EMPLOYEE;
 
-
     @JsonValue
     public int getValue() {return ordinal();}
 
