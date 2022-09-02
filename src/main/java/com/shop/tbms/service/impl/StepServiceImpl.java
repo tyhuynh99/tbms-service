@@ -60,7 +60,6 @@ public class StepServiceImpl implements StepService {
         purchaseOrderComponent.canUpdateOrder(currentOrder);
         stepComponent.canReportProgress(currentStep);
 
-        // TODO: validate which step can update paid
         if (Boolean.TRUE.equals(currentStep.getIsEnd())) {
             // TODO: validate complete all step
             currentOrder.setStatus(OrderStatus.COMPLETED);
@@ -80,11 +79,10 @@ public class StepServiceImpl implements StepService {
         stepComponent.updateChecklist(currentChecklist, reportStepReqDTO.getChecklist());
         checklistRepository.saveAll(currentChecklist);
 
-        stepComponent.updateMoldElement(currentMoldElement, reportStepReqDTO.getMoleElement());
+        stepComponent.updateMoldElement(currentStep, currentMoldElement, reportStepReqDTO.getMoleElement());
         moldElementRepository.saveAll(currentMoldElement);
 
-        // TODO: validate step require evidence
-        stepComponent.updateEvidence(currentEvidence, reportStepReqDTO.getEvidence());
+        stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence());
 
         stepComponent.updateStep(currentStep, reportStepReqDTO);
         stepComponent.updateStepStatus(currentStep, currentMoldProgress);

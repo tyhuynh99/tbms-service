@@ -9,4 +9,5 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReportEvidenceReqDTO {
+    private String url;
 }

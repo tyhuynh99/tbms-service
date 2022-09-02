@@ -19,14 +19,4 @@ public class StepUtil {
                 .findFirst()
                 .orElseThrow(EntityNotFoundException::new);
     }
-
-    public static boolean canUpdatePaid(Step currentStep) {
-        // TODO:
-        return true;
-    }
-
-    public static boolean isThirdPartyStep(Step currentStep) {
-        // TODO:
-        return true;
-    }
 }
