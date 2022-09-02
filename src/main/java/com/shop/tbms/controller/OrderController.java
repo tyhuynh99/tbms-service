@@ -3,10 +3,7 @@ package com.shop.tbms.controller;
 import com.shop.tbms.annotation.ValidRole;
 import com.shop.tbms.dto.PageResponse;
 import com.shop.tbms.dto.SuccessRespDTO;
-import com.shop.tbms.dto.order.OrderCreateReqDTO;
-import com.shop.tbms.dto.order.OrderDetailRespDTO;
-import com.shop.tbms.dto.order.OrderFilterReqDTO;
-import com.shop.tbms.dto.order.OrderListRespDTO;
+import com.shop.tbms.dto.order.*;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteRespDTO;
 import com.shop.tbms.entity.Procedure_;
@@ -36,6 +33,12 @@ public class OrderController {
     @ValidRole(role = {Role.PRESIDENT, Role.SECRETARY})
     public ResponseEntity<SuccessRespDTO> createOrder(@RequestBody @Valid OrderCreateReqDTO orderCreateReqDTO) {
         return ResponseEntity.ok(purchaseOrderService.createOrder(orderCreateReqDTO));
+    }
+
+    @PutMapping("/update")
+    @ValidRole(role = {Role.PRESIDENT, Role.SECRETARY})
+    public ResponseEntity<SuccessRespDTO> updateOrder(@RequestBody @Valid OrderUpdateReqDTO orderUpdateReqDTO) {
+        return ResponseEntity.ok(purchaseOrderService.updateOrder(orderUpdateReqDTO));
     }
 
     @GetMapping("/detail")

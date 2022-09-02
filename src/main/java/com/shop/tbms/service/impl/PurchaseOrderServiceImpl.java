@@ -4,10 +4,7 @@ import com.shop.tbms.component.*;
 import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
-import com.shop.tbms.dto.order.OrderCreateReqDTO;
-import com.shop.tbms.dto.order.OrderDetailRespDTO;
-import com.shop.tbms.dto.order.OrderFilterReqDTO;
-import com.shop.tbms.dto.order.OrderListRespDTO;
+import com.shop.tbms.dto.order.*;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteRespDTO;
 import com.shop.tbms.entity.*;
@@ -138,6 +135,32 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
         return SuccessRespDTO.builder()
                 .message(messageConstant.getCreateSuccess())
+                .build();
+    }
+
+    /*
+    * Update normal information
+    * Update mold:
+    * * If remove mold -> update progress of all step
+    * * If add new mold -> update progress of all step
+    * */
+    @Override
+    public SuccessRespDTO updateOrder(OrderUpdateReqDTO orderUpdateReqDTO) {
+        PurchaseOrder currentOrder = purchaseOrderRepository.findById(orderUpdateReqDTO.getOrderId())
+                .orElseThrow(EntityNotFoundException::new);
+
+        /* validate current order */
+        purchaseOrderComponent.canUpdateOrder(currentOrder);
+
+        /* update normal information */
+        purchaseOrderMapper.partialUpdateOrderEntity(currentOrder, orderUpdateReqDTO);
+        purchaseOrderRepository.save(currentOrder);
+
+        /* update mold & progress of mold */
+        moldComponent.updateListMoldInOrder(currentOrder, orderUpdateReqDTO);
+
+        return SuccessRespDTO.builder()
+                .message(messageConstant.getUpdateSuccess())
                 .build();
     }
 
