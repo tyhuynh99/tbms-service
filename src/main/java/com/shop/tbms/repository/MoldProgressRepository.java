@@ -9,4 +9,8 @@ import java.util.List;
 @Repository
 public interface MoldProgressRepository extends JpaRepository<MoldProgress, Long> {
     List<MoldProgress> findAllByStepId(Long stepId);
+
+    List<MoldProgress> findDistinctByStepProcedurePurchaseOrderId(Long orderId);
+
+    long deleteByMoldIdIn(List<Long> listMoldId);
 }

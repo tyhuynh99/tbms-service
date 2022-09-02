@@ -13,4 +13,7 @@ import org.springframework.stereotype.Component;
 public class MessageConstant {
     @Value("${create_success}")
     private String createSuccess;
+
+    @Value("${update_success}")
+    private String updateSuccess;
 }
