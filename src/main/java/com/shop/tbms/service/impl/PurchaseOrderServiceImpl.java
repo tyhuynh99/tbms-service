@@ -117,21 +117,19 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         /* Insert data Checklist */
         checklistRepository.saveAll(listChecklist);
 
-        /* Process begin step */
-        Step beginningStep = procedure.getListStep().stream()
-                .filter(step -> Boolean.TRUE.equals(step.getIsStart()))
-                .findFirst()
-                .orElseThrow(() -> new BusinessException("Not found start step"));
-        beginningStep.setStatus(StepStatus.IN_PROGRESS);
-
         /* Generate process of begin step */
-        List<MoldProgress> listMoldProgress = MoldProgressUtil.generateProcess(listMold, beginningStep);
+        List<MoldProgress> listMoldProgress = new ArrayList<>();
+        procedure.getListStep().forEach(step -> {
+            /* Process steps */
+            step.setStatus(StepStatus.IN_PROGRESS);
+            listMoldProgress.addAll(MoldProgressUtil.generateProcess(listMold, step));
+        });
 
         /* Insert data MoldProgress */
         moldProgressRepository.saveAll(listMoldProgress);
 
         /* Update status of Step */
-        stepRepository.save(beginningStep);
+        stepRepository.saveAll(procedure.getListStep());
 
         return SuccessRespDTO.builder()
                 .message(messageConstant.getCreateSuccess())

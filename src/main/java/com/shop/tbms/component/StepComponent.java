@@ -3,11 +3,9 @@ package com.shop.tbms.component;
 import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.constant.MathConstant;
 import com.shop.tbms.dto.order.OrderStepRespDTO;
+import com.shop.tbms.dto.step.report.*;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
-import com.shop.tbms.entity.MoldProgress;
-import com.shop.tbms.entity.Procedure;
-import com.shop.tbms.entity.PurchaseOrder;
-import com.shop.tbms.entity.Step;
+import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.OrderStatus;
 import com.shop.tbms.enumerate.StepStatus;
 import com.shop.tbms.repository.MoldProgressRepository;
@@ -80,5 +78,75 @@ public class StepComponent {
         if (isReqDateInvalid) {
             throw new BusinessException("Invalid request. Contains date in the past.");
         }
+    }
+
+    public void canReportProgress(Step currentStep) {
+        /* check step status */
+        if (StepStatus.COMPLETED.equals(currentStep.getStatus())) {
+            throw new BusinessException(
+                    String.format(
+                            "Current step {} status is {}. Only status not Completed can be reported.",
+                            currentStep.getCode(),
+                            currentStep.getStatus()
+                    )
+            );
+        }
+    }
+
+    public void updateStep(Step currentStep, ReportStepReqDTO req) {
+        currentStep.setNote(req.getNote());
+
+        // TODO: validate which step can update this
+        if (StepUtil.isThirdPartyStep(currentStep)) {
+            currentStep.setDeliveredDate(req.getDeliveredDate());
+            currentStep.setReceivedDate(req.getReceivedDate());
+        }
+
+        // TODO: validate which step can update this
+        if (Boolean.TRUE.equals(currentStep.getIsEnd())) {
+            currentStep.setExportDate(req.getExportDate());
+            currentStep.setExpectedPaidDate(req.getExpectedPaidDate());
+        }
+    }
+
+    public void updateStepStatus(Step currentStep, List<MoldProgress> listMoldProgress) {
+        boolean isAllMoldComplete = listMoldProgress.stream()
+                .allMatch(progress -> Boolean.TRUE.equals(progress.getIsCompleted()));
+
+        if (isAllMoldComplete) {
+            currentStep.setStatus(StepStatus.COMPLETED);
+        }
+    }
+
+    public void updateMoldProgress(List<MoldProgress> currentMoldProgress, List<ReportMoldProgressReqDTO> listReq) {
+        currentMoldProgress.forEach(currentProgress -> {
+            currentProgress.setIsCompleted(
+                    listReq.stream()
+                            .filter(req -> currentProgress.getId().equals(req.getProgressId()))
+                            .map(ReportMoldProgressReqDTO::getIsCompleted)
+                            .findFirst()
+                            .orElse(currentProgress.getIsCompleted())
+            );
+        });
+    }
+
+    public void updateMoldElement(List<MoldElement> currentMoldElement, List<ReportMoldElementReqDTO> listReq) {
+        // TODO:
+    }
+
+    public void updateChecklist(List<Checklist> currentChecklist, List<ReportChecklistReqDTO> listReq) {
+        currentChecklist.forEach(checklist -> {
+            checklist.setIsChecked(
+                    listReq.stream()
+                            .filter(req -> checklist.getId().equals(req.getChecklistId()))
+                            .map(ReportChecklistReqDTO::getIsChecked)
+                            .findFirst()
+                            .orElse(checklist.getIsChecked())
+            );
+        });
+    }
+
+    public void updateEvidence(List<Evidence> currentEvidence, List<ReportEvidenceReqDTO> listReq) {
+        // TODO:
     }
 }

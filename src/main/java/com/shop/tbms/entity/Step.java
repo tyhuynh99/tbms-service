@@ -61,6 +61,12 @@ public class Step extends AbstractAuditingEntity {
     @Column(name = "received_date")
     private LocalDateTime receivedDate;
 
+    @Column(name = "export_date")
+    private LocalDate exportDate;
+
+    @Column(name = "expected_paid_date")
+    private LocalDate expectedPaidDate;
+
     @Column(name = "note", length = 1000)
     private String note;
 
