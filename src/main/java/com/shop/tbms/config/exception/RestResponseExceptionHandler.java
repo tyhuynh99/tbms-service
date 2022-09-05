@@ -35,11 +35,23 @@ public class RestResponseExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(buildErrorResponse(e));
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorRespDTO> handleException(Exception e, WebRequest webRequest) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildErrorResponse(e));
+    }
+
     private ErrorRespDTO buildErrorResponse(BusinessException e) {
         return ErrorRespDTO.builder()
                 .errorCode(e.getErrorCode())
                 .errorMessage(e.getErrorMessage())
                 .data(e.getData())
+                .build();
+    }
+
+    private ErrorRespDTO buildErrorResponse(Exception e) {
+        return ErrorRespDTO.builder()
+                .errorCode(e.getMessage())
+                .errorMessage(e.getMessage())
                 .build();
     }
 

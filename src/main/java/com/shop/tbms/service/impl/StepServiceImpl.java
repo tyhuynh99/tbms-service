@@ -1,9 +1,15 @@
 package com.shop.tbms.service.impl;
 
+import com.shop.tbms.component.PurchaseOrderComponent;
+import com.shop.tbms.component.StepComponent;
+import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.step.detail.StepDTO;
-import com.shop.tbms.entity.Step;
+import com.shop.tbms.dto.step.report.ReportStepReqDTO;
+import com.shop.tbms.entity.*;
+import com.shop.tbms.enumerate.OrderPaymentStatus;
+import com.shop.tbms.enumerate.OrderStatus;
 import com.shop.tbms.mapper.StepMapper;
-import com.shop.tbms.repository.StepRepository;
+import com.shop.tbms.repository.*;
 import com.shop.tbms.service.StepService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +17,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.List;
 
 @Service
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -20,10 +27,67 @@ public class StepServiceImpl implements StepService {
 
     @Autowired
     private StepRepository stepRepository;
+    @Autowired
+    private MoldProgressRepository moldProgressRepository;
+    @Autowired
+    private ChecklistRepository checklistRepository;
+    @Autowired
+    private MoldElementRepository moldElementRepository;
+    @Autowired
+    private PurchaseOrderRepository purchaseOrderRepository;
+
+    @Autowired
+    private StepComponent stepComponent;
+    @Autowired
+    private PurchaseOrderComponent purchaseOrderComponent;
 
     @Override
     public StepDTO getStep(Long stepId) {
         Step step = stepRepository.findById(stepId).orElseThrow(EntityNotFoundException::new);
         return stepMapper.toDTO(step);
+    }
+
+    @Override
+    public SuccessRespDTO reportStepProgress(ReportStepReqDTO reportStepReqDTO) {
+        Step currentStep = stepRepository.findById(reportStepReqDTO.getStepId()).orElseThrow(EntityNotFoundException::new);
+        PurchaseOrder currentOrder = currentStep.getProcedure().getPurchaseOrder();
+        List<MoldProgress> currentMoldProgress = moldProgressRepository.findAllByStepId(currentStep.getId());
+        List<Checklist> currentChecklist = currentStep.getListChecklist();
+        List<Evidence> currentEvidence = currentStep.getListEvidence();
+        List<MoldElement> currentMoldElement = currentOrder.getListMoldElement();
+
+        /* validate */
+        purchaseOrderComponent.canUpdateOrder(currentOrder);
+        stepComponent.canReportProgress(currentStep);
+
+        if (Boolean.TRUE.equals(currentStep.getIsEnd())) {
+            // TODO: validate complete all step
+            currentOrder.setStatus(OrderStatus.COMPLETED);
+
+            if (Boolean.TRUE.equals(reportStepReqDTO.getIsPaid())) {
+                currentOrder.setPaymentStatus(OrderPaymentStatus.PAID);
+            } else {
+                currentOrder.setPaymentStatus(OrderPaymentStatus.NOT_PAID);
+            }
+
+            purchaseOrderRepository.save(currentOrder);
+        }
+
+        stepComponent.updateMoldProgress(currentMoldProgress, reportStepReqDTO.getMoldProgress());
+        moldProgressRepository.saveAll(currentMoldProgress);
+
+        stepComponent.updateChecklist(currentChecklist, reportStepReqDTO.getChecklist());
+        checklistRepository.saveAll(currentChecklist);
+
+        stepComponent.updateMoldElement(currentStep, currentMoldElement, reportStepReqDTO.getMoleElement());
+        moldElementRepository.saveAll(currentMoldElement);
+
+        stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence());
+
+        stepComponent.updateStep(currentStep, reportStepReqDTO);
+        stepComponent.updateStepStatus(currentStep, currentMoldProgress);
+        stepRepository.save(currentStep);
+
+        return null;
     }
 }

@@ -6,9 +6,11 @@ import com.shop.tbms.entity.Mold;
 import com.shop.tbms.entity.MoldProgress;
 import com.shop.tbms.entity.PurchaseOrder;
 import com.shop.tbms.entity.Step;
+import com.shop.tbms.enumerate.StepStatus;
 import com.shop.tbms.repository.IssueMoldDetailRepository;
 import com.shop.tbms.repository.MoldProgressRepository;
 import com.shop.tbms.repository.MoldRepository;
+import com.shop.tbms.repository.StepRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,8 @@ public class MoldComponent {
     IssueMoldDetailRepository issueMoldDetailRepository;
     @Autowired
     MoldRepository moldRepository;
+    @Autowired
+    StepRepository stepRepository;
 
     public List<Mold> generateMoldEntity(List<String> listMoldReq, PurchaseOrder order) {
         return listMoldReq.stream().map(moldSizeReq -> {
@@ -89,6 +93,10 @@ public class MoldComponent {
                 .map(MoldProgress::getStep)
                 .distinct()
                 .collect(Collectors.toList());
+
+        /* Change status of step to IN PROGRESS */
+        listStepHasProgress.forEach(step -> step.setStatus(StepStatus.IN_PROGRESS));
+        stepRepository.saveAll(listStepHasProgress);
 
         /* create new Mold entity */
         List<Mold> listNewMold = newMold.stream().map(newSize -> {
