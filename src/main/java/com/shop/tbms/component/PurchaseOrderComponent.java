@@ -19,8 +19,8 @@ public class PurchaseOrderComponent {
         if (Objects.nonNull(orderFilterReqDTO.getCodeContains())) {
             specification = specification.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.like(
-                            root.get(PurchaseOrder_.code),
-                            "%" + orderFilterReqDTO.getCodeContains() + "%"));
+                            criteriaBuilder.upper(root.get(PurchaseOrder_.code)),
+                            "%" + orderFilterReqDTO.getCodeContains().toUpperCase() + "%"));
         }
 
         if (Objects.nonNull(orderFilterReqDTO.getProcedureCodeEqual())) {
