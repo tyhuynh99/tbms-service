@@ -12,6 +12,11 @@ public interface StepMapper {
     @Mapping(target = "checklist", source = "listChecklist")
     @Mapping(target = "listMoldProgress", source = "listMoldProgresses")
     @Mapping(target = "listMoldElement", source = "procedure.purchaseOrder.listMoldElement")
+    @Mapping(target = "resettable", defaultValue = "false")
+    @Mapping(target = "requiredEvidence", defaultValue = "false")
+    @Mapping(target = "isStart", defaultValue = "false")
+    @Mapping(target = "isEnd", defaultValue = "false")
+    @Mapping(target = "isPaid", ignore = true, defaultValue = "false")
     StepDTO toDTO(Step step);
 
     List<StepDTO> toDTOs(List<Step> steps);
