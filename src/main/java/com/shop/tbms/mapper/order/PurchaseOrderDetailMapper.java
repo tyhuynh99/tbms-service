@@ -8,6 +8,7 @@ import com.shop.tbms.entity.Mold;
 import com.shop.tbms.entity.MoldElement;
 import com.shop.tbms.entity.PurchaseOrder;
 import com.shop.tbms.entity.Step;
+import com.shop.tbms.enumerate.OrderDisplayStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -20,8 +21,14 @@ public interface PurchaseOrderDetailMapper {
     @Mapping(target = "listMold", source = "order", qualifiedByName = "genListMold")
     @Mapping(target = "listMoldElement", source = "order", qualifiedByName = "genListMoldElement")
     @Mapping(target = "listStep", source = "order", qualifiedByName = "genListStep")
+    @Mapping(target = "status", source = "order", qualifiedByName = "genDisplayStatus")
     @Mapping(target = "procedureName", source = "procedure.name")
     OrderDetailRespDTO fromEntityToDetailDTO(PurchaseOrder order);
+
+    @Named("genDisplayStatus")
+    default OrderDisplayStatus genDisplayStatus(PurchaseOrder order) {
+        return OrderDisplayStatus.generate(order);
+    }
 
     /* MOLD */
     MoldDTO toMoldDTO(Mold mold);

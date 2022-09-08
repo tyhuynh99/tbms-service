@@ -1,7 +1,7 @@
 package com.shop.tbms.dto.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.shop.tbms.enumerate.OrderStatus;
+import com.shop.tbms.enumerate.OrderDisplayStatus;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -17,8 +17,7 @@ public class OrderListRespDTO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate deliveredDate;
     private boolean isUrgent;
-    private boolean isLate;
-    private OrderStatus status;
+    private OrderDisplayStatus status;
     private Long numOfMold;
     private String procedureName;
 }

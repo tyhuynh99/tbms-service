@@ -3,6 +3,7 @@ package com.shop.tbms.dto.order;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.shop.tbms.dto.MoldDTO;
 import com.shop.tbms.dto.MoldElementDTO;
+import com.shop.tbms.enumerate.OrderDisplayStatus;
 import com.shop.tbms.enumerate.OrderStatus;
 import lombok.*;
 
@@ -20,7 +21,7 @@ public class OrderDetailRespDTO {
     private String code;
     private String customerName;
     private String soleFactoryName;
-    private OrderStatus status;
+    private OrderDisplayStatus status;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate deliveredDate;
     private String procedureName;
