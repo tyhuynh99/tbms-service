@@ -15,8 +15,10 @@ import com.shop.tbms.mapper.order.PurchaseOrderListMapper;
 import com.shop.tbms.mapper.order.PurchaseOrderMapper;
 import com.shop.tbms.repository.*;
 import com.shop.tbms.service.PurchaseOrderService;
+import com.shop.tbms.specification.PurchaseOrderSpecification;
 import com.shop.tbms.util.MoldProgressUtil;
 import com.shop.tbms.util.TemplateUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+@Slf4j
 public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     /* Constant */
     @Autowired
@@ -176,7 +179,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     @Override
     public Page<OrderListRespDTO> getListOrder(OrderFilterReqDTO filterReqDTO, Pageable pageable) {
-        Specification<PurchaseOrder> specification = purchaseOrderComponent.buildSpecForList(filterReqDTO);
+        Specification<PurchaseOrder> specification = PurchaseOrderSpecification.buildSpecForList(filterReqDTO);
         return purchaseOrderRepository.findAll(specification, pageable).map(purchaseOrderListMapper::toListResp);
     }
 
@@ -214,5 +217,15 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                 .stepId(updatedId)
                                 .build())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void checkLateOrder() {
+        List<PurchaseOrder> listLateOrder = purchaseOrderRepository.findAll(PurchaseOrderSpecification.getListLateOrderToday());
+        log.info("Set late for orders {}", listLateOrder);
+
+        listLateOrder.forEach(order -> order.setIsLate(Boolean.TRUE));
+
+        purchaseOrderRepository.saveAll(listLateOrder);
     }
 }
