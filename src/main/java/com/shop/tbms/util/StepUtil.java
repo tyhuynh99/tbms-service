@@ -1,6 +1,7 @@
 package com.shop.tbms.util;
 
 import com.shop.tbms.entity.Step;
+import com.shop.tbms.entity.StepSequence;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;

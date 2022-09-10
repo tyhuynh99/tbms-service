@@ -1,6 +1,7 @@
 package com.shop.tbms.service.impl;
 
 import com.shop.tbms.component.PurchaseOrderComponent;
+import com.shop.tbms.component.ReportLogComponent;
 import com.shop.tbms.component.StepComponent;
 import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
@@ -10,10 +11,12 @@ import com.shop.tbms.dto.step.report_error.ReportErrorToStepRespDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.OrderPaymentStatus;
 import com.shop.tbms.enumerate.OrderStatus;
+import com.shop.tbms.enumerate.StepStatus;
 import com.shop.tbms.mapper.StepMapper;
 import com.shop.tbms.mapper.StepSequenceMapper;
 import com.shop.tbms.repository.*;
 import com.shop.tbms.service.StepService;
+import com.shop.tbms.util.MoldProgressUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -21,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -49,6 +53,8 @@ public class StepServiceImpl implements StepService {
     private StepComponent stepComponent;
     @Autowired
     private PurchaseOrderComponent purchaseOrderComponent;
+    @Autowired
+    private ReportLogComponent reportLogComponent;
 
     @Autowired
     private MessageConstant messageConstant;
@@ -91,7 +97,7 @@ public class StepServiceImpl implements StepService {
         stepComponent.updateChecklist(currentChecklist, reportStepReqDTO.getChecklist());
         checklistRepository.saveAll(currentChecklist);
 
-        stepComponent.updateMoldElement(currentStep, currentMoldElement, reportStepReqDTO.getMoleElement());
+        stepComponent.updateMoldElement(currentStep, currentMoldElement, reportStepReqDTO.getMoldElement());
         moldElementRepository.saveAll(currentMoldElement);
 
         stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence());
@@ -100,7 +106,16 @@ public class StepServiceImpl implements StepService {
         stepComponent.updateStepStatus(currentStep, currentMoldProgress);
         stepRepository.save(currentStep);
 
-        // TODO: check generate next step progress
+        /* Generate next step progress */
+//        List<MoldProgress> listMoldProgress = new ArrayList<>();
+//        procedure.getListStep().forEach(step -> {
+//            /* Process steps */
+//            step.setStatus(StepStatus.IN_PROGRESS);
+//            listMoldProgress.addAll(MoldProgressUtil.generateProcess(listMold, step));
+//        });
+
+        /* insert log */
+        reportLogComponent.insertReportLog(currentStep, reportStepReqDTO);
 
         return SuccessRespDTO.builder()
                 .message(messageConstant.getUpdateSuccess())

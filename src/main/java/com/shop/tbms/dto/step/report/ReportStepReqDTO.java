@@ -35,5 +35,5 @@ public class ReportStepReqDTO {
 
     private List<ReportEvidenceReqDTO> evidence;
 
-    private List<ReportMoldElementReqDTO> moleElement;
+    private List<ReportMoldElementReqDTO> moldElement;
 }

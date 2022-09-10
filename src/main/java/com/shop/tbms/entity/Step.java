@@ -98,4 +98,8 @@ public class Step extends AbstractAuditingEntity {
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<Issue> listIssue = new ArrayList<>();
+
+    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<ReportLog> listReportLog = new ArrayList<>();
 }
