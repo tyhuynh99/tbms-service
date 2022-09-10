@@ -2,6 +2,7 @@ package com.shop.tbms.service.impl;
 
 import com.shop.tbms.component.PurchaseOrderComponent;
 import com.shop.tbms.component.StepComponent;
+import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.step.detail.StepDTO;
 import com.shop.tbms.dto.step.report.ReportStepReqDTO;
@@ -48,6 +49,9 @@ public class StepServiceImpl implements StepService {
     private StepComponent stepComponent;
     @Autowired
     private PurchaseOrderComponent purchaseOrderComponent;
+
+    @Autowired
+    private MessageConstant messageConstant;
 
     @Override
     public StepDTO getStep(Long stepId) {
@@ -96,7 +100,11 @@ public class StepServiceImpl implements StepService {
         stepComponent.updateStepStatus(currentStep, currentMoldProgress);
         stepRepository.save(currentStep);
 
-        return null;
+        // TODO: check generate next step progress
+
+        return SuccessRespDTO.builder()
+                .message(messageConstant.getUpdateSuccess())
+                .build();
     }
 
     @Override
