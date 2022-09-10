@@ -17,6 +17,7 @@ import com.shop.tbms.mapper.StepSequenceMapper;
 import com.shop.tbms.repository.*;
 import com.shop.tbms.service.StepService;
 import com.shop.tbms.util.MoldProgressUtil;
+import com.shop.tbms.util.StepUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -106,13 +107,12 @@ public class StepServiceImpl implements StepService {
         stepComponent.updateStepStatus(currentStep, currentMoldProgress);
         stepRepository.save(currentStep);
 
-        /* Generate next step progress */
-//        List<MoldProgress> listMoldProgress = new ArrayList<>();
-//        procedure.getListStep().forEach(step -> {
-//            /* Process steps */
-//            step.setStatus(StepStatus.IN_PROGRESS);
-//            listMoldProgress.addAll(MoldProgressUtil.generateProcess(listMold, step));
-//        });
+        /* set status next step */
+        Step nextMainStep = StepUtil.getNextMainStep(stepSequenceRepository.findByStepBeforeId(currentStep.getId()));
+        if (!StepStatus.IN_PROGRESS.equals(nextMainStep.getStatus())) {
+            nextMainStep.setStatus(StepStatus.IN_PROGRESS);
+            stepRepository.save(nextMainStep);
+        }
 
         /* insert log */
         reportLogComponent.insertReportLog(currentStep, reportStepReqDTO);

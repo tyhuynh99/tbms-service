@@ -2,8 +2,10 @@ package com.shop.tbms.util;
 
 import com.shop.tbms.entity.Step;
 import com.shop.tbms.entity.StepSequence;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.Comparator;
 import java.util.List;
 
 public class StepUtil {
@@ -19,5 +21,12 @@ public class StepUtil {
                 .filter(step -> step.getId().equals(stepId))
                 .findFirst()
                 .orElseThrow(EntityNotFoundException::new);
+    }
+
+    public static Step getNextMainStep(List<StepSequence> lisStepSequenceBefore) {
+        if (CollectionUtils.isEmpty(lisStepSequenceBefore)) return null;
+
+        lisStepSequenceBefore.sort(Comparator.comparing(o -> o.getStepAfter().getSequenceNo()));
+        return lisStepSequenceBefore.get(lisStepSequenceBefore.size() - 1).getStepAfter();
     }
 }

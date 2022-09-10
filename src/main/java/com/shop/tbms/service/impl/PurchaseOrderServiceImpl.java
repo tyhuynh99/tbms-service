@@ -10,6 +10,7 @@ import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteRespDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.OrderStatus;
 import com.shop.tbms.enumerate.StepStatus;
+import com.shop.tbms.enumerate.StepType;
 import com.shop.tbms.mapper.order.PurchaseOrderDetailMapper;
 import com.shop.tbms.mapper.order.PurchaseOrderListMapper;
 import com.shop.tbms.mapper.order.PurchaseOrderMapper;
@@ -124,8 +125,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         List<MoldProgress> listMoldProgress = new ArrayList<>();
         procedure.getListStep().forEach(step -> {
             /* Process steps */
-            step.setStatus(StepStatus.IN_PROGRESS);
-            listMoldProgress.addAll(MoldProgressUtil.generateProcess(listMold, step));
+            if (!StepType.FIXING.equals(step.getType())) {
+                if (Boolean.TRUE.equals(step.getIsStart())) step.setStatus(StepStatus.IN_PROGRESS);
+                listMoldProgress.addAll(MoldProgressUtil.generateProcess(listMold, step));
+            }
         });
 
         /* Insert data MoldProgress */
