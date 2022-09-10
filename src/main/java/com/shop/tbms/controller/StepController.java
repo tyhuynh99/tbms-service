@@ -4,6 +4,7 @@ import com.shop.tbms.annotation.ValidRole;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.step.detail.StepDTO;
 import com.shop.tbms.dto.step.report.ReportStepReqDTO;
+import com.shop.tbms.dto.step.report_error.ReportErrorToStepRespDTO;
 import com.shop.tbms.enumerate.Role;
 import com.shop.tbms.service.StepService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/step")
@@ -27,5 +29,11 @@ public class StepController {
     @ValidRole(role = {Role.EMPLOYEE})
     public ResponseEntity<SuccessRespDTO> reportStep(@RequestBody @Valid ReportStepReqDTO reportStepReqDTO) {
         return ResponseEntity.ok(stepService.reportStepProgress(reportStepReqDTO));
+    }
+
+    @GetMapping("/report_error/list_to_step")
+    @ValidRole(role = {Role.EMPLOYEE})
+    public ResponseEntity<List<ReportErrorToStepRespDTO>> getListToStepInReportError(@RequestParam(name = "stepId") Long stepId) {
+        return ResponseEntity.ok(stepService.getListToStepInReportError(stepId));
     }
 }

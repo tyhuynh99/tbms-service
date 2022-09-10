@@ -5,18 +5,22 @@ import com.shop.tbms.component.StepComponent;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.step.detail.StepDTO;
 import com.shop.tbms.dto.step.report.ReportStepReqDTO;
+import com.shop.tbms.dto.step.report_error.ReportErrorToStepRespDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.OrderPaymentStatus;
 import com.shop.tbms.enumerate.OrderStatus;
 import com.shop.tbms.mapper.StepMapper;
+import com.shop.tbms.mapper.StepSequenceMapper;
 import com.shop.tbms.repository.*;
 import com.shop.tbms.service.StepService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -24,6 +28,8 @@ import java.util.List;
 public class StepServiceImpl implements StepService {
     @Autowired
     private StepMapper stepMapper;
+    @Autowired
+    private StepSequenceMapper stepSequenceMapper;
 
     @Autowired
     private StepRepository stepRepository;
@@ -35,6 +41,8 @@ public class StepServiceImpl implements StepService {
     private MoldElementRepository moldElementRepository;
     @Autowired
     private PurchaseOrderRepository purchaseOrderRepository;
+    @Autowired
+    private StepSequenceRepository stepSequenceRepository;
 
     @Autowired
     private StepComponent stepComponent;
@@ -89,5 +97,18 @@ public class StepServiceImpl implements StepService {
         stepRepository.save(currentStep);
 
         return null;
+    }
+
+    @Override
+    public List<ReportErrorToStepRespDTO> getListToStepInReportError(Long stepId) {
+        List<StepSequence> listStepSequence = stepSequenceRepository.findByStepBeforeId(stepId);
+
+        /* return empty if there is only one option for step */
+        if (CollectionUtils.isEmpty(listStepSequence) || listStepSequence.size() == 1) return List.of();
+
+        listStepSequence.sort(Comparator.comparing(o -> o.getStepAfter().getSequenceNo()));
+        listStepSequence.remove(listStepSequence.size() - 1);
+
+        return stepSequenceMapper.toToNextStepErrors(listStepSequence);
     }
 }
