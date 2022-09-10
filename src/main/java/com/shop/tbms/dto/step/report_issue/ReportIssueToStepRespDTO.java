@@ -1,6 +1,5 @@
-package com.shop.tbms.dto.step.report_error;
+package com.shop.tbms.dto.step.report_issue;
 
-import com.shop.tbms.enumerate.StepType;
 import lombok.*;
 
 @Getter
@@ -9,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ReportErrorToStepRespDTO {
+public class ReportIssueToStepRespDTO {
     private Long stepId;
     private String stepCode;
     private String stepName;

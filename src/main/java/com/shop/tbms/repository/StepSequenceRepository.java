@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface StepSequenceRepository extends JpaRepository<StepSequence, Long> {
     List<StepSequence> findByStepBeforeId(Long stepBeforeId);
+    List<StepSequence> findByStepAfterId(Long stepAfterId);
 }

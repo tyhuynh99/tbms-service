@@ -1,6 +1,7 @@
 package com.shop.tbms.util;
 
 import com.shop.tbms.dto.step.report.*;
+import com.shop.tbms.dto.step.report_issue.ReportIssueStepReqDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -67,5 +68,9 @@ public class ReportLogUtil {
                         .map(ReportMoldElementReqDTO::toString)
                         .collect(Collectors.toList())
         );
+    }
+
+    public static String generateDescription(ReportIssueStepReqDTO reportIssueStepReqDTO) {
+        return reportIssueStepReqDTO.toString();
     }
 }

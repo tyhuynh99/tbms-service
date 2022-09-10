@@ -23,10 +23,17 @@ public class StepUtil {
                 .orElseThrow(EntityNotFoundException::new);
     }
 
-    public static Step getNextMainStep(List<StepSequence> lisStepSequenceBefore) {
-        if (CollectionUtils.isEmpty(lisStepSequenceBefore)) return null;
+    public static Step getNextMainStep(List<StepSequence> listStepSequenceBefore) {
+        if (CollectionUtils.isEmpty(listStepSequenceBefore)) return null;
 
-        lisStepSequenceBefore.sort(Comparator.comparing(o -> o.getStepAfter().getSequenceNo()));
-        return lisStepSequenceBefore.get(lisStepSequenceBefore.size() - 1).getStepAfter();
+        listStepSequenceBefore.sort(Comparator.comparing(o -> o.getStepAfter().getSequenceNo()));
+        return listStepSequenceBefore.get(listStepSequenceBefore.size() - 1).getStepAfter();
+    }
+
+    public static Step getPreMainStep(List<StepSequence> listStepSequenceAfter) {
+        if (CollectionUtils.isEmpty(listStepSequenceAfter)) return null;
+
+        listStepSequenceAfter.sort(Comparator.comparing(o -> o.getStepBefore().getSequenceNo()));
+        return listStepSequenceAfter.get(0).getStepAfter();
     }
 }

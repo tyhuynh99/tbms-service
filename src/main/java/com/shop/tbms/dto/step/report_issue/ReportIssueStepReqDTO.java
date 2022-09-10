@@ -1,4 +1,4 @@
-package com.shop.tbms.dto.step.report_error;
+package com.shop.tbms.dto.step.report_issue;
 
 import lombok.*;
 
@@ -11,11 +11,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ReportErrorStepReqDTO {
+public class ReportIssueStepReqDTO {
     @NotNull
     private Long stepId;
 
-    private String note;
+    private String description;
 
     @NotNull
     private List<Long> listMoldId;
@@ -23,5 +23,5 @@ public class ReportErrorStepReqDTO {
     @NotNull
     private Boolean isNeedSupport;
 
-    private Long changeToStep;
+    private Long changeToStepId;
 }

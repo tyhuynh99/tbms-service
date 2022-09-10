@@ -5,6 +5,7 @@ import com.shop.tbms.constant.MathConstant;
 import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.order.OrderStepRespDTO;
 import com.shop.tbms.dto.step.report.*;
+import com.shop.tbms.dto.step.report_issue.ReportIssueStepReqDTO;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.OrderStatus;
@@ -15,6 +16,7 @@ import com.shop.tbms.repository.PurchaseOrderRepository;
 import com.shop.tbms.repository.TemplateMoldElementRepository;
 import com.shop.tbms.util.MoldElementUtil;
 import com.shop.tbms.util.StepUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -26,6 +28,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class StepComponent {
     @Autowired
     private MoldProgressRepository moldProgressRepository;
@@ -193,5 +196,43 @@ public class StepComponent {
 //                throw new BusinessException("Step require evidences");
 //            }
 //        }
+    }
+
+    public void resetProgress(Step step, List<Mold> listMold) {
+        log.info("Begin reset progress mold {} of step {}", listMold, step);
+
+        /* set status to IN PROGRESS */
+        if (!StepStatus.IN_PROGRESS.equals(step.getStatus())) step.setStatus(StepStatus.IN_PROGRESS);
+
+        List<MoldProgress> moldProgressList = moldProgressRepository.findAllByStepId(step.getId());
+        log.info("get list progress list of step {} get result {}", step, moldProgressList);
+        List<MoldProgress> listUpdatedProgress = new ArrayList<>();
+
+        listMold.forEach(mold -> {
+            log.info("Start change complete mold {} of step {}", mold, step);
+            Optional<MoldProgress> optionalMoldProgress = moldProgressList.stream()
+                    .filter(moldProgress -> moldProgress.getMold().getId().equals(mold.getId()))
+                    .findFirst();
+
+            if (optionalMoldProgress.isPresent()) {
+                MoldProgress moldProgress = optionalMoldProgress.get();
+                log.info("mold progress is exited {}. Change complete to FALSE", moldProgress);
+                moldProgress.setIsCompleted(Boolean.FALSE);
+
+                listUpdatedProgress.add(moldProgress);
+            } else {
+                log.info("mold progress is not existed. create new mold progress.");
+                MoldProgress moldProgress = new MoldProgress();
+                moldProgress.setMold(mold);
+                moldProgress.setStep(step);
+                moldProgress.setIsCompleted(Boolean.FALSE);
+
+                listUpdatedProgress.add(moldProgress);
+            }
+        });
+
+        log.info("Updated progress {}", listUpdatedProgress);
+        moldProgressRepository.saveAll(listUpdatedProgress);
+        log.info("End reset mold progress to fixing step.");
     }
 }

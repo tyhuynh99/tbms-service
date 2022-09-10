@@ -1,8 +1,6 @@
 package com.shop.tbms.mapper;
 
 import com.shop.tbms.dto.step.detail.StepDTO;
-import com.shop.tbms.dto.step.report.ReportStepReqDTO;
-import com.shop.tbms.dto.step.report_error.ReportErrorToStepRespDTO;
 import com.shop.tbms.entity.Step;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
