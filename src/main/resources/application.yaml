@@ -8,6 +8,7 @@ server:
 
 # spring setting
 spring:
+  profiles: default
   datasource:
     url: jdbc:postgresql://58.84.1.74:5432/tbms
     username: admin
@@ -28,3 +29,37 @@ firebase:
   admin-key: tbms-a082d-firebase-adminsdk-43tdy-6fc21f54ab.json
   bucket-name: tbms-a082d.appspot.com
   preview-url: https://firebasestorage.googleapis.com/v0/b/tbms-a082d.appspot.com/o/%s?alt=media
+
+---
+
+# application port
+server:
+  port: 8888
+  error:
+    include-stacktrace: never
+  servlet:
+    context-path: /tbms_service
+
+# spring setting
+spring:
+  profiles: dev
+  datasource:
+    url: jdbc:postgresql://${DB_SERVER}:${DB_PORT}/tbms
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    sql-script-encoding: UTF-8
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 5
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
+
+# firebase
+firebase:
+  admin-key: ${ADMIN_KEY_FILE_PATH}
+  bucket-name: ${BUCKET_NAME}
+  preview-url: ${PREVIEW_URL}
