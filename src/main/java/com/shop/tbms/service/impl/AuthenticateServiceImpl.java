@@ -9,9 +9,11 @@ import com.shop.tbms.dto.authen.LoginReqDTO;
 import com.shop.tbms.dto.authen.LoginResDTO;
 import com.shop.tbms.dto.authen.RefreshTokenReqDTO;
 import com.shop.tbms.entity.Account;
+import com.shop.tbms.entity.TemplateStep;
 import com.shop.tbms.enumerate.Role;
 import com.shop.tbms.mapper.AccountToUserDetailsMapper;
 import com.shop.tbms.repository.AccountRepository;
+import com.shop.tbms.repository.TemplateStepRepository;
 import com.shop.tbms.service.AuthenticateService;
 import com.shop.tbms.util.AuthenticationUtil;
 import com.shop.tbms.util.JWTUtil;
@@ -36,6 +38,8 @@ public class AuthenticateServiceImpl implements AuthenticateService {
 
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private TemplateStepRepository templateStepRepository;
 
     @Autowired
     private AuthenticateComponent authenticateComponent;
@@ -53,6 +57,7 @@ public class AuthenticateServiceImpl implements AuthenticateService {
         authenticateComponent.checkValidAccount(account, loginReqDTO);
 
         TbmsUserDetails userDetails = accountToUserDetailsMapper.toUserDetails(account);
+        userDetails.setAssignedStep(authenticateComponent.getStepAssignedUser(account));
 
         String accessToken = authenticateComponent.generateToken(true, userDetails);
         String refreshToken = authenticateComponent.generateToken(false, userDetails);

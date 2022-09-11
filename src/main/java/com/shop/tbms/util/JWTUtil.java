@@ -2,6 +2,7 @@ package com.shop.tbms.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shop.tbms.config.security.TbmsUserDetails;
+import com.shop.tbms.config.security.TbmsUserStep;
 import com.shop.tbms.dto.ErrorRespDTO;
 import com.shop.tbms.enumerate.Role;
 import io.jsonwebtoken.Claims;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.List;
 
 import static com.shop.tbms.constant.AuthenticateConstant.*;
 import static com.shop.tbms.constant.CommonConstant.RES_JSON_TYPE;
@@ -40,6 +42,7 @@ public class JWTUtil {
                 .fullname((String) claims.get(FULLNAME))
                 .active((Boolean) claims.get(IS_ACTIVE))
                 .role(Role.fromValue((int) claims.get(ROLE)))
+                .assignedStep((List<TbmsUserStep>) claims.get(ASSIGNED_STEP))
                 .build();
     }
 

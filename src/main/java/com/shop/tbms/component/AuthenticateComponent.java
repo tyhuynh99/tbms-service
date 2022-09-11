@@ -2,9 +2,14 @@ package com.shop.tbms.component;
 
 import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.config.security.TbmsUserDetails;
+import com.shop.tbms.config.security.TbmsUserStep;
 import com.shop.tbms.constant.AuthenticateConstant;
 import com.shop.tbms.dto.authen.LoginReqDTO;
 import com.shop.tbms.entity.Account;
+import com.shop.tbms.entity.AccountAssignStep;
+import com.shop.tbms.entity.TemplateStep;
+import com.shop.tbms.mapper.StepMapper;
+import com.shop.tbms.repository.TemplateStepRepository;
 import com.shop.tbms.util.PasswordUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -13,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.shop.tbms.constant.AuthenticateConstant.*;
 
@@ -20,6 +27,12 @@ import static com.shop.tbms.constant.AuthenticateConstant.*;
 public class AuthenticateComponent {
     @Autowired
     private AuthenticateConstant authenticateConstant;
+
+    @Autowired
+    private TemplateStepRepository templateStepRepository;
+
+    @Autowired
+    private StepMapper stepMapper;
 
     public String generateToken(boolean isAccessToken, TbmsUserDetails userDetails) {
         String signingKey = authenticateConstant.getKey();
@@ -34,6 +47,7 @@ public class AuthenticateComponent {
                 .claim(USER_ID, userDetails.getUserId())
                 .claim(USERNAME, userDetails.getUsername())
                 .claim(FULLNAME, userDetails.getFullname())
+                .claim(ASSIGNED_STEP, userDetails.getAssignedStep())
                 .claim(ROLE, userDetails.getRole())
                 .claim(IS_ACTIVE, userDetails.getActive())
                 .compact();
@@ -54,5 +68,15 @@ public class AuthenticateComponent {
         if (!Boolean.TRUE.equals(account.getActive())) {
             throw new BusinessException("Account is locked");
         }
+    }
+
+    public List<TbmsUserStep> getStepAssignedUser(Account account) {
+        List<TemplateStep> listStep = templateStepRepository
+                .findAllById(
+                        account.getAssignedSteps().stream()
+                                .map(AccountAssignStep::getStep)
+                                .collect(Collectors.toList()));
+
+        return stepMapper.toUserSteps(listStep);
     }
 }

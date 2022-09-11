@@ -1,7 +1,9 @@
 package com.shop.tbms.mapper;
 
+import com.shop.tbms.config.security.TbmsUserStep;
 import com.shop.tbms.dto.step.detail.StepDTO;
 import com.shop.tbms.entity.Step;
+import com.shop.tbms.entity.TemplateStep;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -21,5 +23,9 @@ public interface StepMapper {
 
     List<StepDTO> toDTOs(List<Step> steps);
 
+    @Mapping(target = "stepCode", source = "code")
+    @Mapping(target = "stepName", source = "name")
+    TbmsUserStep toUserStep(TemplateStep step);
 
+    List<TbmsUserStep> toUserSteps(List<TemplateStep> steps);
 }

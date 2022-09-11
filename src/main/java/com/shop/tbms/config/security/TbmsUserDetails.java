@@ -3,6 +3,7 @@ package com.shop.tbms.config.security;
 import com.shop.tbms.enumerate.Role;
 import lombok.*;
 
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -17,6 +18,7 @@ public class TbmsUserDetails {
     private String fullname;
     private Role role;
     private Boolean active;
+    private List<TbmsUserStep> assignedStep;
 
     @Override
     public boolean equals(Object obj) {

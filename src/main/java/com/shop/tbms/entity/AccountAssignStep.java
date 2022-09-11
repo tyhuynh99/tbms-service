@@ -17,7 +17,7 @@ public class AccountAssignStep extends AbstractAuditingEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "step", length = 50, nullable = false)
+    @Column(name = "step", nullable = false, length = 50)
     private String step;
 
     @ManyToOne

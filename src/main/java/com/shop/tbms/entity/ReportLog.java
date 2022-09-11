@@ -21,8 +21,7 @@ public class ReportLog {
     @Enumerated(EnumType.STRING)
     private ReportActionType action;
 
-    @Column(name = "description")
-    @Lob
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne

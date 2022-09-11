@@ -16,6 +16,7 @@ public class AuthenticateConstant {
     public static final String USER_ID = "userId";
     public static final String USERNAME = "username";
     public static final String FULLNAME = "fullname";
+    public static final String ASSIGNED_STEP = "assignedStep";
     public static final String IS_ACTIVE = "isActive";
     public static final String ROLE = "role";
     public static final String SYSTEM = "system";
