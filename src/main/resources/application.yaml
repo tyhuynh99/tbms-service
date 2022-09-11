@@ -22,3 +22,9 @@ spring:
     hibernate:
       ddl-auto: update
     generate-ddl: true
+
+# firebase
+firebase:
+  admin-key: tbms-a082d-firebase-adminsdk-43tdy-6fc21f54ab.json
+  bucket-name: tbms-a082d.appspot.com
+  preview-url: https://firebasestorage.googleapis.com/v0/b/tbms-a082d.appspot.com/o/%s?alt=media
