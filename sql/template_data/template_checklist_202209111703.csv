@@ -1,0 +1,31 @@
+"id","created_by","created_date","updated_by","updated_date","content","template_step_id"
+1,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Đúng size đi đúc.,GO_TIA_TOT
+2,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Sạch sẽ.,GO_TIA_TOT
+3,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Có đầy đủ rập đúc cho khâu đúc.,GO_TIA_TOT
+4,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Chụp hình.,GO_TIA_TOT
+5,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Độ dày khuôn không được lệch quá 5mm.,DUC
+6,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Rập top miêng khuôn + bottom không được lệch quá 0.5mm.,DUC
+7,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,"Hoa văn, logo phải đúng với mẫu gỗ.",DUC
+8,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Phay xong phải xịt ba zớ sạch sẽ.,SCAN
+9,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Phay 2 cạnh hoặc 2 mặt vuông góc.,SCAN
+10,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Khoan lỗ khi cần thiết.,SCAN
+11,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,"Dùng máy mài, mài bằng mặt đáy của khuôn.",SCAN
+12,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Xịt sơn vừa đủ.,SCAN
+13,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,"Trung khoang, trung bản nắp đế, lõi phải khớp với nhau.",HOP_KHUON
+14,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Độ dày khuôn phải đúng với bản vẽ. ,HOP_KHUON
+15,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Tên khuôn phải đúng.,HOP_KHUON
+16,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,"Số size chân trái, chân phải trong cùng một khuôn phải giống nhau.",HOP_KHUON
+17,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Logo phải đúng kích thuớc bản vẽ.,PHONG_DIEN
+18,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Nét chữ các khuôn trong cùng lô phải giống nhau.,PHONG_DIEN
+19,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Kiểm tra đúng than chưa trước khi bắn điện.,PHONG_DIEN
+20,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,"Chân trái, chân phải trong cùng 1 khuôn phải giống.",PHONG_DIEN
+21,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,OK.,RAP_KHUON
+22,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,OK.,RAP_KHUON
+23,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Kiểm tra hoa văn không được ăn lem.,TAO_HOA
+24,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Kiểm tra phải giống với bản vẽ tạo hoa.,TAO_HOA
+25,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,"Đúng với yêu cầu kỹ thuật: không bị ố vàng, đen khuôn, phải mở được khuôn xi mạ mờ, xi mạ bóng, phủ nano.",XI_MA_SON_DANH_BONG
+26,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Sơn không tróc và đúng màu sơn theo yêu cầu.,XI_MA_SON_DANH_BONG
+27,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Đúng số size theo đơn hàng.,KIEM_TRA
+28,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Ngoại quan tổng thể phải sạch sẽ.,KIEM_TRA
+29,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,"Khuôn mở ra, đóng vào phải nhẹ nhàng, không bị kẹt.",KIEM_TRA
+30,system,2022-08-21 20:39:02.275,system,2022-08-21 20:39:02.275,Bôi mỡ vào chốt.,KIEM_TRA

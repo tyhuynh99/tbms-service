@@ -1,0 +1,13 @@
+"code","created_by","created_date","updated_by","updated_date","name","type","template_procedure_id","is_required","possible_value"
+SXKT_TEM,system,2022-08-22 21:13:03.024,system,2022-08-22 21:13:03.024,Tem,0,SXKT,false,
+SXKT_NANO,system,2022-08-22 21:13:03.024,system,2022-08-22 21:13:03.024,Có phủ nano không,0,SXKT,false,
+SXKT_SON_MAU,system,2022-08-22 21:13:03.024,system,2022-08-22 21:13:03.024,Sơn màu gì,1,SXKT,false,
+SXKT_NAP,system,2022-08-22 21:13:03.024,system,2022-08-22 21:13:03.024,Nắp,0,SXKT,true,
+SXKT_LOI,system,2022-08-22 21:13:03.024,system,2022-08-22 21:13:03.024,Lõi,0,SXKT,false,
+SXKT_DE,system,2022-08-22 21:13:03.024,system,2022-08-22 21:13:03.024,Đế,0,SXKT,true,
+SXKT_TRUNG_KHOANG,system,2022-08-22 21:13:03.024,system,2022-08-22 21:13:03.024,Trung khoang,0,SXKT,false,
+SXKT_TRUNG_BAN,system,2022-08-22 21:13:03.024,system,2022-08-22 21:13:03.024,Trung bản,0,SXKT,false,
+SXKT_LOGO,system,2022-08-22 21:13:03.024,system,2022-08-22 21:13:03.024,Logo,0,SXKT,false,
+SXKT_THAN,system,2022-08-22 21:13:03.024,system,2022-08-22 21:13:03.024,Than,0,SXKT,false,
+SXKT_XI,system,2022-08-22 21:13:03.024,system,2022-08-22 21:13:03.024,Xi mạ,2,SXKT,false,Xi mạ thuờng;Xi mạ mờ;Đánh bóng
+SXKT_LOAI_KHUON,system,2022-08-22 21:13:03.024,system,2022-08-22 21:13:03.024,Loại khuôn,2,SXKT,false,RB;CM EVA;TPR;IP;PU

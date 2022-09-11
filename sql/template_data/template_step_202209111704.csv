@@ -1,0 +1,21 @@
+"code","created_by","created_date","updated_by","updated_date","is_end","is_start","name","required_evidence","resettable","sequence_no","type","template_procedure_id"
+"2D",system,2022-08-21 19:21:14.186,system,2022-08-21 19:21:20.352,false,true,"2D",false,false,1,0,SXKT
+DAT_VAT_TU,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Đặt vật tư,false,false,2,0,SXKT
+"3D_GO",system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,"3D gỗ",false,false,3,0,SXKT
+CAM_GO,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Cam gỗ,false,false,4,0,SXKT
+CNC_GO_IN,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,CNC gỗ + in,false,false,5,0,SXKT
+GO_TIA_TOT,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Gỗ tỉa tót,false,false,6,0,SXKT
+DUC,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Đúc,true,false,7,1,SXKT
+SCAN,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Scan,false,false,8,0,SXKT
+"3D_KHUON",system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,"3D khuôn",false,false,9,0,SXKT
+CAM_KHUON,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Cam khuôn,false,false,10,0,SXKT
+CNC_KHUON,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,CNC khuôn,false,false,11,0,SXKT
+HOP_KHUON,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Hợp khuôn,false,false,12,0,SXKT
+PHONG_DIEN,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Phóng điện,false,false,13,0,SXKT
+RAP_KHUON,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Ráp khuôn,false,false,14,0,SXKT
+THU_KHUON,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Thử khuôn,false,false,15,1,SXKT
+TAO_HOA,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Tạo hoa,true,false,17,1,SXKT
+XI_MA_SON_DANH_BONG,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,"Xi,mạ,sơn,đánh bóng",false,false,18,1,SXKT
+KIEM_TRA,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Kiểm tra,false,false,19,0,SXKT
+GIAO_HANG,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,true,false,Giao hàng,false,false,20,2,SXKT
+SUA_KHUON,system,2022-08-21 19:43:10.526,system,2022-08-21 19:43:10.526,false,false,Sửa khuôn,false,false,16,3,SXKT
