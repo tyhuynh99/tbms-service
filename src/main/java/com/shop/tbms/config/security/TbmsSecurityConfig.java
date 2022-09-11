@@ -41,7 +41,6 @@ public class TbmsSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, AuthorizationConfig.LOGIN).permitAll()
                 .antMatchers(HttpMethod.POST, AuthorizationConfig.REFRESH_TOKEN).permitAll()
                 .antMatchers(SWAGGER_WHITELIST).permitAll()
-                .antMatchers("/file/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
