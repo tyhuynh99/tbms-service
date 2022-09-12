@@ -47,7 +47,6 @@ public class AuthenticateComponent {
                 .claim(USER_ID, userDetails.getUserId())
                 .claim(USERNAME, userDetails.getUsername())
                 .claim(FULLNAME, userDetails.getFullname())
-                .claim(ASSIGNED_STEP, userDetails.getAssignedStep())
                 .claim(ROLE, userDetails.getRole())
                 .claim(IS_ACTIVE, userDetails.getActive())
                 .compact();

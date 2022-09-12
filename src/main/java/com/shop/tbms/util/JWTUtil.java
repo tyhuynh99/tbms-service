@@ -42,7 +42,6 @@ public class JWTUtil {
                 .fullname((String) claims.get(FULLNAME))
                 .active((Boolean) claims.get(IS_ACTIVE))
                 .role(Role.fromValue((int) claims.get(ROLE)))
-                .assignedStep((List<TbmsUserStep>) claims.get(ASSIGNED_STEP))
                 .build();
     }
 
