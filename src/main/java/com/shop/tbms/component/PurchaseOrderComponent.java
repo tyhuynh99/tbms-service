@@ -4,6 +4,7 @@ import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.dto.order.OrderFilterReqDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.OrderStatus;
+import com.shop.tbms.util.OrderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,9 @@ import java.util.Objects;
 @Component
 public class PurchaseOrderComponent {
     public void canUpdateOrder(PurchaseOrder currentOrder) {
+        /* validate delete order */
+        OrderUtil.validateDeletedOrder(currentOrder);
+
         /* check order status */
         if (!OrderStatus.IN_PROGRESS.equals(currentOrder.getStatus())) {
             throw new BusinessException(
