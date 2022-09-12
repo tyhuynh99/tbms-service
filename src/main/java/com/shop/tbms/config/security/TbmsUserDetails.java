@@ -1,5 +1,6 @@
 package com.shop.tbms.config.security;
 
+import com.shop.tbms.dto.UserAssignedStepDTO;
 import com.shop.tbms.enumerate.Role;
 import lombok.*;
 
@@ -18,7 +19,7 @@ public class TbmsUserDetails {
     private String fullname;
     private Role role;
     private Boolean active;
-    private List<TbmsUserStep> assignedStep;
+    private List<UserAssignedStepDTO> assignedStep;
 
     @Override
     public boolean equals(Object obj) {

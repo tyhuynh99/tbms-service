@@ -2,7 +2,7 @@ package com.shop.tbms.component;
 
 import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.config.security.TbmsUserDetails;
-import com.shop.tbms.config.security.TbmsUserStep;
+import com.shop.tbms.dto.UserAssignedStepDTO;
 import com.shop.tbms.constant.AuthenticateConstant;
 import com.shop.tbms.dto.authen.LoginReqDTO;
 import com.shop.tbms.entity.Account;
@@ -27,12 +27,6 @@ import static com.shop.tbms.constant.AuthenticateConstant.*;
 public class AuthenticateComponent {
     @Autowired
     private AuthenticateConstant authenticateConstant;
-
-    @Autowired
-    private TemplateStepRepository templateStepRepository;
-
-    @Autowired
-    private StepMapper stepMapper;
 
     public String generateToken(boolean isAccessToken, TbmsUserDetails userDetails) {
         String signingKey = authenticateConstant.getKey();
@@ -67,15 +61,5 @@ public class AuthenticateComponent {
         if (!Boolean.TRUE.equals(account.getActive())) {
             throw new BusinessException("Account is locked");
         }
-    }
-
-    public List<TbmsUserStep> getStepAssignedUser(Account account) {
-        List<TemplateStep> listStep = templateStepRepository
-                .findAllById(
-                        account.getAssignedSteps().stream()
-                                .map(AccountAssignStep::getStep)
-                                .collect(Collectors.toList()));
-
-        return stepMapper.toUserSteps(listStep);
     }
 }

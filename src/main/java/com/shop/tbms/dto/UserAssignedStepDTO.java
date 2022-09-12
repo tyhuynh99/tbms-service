@@ -1,4 +1,4 @@
-package com.shop.tbms.config.security;
+package com.shop.tbms.dto;
 
 import lombok.*;
 
@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TbmsUserStep {
+public class UserAssignedStepDTO {
     private String stepCode;
     private String stepName;
 }

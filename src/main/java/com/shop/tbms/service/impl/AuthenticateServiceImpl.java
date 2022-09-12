@@ -57,7 +57,6 @@ public class AuthenticateServiceImpl implements AuthenticateService {
         authenticateComponent.checkValidAccount(account, loginReqDTO);
 
         TbmsUserDetails userDetails = accountToUserDetailsMapper.toUserDetails(account);
-        userDetails.setAssignedStep(authenticateComponent.getStepAssignedUser(account));
 
         String accessToken = authenticateComponent.generateToken(true, userDetails);
         String refreshToken = authenticateComponent.generateToken(false, userDetails);
