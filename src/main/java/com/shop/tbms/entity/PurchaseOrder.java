@@ -7,6 +7,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,12 @@ public class PurchaseOrder extends AbstractAuditingEntity {
 
     @Column(name = "payment_status")
     private OrderPaymentStatus paymentStatus;
+
+    @Column(name = "delete_by", length = 50)
+    private String deleteBy;
+
+    @Column(name = "delete_date")
+    private LocalDateTime deleteDate;
 
     @OneToOne(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn

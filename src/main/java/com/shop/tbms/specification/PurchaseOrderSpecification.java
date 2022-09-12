@@ -15,7 +15,14 @@ import java.util.Objects;
 
 public class PurchaseOrderSpecification {
     public static Specification<PurchaseOrder> buildSpecForList(OrderFilterReqDTO orderFilterReqDTO) {
-        Specification<PurchaseOrder> specification = Specification.where(null);
+        /* order not deleted */
+        Specification<PurchaseOrder> specification = Specification
+                .where(
+                        (root, query, criteriaBuilder) ->
+                                criteriaBuilder.equal(
+                                        root.get(PurchaseOrder_.IS_DELETED),
+                                        Boolean.FALSE)
+                );
 
         if (Objects.nonNull(orderFilterReqDTO.getCodeContains())) {
             specification = specification.and((root, query, criteriaBuilder) ->
@@ -70,6 +77,14 @@ public class PurchaseOrderSpecification {
                                         OrderStatus.IN_PROGRESS)
                 );
 
+        /* not deleted */
+        specification = specification
+                .and(
+                        (root, query, criteriaBuilder) ->
+                                criteriaBuilder.equal(
+                                        root.get(PurchaseOrder_.IS_DELETED),
+                                        Boolean.FALSE)
+                );
         return specification;
     }
 }

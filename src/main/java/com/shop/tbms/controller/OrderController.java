@@ -46,6 +46,11 @@ public class OrderController {
         return ResponseEntity.ok(purchaseOrderService.getOrderById(orderId));
     }
 
+    @DeleteMapping
+    public ResponseEntity<SuccessRespDTO> deleteOrder(@RequestParam(name = "id") Long orderId) {
+        return ResponseEntity.ok(purchaseOrderService.deleteOrder(orderId));
+    }
+
     @GetMapping("/list")
     public ResponseEntity<PageResponse<OrderListRespDTO>> getDetailOrder(
             OrderFilterReqDTO filterReqDTO,

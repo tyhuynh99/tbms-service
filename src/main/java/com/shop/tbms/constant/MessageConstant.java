@@ -16,4 +16,7 @@ public class MessageConstant {
 
     @Value("${update_success}")
     private String updateSuccess;
+
+    @Value("${delete_success}")
+    private String deleteSuccess;
 }

@@ -13,6 +13,7 @@ import java.util.List;
 public interface PurchaseOrderService {
     SuccessRespDTO createOrder(OrderCreateReqDTO orderCreateReqDTO);
     SuccessRespDTO updateOrder(OrderUpdateReqDTO orderUpdateReqDTO);
+    SuccessRespDTO deleteOrder(Long orderId);
     OrderDetailRespDTO getOrderById(Long orderId);
     Page<OrderListRespDTO> getListOrder(OrderFilterReqDTO filterReqDTO, Pageable pageable);
     List<UpdateExpectedCompleteRespDTO> updateStepExpectedComplete(List<UpdateExpectedCompleteReqDTO> listReqDTO);

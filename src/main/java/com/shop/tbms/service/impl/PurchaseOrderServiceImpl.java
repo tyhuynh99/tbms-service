@@ -1,7 +1,6 @@
 package com.shop.tbms.service.impl;
 
 import com.shop.tbms.component.*;
-import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.order.*;
@@ -17,7 +16,9 @@ import com.shop.tbms.mapper.order.PurchaseOrderMapper;
 import com.shop.tbms.repository.*;
 import com.shop.tbms.service.PurchaseOrderService;
 import com.shop.tbms.specification.PurchaseOrderSpecification;
+import com.shop.tbms.util.AuthenticationUtil;
 import com.shop.tbms.util.MoldProgressUtil;
+import com.shop.tbms.util.OrderUtil;
 import com.shop.tbms.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -169,8 +171,25 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
     @Override
+    public SuccessRespDTO deleteOrder(Long orderId) {
+        PurchaseOrder order = purchaseOrderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+        /* validate */
+        OrderUtil.validateDeletedOrder(order);
+
+        order.setIsDeleted(Boolean.TRUE);
+        order.setDeleteBy(AuthenticationUtil.getUserDetails().getUsername());
+        order.setDeleteDate(LocalDateTime.now());
+        purchaseOrderRepository.save(order);
+
+        return SuccessRespDTO.builder()
+                .message(messageConstant.getDeleteSuccess())
+                .build();
+    }
+
+    @Override
     public OrderDetailRespDTO getOrderById(Long orderId) {
         PurchaseOrder order = purchaseOrderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+
         OrderDetailRespDTO respDTO = purchaseOrderDetailMapper.fromEntityToDetailDTO(order);
 
         respDTO.setListStep(stepComponent.setPercentProgress(respDTO.getListStep(), order.getProcedure().getListStep()));

@@ -75,8 +75,11 @@ public class StepComponent {
                 .collect(Collectors.toList());
 
         boolean isInvalidOrderStatus = listOrder.stream()
-                .map(PurchaseOrder::getStatus)
-                .anyMatch(Predicate.not(OrderStatus.IN_PROGRESS::equals));
+                .anyMatch(purchaseOrder ->
+                        !OrderStatus.IN_PROGRESS.equals(purchaseOrder.getStatus())
+                                ||
+                                Boolean.TRUE.equals(purchaseOrder.getIsDeleted())
+                );
 
         if (isInvalidOrderStatus) {
             throw new BusinessException("Invalid request. Contains completed order.");
