@@ -47,6 +47,7 @@ public class OrderController {
     }
 
     @DeleteMapping
+    @ValidRole(role = {Role.PRESIDENT, Role.SECRETARY, Role.ACCOUNTANT})
     public ResponseEntity<SuccessRespDTO> deleteOrder(@RequestParam(name = "id") Long orderId) {
         return ResponseEntity.ok(purchaseOrderService.deleteOrder(orderId));
     }
