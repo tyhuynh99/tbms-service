@@ -8,11 +8,12 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.validation.ValidationException;
 
-@ControllerAdvice
+@RestControllerAdvice
 @Slf4j
 public class RestResponseExceptionHandler {
     @ExceptionHandler(BusinessException.class)
@@ -35,10 +36,10 @@ public class RestResponseExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(buildErrorResponse(e));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorRespDTO> handleException(Exception e, WebRequest webRequest) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildErrorResponse(e));
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ErrorRespDTO> handleException(Exception e, WebRequest webRequest) {
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildErrorResponse(e));
+//    }
 
     private ErrorRespDTO buildErrorResponse(BusinessException e) {
         return ErrorRespDTO.builder()

@@ -9,7 +9,6 @@ import com.shop.tbms.dto.authen.LoginReqDTO;
 import com.shop.tbms.dto.authen.LoginResDTO;
 import com.shop.tbms.dto.authen.RefreshTokenReqDTO;
 import com.shop.tbms.entity.Account;
-import com.shop.tbms.entity.TemplateStep;
 import com.shop.tbms.enumerate.Role;
 import com.shop.tbms.mapper.AccountToUserDetailsMapper;
 import com.shop.tbms.repository.AccountRepository;
@@ -17,15 +16,11 @@ import com.shop.tbms.repository.TemplateStepRepository;
 import com.shop.tbms.service.AuthenticateService;
 import com.shop.tbms.util.AuthenticationUtil;
 import com.shop.tbms.util.JWTUtil;
-import com.shop.tbms.util.PasswordUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -51,7 +46,7 @@ public class AuthenticateServiceImpl implements AuthenticateService {
     @Override
     public LoginResDTO login(LoginReqDTO loginReqDTO) {
         Account account = accountRepository.findFirstByUsername(loginReqDTO.getUsername())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid username or password"));
+                .orElseThrow(() -> new BusinessException("Invalid username or password"));
 
         // check valid account
         authenticateComponent.checkValidAccount(account, loginReqDTO);

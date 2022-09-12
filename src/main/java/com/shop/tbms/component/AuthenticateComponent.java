@@ -2,14 +2,9 @@ package com.shop.tbms.component;
 
 import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.config.security.TbmsUserDetails;
-import com.shop.tbms.dto.UserAssignedStepDTO;
 import com.shop.tbms.constant.AuthenticateConstant;
 import com.shop.tbms.dto.authen.LoginReqDTO;
 import com.shop.tbms.entity.Account;
-import com.shop.tbms.entity.AccountAssignStep;
-import com.shop.tbms.entity.TemplateStep;
-import com.shop.tbms.mapper.StepMapper;
-import com.shop.tbms.repository.TemplateStepRepository;
 import com.shop.tbms.util.PasswordUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -18,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.shop.tbms.constant.AuthenticateConstant.*;
 
