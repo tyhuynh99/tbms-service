@@ -17,8 +17,11 @@ public class Evidence extends AbstractAuditingEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "description", length = 1000)
-    private String description;
+    @Column(name = "filename", length = 50)
+    private String filename;
+
+    @Column(name = "origin_filename")
+    private String originFilename;
 
     @Column(name = "url", length = 1000, nullable = false)
     private String url;

@@ -7,6 +7,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ReportLogUtil {
@@ -46,15 +47,13 @@ public class ReportLogUtil {
         );
     }
 
-    private static String genEvidence(List<ReportEvidenceReqDTO> evidence) {
-        if (CollectionUtils.isEmpty(evidence)) return StringUtils.EMPTY;
+    private static String genEvidence(ReportEvidenceReqDTO evidence) {
+        if (Objects.isNull(evidence)) return StringUtils.EMPTY;
 
         return "evidence: "
                 + String.join(
                 DELIMETER,
-                evidence.stream()
-                        .map(ReportEvidenceReqDTO::toString)
-                        .collect(Collectors.toList())
+                evidence.toString()
         );
     }
 

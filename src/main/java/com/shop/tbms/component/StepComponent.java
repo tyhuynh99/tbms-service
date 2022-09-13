@@ -3,17 +3,20 @@ package com.shop.tbms.component;
 import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.constant.MathConstant;
 import com.shop.tbms.constant.StepConstant;
+import com.shop.tbms.dto.FileDTO;
 import com.shop.tbms.dto.order.OrderStepRespDTO;
 import com.shop.tbms.dto.step.report.*;
-import com.shop.tbms.dto.step.report_issue.ReportIssueStepReqDTO;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.OrderStatus;
 import com.shop.tbms.enumerate.StepStatus;
 import com.shop.tbms.enumerate.StepType;
+import com.shop.tbms.repository.EvidenceRepository;
 import com.shop.tbms.repository.MoldProgressRepository;
 import com.shop.tbms.repository.PurchaseOrderRepository;
 import com.shop.tbms.repository.TemplateMoldElementRepository;
+import com.shop.tbms.service.FileService;
+import com.shop.tbms.util.EvidenceUtil;
 import com.shop.tbms.util.MoldElementUtil;
 import com.shop.tbms.util.StepUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -21,21 +24,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class StepComponent {
     @Autowired
+    private FileService fileService;
+
+    @Autowired
     private MoldProgressRepository moldProgressRepository;
     @Autowired
     private PurchaseOrderRepository purchaseOrderRepository;
     @Autowired
     private TemplateMoldElementRepository templateMoldElementRepository;
+    @Autowired
+    private EvidenceRepository evidenceRepository;
 
     @Autowired
     private StepConstant stepConstant;
@@ -190,15 +198,56 @@ public class StepComponent {
         });
     }
 
-    public void updateEvidence(Step currentStep, List<ReportEvidenceReqDTO> listReq) {
-//        List<Evidence> currentEvidence = currentStep.getListEvidence();
-//
-//        /* validate required evidence */
-//        if (Boolean.TRUE.equals(currentStep.getRequiredEvidence())) {
-//            if (CollectionUtils.isEmpty(listReq)) {
-//                throw new BusinessException("Step require evidences");
-//            }
-//        }
+    public void updateEvidence(Step currentStep, ReportEvidenceReqDTO reqDTO) {
+        List<Evidence> currentEvidence = currentStep.getListEvidence();
+        log.info("Update Evidence with current {} and req {}", currentEvidence, reqDTO);
+        if (Objects.isNull(reqDTO.getListDeleteEvidenceId())) reqDTO.setListDeleteEvidenceId(new ArrayList<>());
+
+        /* validate delete evidence */
+        List<Evidence> listDeleteEvidence = currentEvidence.stream()
+                .filter(evidence ->
+                        reqDTO.getListDeleteEvidenceId()
+                                .contains(evidence.getId()))
+                .collect(Collectors.toList());
+        /* delete evidence */
+        if (!CollectionUtils.isEmpty(listDeleteEvidence)) {
+            evidenceRepository.deleteAll(listDeleteEvidence);
+        }
+
+        /* validate required evidence */
+        if (Boolean.TRUE.equals(currentStep.getRequiredEvidence())) {
+            if (CollectionUtils.isEmpty(reqDTO.getListFile()) && currentEvidence.size() == listDeleteEvidence.size()) {
+                throw new BusinessException("Step require evidences");
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(reqDTO.getListFile())) {
+            /* upload file */
+            List<Evidence> listNewEvidence = reqDTO.getListFile().parallelStream().map(multipartFile -> {
+                FileDTO fileDTO = null;
+                try {
+                    fileDTO = fileService.upload(multipartFile);
+                } catch (IOException e) {
+                    log.error("Upload file {} has io exception {}", multipartFile.getOriginalFilename(), e);
+                    throw new RuntimeException(e);
+                }
+                return new Evidence(
+                        null,
+                        null,
+                        multipartFile.getOriginalFilename(),
+                        fileDTO.getUrl(),
+                        currentStep
+                );
+            }).collect(Collectors.toList());
+
+            /* save to has evidence id */
+            evidenceRepository.saveAll(listNewEvidence);
+
+            listNewEvidence.forEach(evidence -> evidence.setFilename(EvidenceUtil.generateFilename(evidence)));
+
+            /* update file name */
+            evidenceRepository.saveAll(listNewEvidence);
+        }
     }
 
     public void resetProgress(Step step, List<Mold> listMold) {

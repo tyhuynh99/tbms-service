@@ -33,7 +33,7 @@ public class ReportStepReqDTO {
 
     private List<ReportChecklistReqDTO> checklist;
 
-    private List<ReportEvidenceReqDTO> evidence;
+    private ReportEvidenceReqDTO evidence;
 
     private List<ReportMoldElementReqDTO> moldElement;
 }
