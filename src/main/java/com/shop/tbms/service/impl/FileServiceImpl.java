@@ -47,7 +47,11 @@ public class FileServiceImpl implements FileService {
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .setStorageBucket(bucketName)
                 .build();
-        FirebaseApp.initializeApp(options);
+        if (FirebaseApp.getApps().isEmpty()) {
+            FirebaseApp.initializeApp(options);
+        } else {
+            FirebaseApp.getInstance();
+        }
 
         this.bucket = StorageClient.getInstance().bucket();
         log.info("Connect to Firebase Storage successful !");
