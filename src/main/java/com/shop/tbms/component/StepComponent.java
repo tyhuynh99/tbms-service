@@ -227,8 +227,8 @@ public class StepComponent {
                 FileDTO fileDTO = null;
                 try {
                     fileDTO = fileService.upload(multipartFile);
-                } catch (IOException e) {
-                    log.error("Upload file {} has io exception {}", multipartFile.getOriginalFilename(), e);
+                } catch (Exception e) {
+                    log.error("Upload file {} has exception {}", multipartFile.getOriginalFilename(), e);
                     throw new RuntimeException(e);
                 }
                 return new Evidence(

@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.PostConstruct;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 
 @Slf4j
 @Service
@@ -59,10 +58,10 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public FileDTO upload(MultipartFile multipartFile) throws IOException {
+    public FileDTO upload(MultipartFile multipartFile) throws Exception {
         log.info("Start upload file {}", multipartFile.getOriginalFilename());
         // TODO: Step 0 validate
-
+        validate(multipartFile);
         // TODO: Step 1 resize and compress file
 
         // TODO: Step 2 generate file name
@@ -78,5 +77,21 @@ public class FileServiceImpl implements FileService {
                 .filename(filename)
                 .url(viewUrl)
                 .build();
+    }
+
+    public void validate(MultipartFile multipartFile) throws Exception {
+        if (multipartFile.isEmpty()) {
+            throw new Exception("File is empty");
+        }
+        String contentType = multipartFile.getContentType();
+        if (contentType == null || !isSupportedContentType(contentType)) {
+            throw new Exception("Only support images and video type");
+        }
+    }
+
+    private boolean isSupportedContentType(String contentType) {
+        return contentType.equals("image/png")
+                || contentType.equals("image/jpg")
+                || contentType.equals("image/jpeg");
     }
 }
