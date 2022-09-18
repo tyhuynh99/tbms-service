@@ -1,7 +1,6 @@
 package com.shop.tbms.component;
 
 import com.shop.tbms.config.exception.BusinessException;
-import com.shop.tbms.constant.MathConstant;
 import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.FileDTO;
 import com.shop.tbms.dto.order.OrderStepRespDTO;
@@ -24,11 +23,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.shop.tbms.constant.AppConstant.ZERO_LONG;
 
 @Component
 @Slf4j
@@ -53,7 +52,7 @@ public class StepComponent {
             Step originStep = StepUtil.findStepById(respDTO.getId(), listOriginStep);
 
             if (StepStatus.INIT.equals(originStep.getStatus())) {
-                respDTO.setPercentComplete(BigDecimal.ZERO);
+                respDTO.setPercentComplete(ZERO_LONG);
             } else {
                 respDTO.setPercentComplete(calPercent(originStep));
             }
@@ -61,17 +60,17 @@ public class StepComponent {
         return listStepDTO;
     }
 
-    private BigDecimal calPercent(Step step) {
+    private Long calPercent(Step step) {
         List<MoldProgress> listMoldProgress = moldProgressRepository.findAllByStepId(step.getId());
 
-        if (CollectionUtils.isEmpty(listMoldProgress)) return BigDecimal.ZERO;
+        if (CollectionUtils.isEmpty(listMoldProgress)) return ZERO_LONG;
 
-        BigDecimal completedMold = BigDecimal.valueOf(listMoldProgress.stream()
+        long completedMold = listMoldProgress.stream()
                 .filter(moldProgress -> Boolean.TRUE.equals(moldProgress.getIsCompleted()))
-                .count());
-        BigDecimal totalMold = BigDecimal.valueOf(listMoldProgress.size());
+                .count();
+        long totalMold =listMoldProgress.size();
 
-        return completedMold.divide(totalMold, MathConstant.SCALE, MathConstant.ROUNDING_MODE);
+        return Math.floorDiv(completedMold, totalMold);
     }
 
     public void validateUpdateExpectedCompleteData(List<UpdateExpectedCompleteReqDTO> listReqDTO, List<Step> listCurStep) {

@@ -5,7 +5,6 @@ import com.shop.tbms.enumerate.StepStatus;
 import com.shop.tbms.enumerate.StepType;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -26,7 +25,7 @@ public class OrderStepRespDTO implements Comparable<OrderStepRespDTO> {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expectedCompleteDate;
     private StepStatus status;
-    private BigDecimal percentComplete;
+    private Long percentComplete;
 
     @Override
     public int compareTo(OrderStepRespDTO o) {
