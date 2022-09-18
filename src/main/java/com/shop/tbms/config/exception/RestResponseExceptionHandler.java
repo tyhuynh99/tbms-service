@@ -1,6 +1,7 @@
 package com.shop.tbms.config.exception;
 
 import com.shop.tbms.dto.ErrorRespDTO;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,10 +37,15 @@ public class RestResponseExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(buildErrorResponse(e));
     }
 
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<ErrorRespDTO> handleException(Exception e, WebRequest webRequest) {
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildErrorResponse(e));
-//    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorRespDTO> handleException(Exception e, WebRequest webRequest) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildErrorResponse(e));
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ErrorRespDTO> handleException(ExpiredJwtException e, WebRequest webRequest) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(buildErrorResponse(e));
+    }
 
     private ErrorRespDTO buildErrorResponse(BusinessException e) {
         return ErrorRespDTO.builder()

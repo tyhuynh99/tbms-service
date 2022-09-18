@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AuthorizationConfig {
-    public static final String LOGIN = "/authen/login";
-    public static final String REFRESH_TOKEN = "/authen/refresh";
+    public static final String[] IGNORE_AUTHEN = {
+            "/authen/login",
+            "/authen/refresh",
+            "/scheduler/check_late_order"
+    };
 }
