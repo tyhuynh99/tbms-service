@@ -10,9 +10,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RefreshTokenReqDTO {
-    @NotBlank(message = "Refresh token is required")
-    private String refreshToken;
+public class LogoutReqDTO {
     @NotBlank(message = "Device token is required")
     private String deviceToken;
 }

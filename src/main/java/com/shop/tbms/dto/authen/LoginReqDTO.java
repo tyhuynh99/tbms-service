@@ -16,4 +16,6 @@ public class LoginReqDTO {
     private String username;
     @NotBlank(message = "Password is required")
     private String password;
+    @NotBlank(message = "Device token is required")
+    private String deviceToken;
 }

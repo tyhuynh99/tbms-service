@@ -40,8 +40,6 @@ public class TbmsSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .addFilterBefore(jwtAuthenticateFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-//                .antMatchers(HttpMethod.POST, AuthorizationConfig.LOGIN).permitAll()
-//                .antMatchers(HttpMethod.POST, AuthorizationConfig.REFRESH_TOKEN).permitAll()
                 .antMatchers(SWAGGER_WHITELIST).permitAll()
                 .antMatchers(IGNORE_AUTHEN).permitAll()
                 .antMatchers("/noti/**").permitAll()

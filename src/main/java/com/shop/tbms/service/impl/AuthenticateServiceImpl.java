@@ -5,13 +5,18 @@ import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.config.exception.ForbiddenException;
 import com.shop.tbms.config.security.TbmsUserDetails;
 import com.shop.tbms.constant.AuthenticateConstant;
+import com.shop.tbms.constant.MessageConstant;
+import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.authen.LoginReqDTO;
 import com.shop.tbms.dto.authen.LoginResDTO;
+import com.shop.tbms.dto.authen.LogoutReqDTO;
 import com.shop.tbms.dto.authen.RefreshTokenReqDTO;
 import com.shop.tbms.entity.Account;
+import com.shop.tbms.entity.Device;
 import com.shop.tbms.enumerate.Role;
 import com.shop.tbms.mapper.AccountToUserDetailsMapper;
 import com.shop.tbms.repository.AccountRepository;
+import com.shop.tbms.repository.DeviceRepository;
 import com.shop.tbms.repository.TemplateStepRepository;
 import com.shop.tbms.service.AuthenticateService;
 import com.shop.tbms.util.AuthenticationUtil;
@@ -23,6 +28,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -30,11 +37,15 @@ import java.util.List;
 public class AuthenticateServiceImpl implements AuthenticateService {
     @Autowired
     private AuthenticateConstant authenticateConstant;
+    @Autowired
+    private MessageConstant messageConstant;
 
     @Autowired
     private AccountRepository accountRepository;
     @Autowired
     private TemplateStepRepository templateStepRepository;
+    @Autowired
+    private DeviceRepository deviceRepository;
 
     @Autowired
     private AuthenticateComponent authenticateComponent;
@@ -48,8 +59,20 @@ public class AuthenticateServiceImpl implements AuthenticateService {
         Account account = accountRepository.findFirstByUsername(loginReqDTO.getUsername())
                 .orElseThrow(() -> new BusinessException("Invalid username or password"));
 
-        // check valid account
+        /* check valid account */
         authenticateComponent.checkValidAccount(account, loginReqDTO);
+
+        /* set device token */
+        /* delete old device if existed */
+        Optional<Device> deviceChk = deviceRepository.findFirstByDeviceId(loginReqDTO.getDeviceToken());
+        if (deviceChk.isPresent()) {
+            deviceRepository.delete(deviceChk.get());
+        }
+        /* insert new device token */
+        Device device = new Device();
+        device.setAccount(account);
+        device.setDeviceId(loginReqDTO.getDeviceToken());
+        deviceRepository.save(device);
 
         TbmsUserDetails userDetails = accountToUserDetailsMapper.toUserDetails(account);
 
@@ -70,8 +93,20 @@ public class AuthenticateServiceImpl implements AuthenticateService {
         Account account = accountRepository.findFirstByUsername(curRefreshTokenUserDetail.getUsername())
                 .orElseThrow(() -> new BusinessException("Invalid username or password"));
 
-        // check account is active
+        /* check account is active */
         authenticateComponent.checkActiveAccount(account);
+
+        /* check current device */
+        List<Device> listCurrentDevice = account.getDevices();
+        log.info("Check refresh account device {}", listCurrentDevice);
+
+        boolean hasDevice = listCurrentDevice.stream()
+                .anyMatch(device ->
+                        refreshTokenReqDTO.getDeviceToken().equals(device.getDeviceId()));
+        if (!hasDevice) {
+            log.error("Refresh at new device id {}. Device has not logged in before", refreshTokenReqDTO.getRefreshToken());
+            throw new ForbiddenException("Refresh at new device. Device has not logged in before");
+        }
 
         String newAccessToken = authenticateComponent.generateToken(true, curRefreshTokenUserDetail);
         String newRefreshToken = authenticateComponent.generateToken(false, curRefreshTokenUserDetail);
@@ -80,6 +115,27 @@ public class AuthenticateServiceImpl implements AuthenticateService {
                 .token(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .build();
+    }
+
+    @Override
+    public SuccessRespDTO logout(LogoutReqDTO logoutReqDTO) {
+        TbmsUserDetails userDetails = AuthenticationUtil.getUserDetails();
+
+        if (Objects.nonNull(userDetails)) {
+            Device device = deviceRepository
+                    .findFirstByDeviceIdAndAccountUsername(
+                            logoutReqDTO.getDeviceToken(),
+                            userDetails.getUsername())
+                    .orElseThrow(() ->
+                            new BusinessException("Not found device id with username"));
+            deviceRepository.delete(device);
+
+            return SuccessRespDTO.builder()
+                    .message(messageConstant.getDeleteSuccess())
+                    .build();
+        }
+
+        throw new BusinessException("Not found user detail");
     }
 
     @Override

@@ -17,7 +17,7 @@ public class Device extends AbstractAuditingEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "device_id", nullable = false)
+    @Column(name = "device_id", nullable = false, unique = true)
     private String deviceId;
 
     @ManyToOne
