@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -76,7 +77,8 @@ public class OrderController {
 
     @PostMapping("/step/update_expected_complete")
     @ValidRole(role = {Role.PRESIDENT, Role.SECRETARY})
-    public ResponseEntity<List<UpdateExpectedCompleteRespDTO>> updateStepExceptedComplete(@RequestBody List<@Valid UpdateExpectedCompleteReqDTO> listReqDTO) {
-        return ResponseEntity.ok(purchaseOrderService.updateStepExpectedComplete(listReqDTO));
+    public ResponseEntity<UpdateExpectedCompleteRespDTO> updateStepExceptedComplete(@RequestBody @Valid UpdateExpectedCompleteReqDTO reqDTO) {
+        List<UpdateExpectedCompleteRespDTO> listResp = purchaseOrderService.updateStepExpectedComplete(List.of(reqDTO));
+        return ResponseEntity.ok(CollectionUtils.isEmpty(listResp) ? null : listResp.get(0));
     }
 }
