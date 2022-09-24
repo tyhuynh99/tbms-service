@@ -25,6 +25,7 @@ public class OrderDetailRespDTO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate deliveredDate;
     private String procedureName;
+    private boolean isUrgent;
     private List<MoldDTO> listMold;
     private List<MoldElementDTO> listMoldElement;
     private List<OrderStepRespDTO> listStep;
