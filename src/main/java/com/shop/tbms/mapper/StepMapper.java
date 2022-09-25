@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", uses = {ChecklistMapper.class, EvidenceMapper.class, MoldElementMapper.class, MoldProgressMapper.class})
 public interface StepMapper {
     @Mapping(target = "checklist", source = "listChecklist")
-    @Mapping(target = "listMold", source = "listMoldProgresses")
+    @Mapping(target = "listMoldProgress", source = "listMoldProgresses")
 //    @Mapping(target = "listMold", source = "listMoldProgresses", qualifiedByName = "genListMold")
     @Mapping(target = "listMoldElement", source = "procedure.purchaseOrder.listMoldElement")
     @Mapping(target = "resettable", defaultValue = "false")
