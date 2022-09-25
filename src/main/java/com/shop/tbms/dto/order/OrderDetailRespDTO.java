@@ -26,7 +26,7 @@ public class OrderDetailRespDTO {
     private LocalDate deliveredDate;
     private String procedureName;
     private boolean isUrgent;
-    private List<MoldDTO> listMold;
+    private List<String> listMold;
     private List<MoldElementDTO> listMoldElement;
     private List<OrderStepRespDTO> listStep;
 }

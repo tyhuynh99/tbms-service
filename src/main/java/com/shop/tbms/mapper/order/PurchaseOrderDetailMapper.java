@@ -14,6 +14,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface PurchaseOrderDetailMapper {
@@ -43,8 +44,8 @@ public interface PurchaseOrderDetailMapper {
     List<OrderStepRespDTO> toStepDTO(List<Step> step);
 
     @Named("genListMold")
-    default List<MoldDTO> genListMold(PurchaseOrder order) {
-        return toMoldDTO(order.getListMold());
+    default List<String> genListMold(PurchaseOrder order) {
+        return order.getListMold().stream().map(Mold::getSize).collect(Collectors.toList());
     }
 
     @Named("genListMoldElement")
