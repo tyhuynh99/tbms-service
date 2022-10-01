@@ -18,4 +18,10 @@ public class BusinessException extends RuntimeException {
         super(message);
         this.errorMessage = message;
     }
+
+    public BusinessException(String message, List<?> data) {
+        super(message);
+        this.errorMessage = message;
+        this.data = data;
+    }
 }

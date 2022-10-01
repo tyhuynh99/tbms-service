@@ -1,22 +1,14 @@
 package com.shop.tbms.constant;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
+import static com.shop.tbms.constant.AppConstant.PASSWORD_MIN_LENGTH;
 
-@Getter
-@Setter
-@Component
-@PropertySource("classpath:message.properties")
 public class MessageConstant {
-    @Value("${create_success}")
-    private String createSuccess;
+    public static final String CREATE_SUCCESS = "Create successfully.";
+    public static final String UPDATE_SUCCESS = "Update successfully.";
+    public static final String DELETE_SUCCESS = "Delete successfully.";
 
-    @Value("${update_success}")
-    private String updateSuccess;
-
-    @Value("${delete_success}")
-    private String deleteSuccess;
+    public static final String DUPLICATE_USERNAME = "Duplicate username.";
+    public static final String PASSWORD_NOT_LONG = "Password must be longer than " + PASSWORD_MIN_LENGTH + " characters.";
+    public static final String INVALID_CREATE_ACC_FOR_ROLE = "Cannot create account for this role.";
+    public static final String NOT_FOUND_POSITION = "Not found position.";
 }

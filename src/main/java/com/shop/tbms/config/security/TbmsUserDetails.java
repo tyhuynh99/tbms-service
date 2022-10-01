@@ -19,7 +19,7 @@ public class TbmsUserDetails {
     private String fullname;
     private Role role;
     private Boolean active;
-    private List<UserAssignedStepDTO> assignedStep;
+    private String position;
 
     @Override
     public boolean equals(Object obj) {

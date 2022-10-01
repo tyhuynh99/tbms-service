@@ -39,7 +39,8 @@ public class Account extends AbstractAuditingEntity {
     @ToString.Exclude
     private List<Device> devices = new ArrayList<>();
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    @ManyToOne
+    @JoinColumn(name = "position_code")
     @ToString.Exclude
-    private List<AccountAssignStep> assignedSteps = new ArrayList<>();
+    private Position position;
 }

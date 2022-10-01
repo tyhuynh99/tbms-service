@@ -73,9 +73,6 @@ public class StepServiceImpl implements StepService {
     @Autowired
     private MoldComponent moldComponent;
 
-    @Autowired
-    private MessageConstant messageConstant;
-
     @Override
     public StepDTO getStep(Long stepId) {
         Step step = stepRepository.findById(stepId).orElseThrow(EntityNotFoundException::new);
@@ -143,7 +140,7 @@ public class StepServiceImpl implements StepService {
         log.info("End report step progress");
 
         return SuccessRespDTO.builder()
-                .message(messageConstant.getUpdateSuccess())
+                .message(MessageConstant.UPDATE_SUCCESS)
                 .build();
     }
 
@@ -229,7 +226,7 @@ public class StepServiceImpl implements StepService {
         reportLogComponent.insertReportLog(currentStep, reportIssueStepReqDTO);
 
         return SuccessRespDTO.builder()
-                .message(messageConstant.getUpdateSuccess())
+                .message(MessageConstant.UPDATE_SUCCESS)
                 .build();
     }
 
@@ -282,7 +279,7 @@ public class StepServiceImpl implements StepService {
 
         log.info("End reset mold to step");
         return SuccessRespDTO.builder()
-                .message(messageConstant.getUpdateSuccess())
+                .message(MessageConstant.UPDATE_SUCCESS)
                 .build();
     }
 

@@ -26,4 +26,5 @@ public class TemplateStepSequence extends AbstractAuditingEntity {
     @JoinColumn(name = "template_step_after_id", nullable = false)
     @ToString.Exclude
     private TemplateStep templateStepAfter;
+
 }

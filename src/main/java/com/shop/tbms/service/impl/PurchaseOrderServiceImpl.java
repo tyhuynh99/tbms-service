@@ -42,10 +42,6 @@ import java.util.stream.Collectors;
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 @Slf4j
 public class PurchaseOrderServiceImpl implements PurchaseOrderService {
-    /* Constant */
-    @Autowired
-    private MessageConstant messageConstant;
-
     /* Component */
     @Autowired
     private ProcedureComponent procedureComponent;
@@ -140,7 +136,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         stepRepository.saveAll(procedure.getListStep());
 
         return SuccessRespDTO.builder()
-                .message(messageConstant.getCreateSuccess())
+                .message(MessageConstant.CREATE_SUCCESS)
                 .build();
     }
 
@@ -166,7 +162,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         moldComponent.updateListMoldInOrder(currentOrder, orderUpdateReqDTO);
 
         return SuccessRespDTO.builder()
-                .message(messageConstant.getUpdateSuccess())
+                .message(MessageConstant.UPDATE_SUCCESS)
                 .build();
     }
 
@@ -182,7 +178,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         purchaseOrderRepository.save(order);
 
         return SuccessRespDTO.builder()
-                .message(messageConstant.getDeleteSuccess())
+                .message(MessageConstant.DELETE_SUCCESS)
                 .build();
     }
 

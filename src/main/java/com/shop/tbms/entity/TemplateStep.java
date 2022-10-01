@@ -47,6 +47,11 @@ public class TemplateStep extends AbstractAuditingEntity {
     @ToString.Exclude
     private TemplateProcedure templateProcedure;
 
+    @ManyToOne
+    @JoinColumn(name = "position_code", nullable = false)
+    @ToString.Exclude
+    private Position position;
+
     @OneToMany(mappedBy = "templateStep")
     @ToString.Exclude
     private List<TemplateChecklist> listTemplateChecklist = new ArrayList<>();
