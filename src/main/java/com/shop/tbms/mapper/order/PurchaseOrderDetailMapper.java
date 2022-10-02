@@ -1,11 +1,11 @@
 package com.shop.tbms.mapper.order;
 
 import com.shop.tbms.dto.MoldDTO;
-import com.shop.tbms.dto.MoldElementDTO;
+import com.shop.tbms.dto.MoldGroupDetailDTO;
 import com.shop.tbms.dto.order.OrderDetailRespDTO;
 import com.shop.tbms.dto.order.OrderStepRespDTO;
 import com.shop.tbms.entity.Mold;
-import com.shop.tbms.entity.MoldElement;
+import com.shop.tbms.entity.MoldGroupDetail;
 import com.shop.tbms.entity.PurchaseOrder;
 import com.shop.tbms.entity.Step;
 import com.shop.tbms.enumerate.order.OrderDisplayStatus;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public interface PurchaseOrderDetailMapper {
     /* PURCHASE ORDER */
     @Mapping(target = "listMold", source = "order", qualifiedByName = "genListMold")
-    @Mapping(target = "listMoldElement", source = "order", qualifiedByName = "genListMoldElement")
+    @Mapping(target = "listMoldGroupDetail", source = "order", qualifiedByName = "genListMoldGroupDetail")
     @Mapping(target = "listStep", source = "order", qualifiedByName = "genListStep")
     @Mapping(target = "status", source = "order", qualifiedByName = "genDisplayStatus")
     @Mapping(target = "procedureName", source = "procedure.name")
@@ -36,8 +36,8 @@ public interface PurchaseOrderDetailMapper {
     List<MoldDTO> toMoldDTO(List<Mold> mold);
 
     /* MOLD ELEMENT */
-    MoldElementDTO toMoldElementDTO(MoldElement moldElement);
-    List<MoldElementDTO> toMoldElementDTO(List<MoldElement> moldElement);
+    MoldGroupDetailDTO toMoldGroupDetailDTO(MoldGroupDetail moldGroupDetail);
+    List<MoldGroupDetailDTO> toMoldGroupDetailDTO(List<MoldGroupDetail> moldGroupDetailList);
 
     /* STEP */
     OrderStepRespDTO toStepDTO(Step step);
@@ -48,9 +48,9 @@ public interface PurchaseOrderDetailMapper {
         return order.getListMold().stream().map(Mold::getSize).collect(Collectors.toList());
     }
 
-    @Named("genListMoldElement")
-    default List<MoldElementDTO> genListMoldElement(PurchaseOrder order) {
-        return toMoldElementDTO(order.getListMoldElement());
+    @Named("genListMoldGroupDetail")
+    default List<MoldGroupDetailDTO> genListMoldGroupDetail(PurchaseOrder order) {
+        return toMoldGroupDetailDTO(order.getListMoldGroupDetail());
     }
 
     @Named("genListStep")

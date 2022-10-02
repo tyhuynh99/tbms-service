@@ -1,7 +1,7 @@
 package com.shop.tbms.dto.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.shop.tbms.dto.MoldElementDTO;
+import com.shop.tbms.dto.MoldGroupDetailDTO;
 import com.shop.tbms.enumerate.order.OrderDisplayStatus;
 import lombok.*;
 
@@ -25,6 +25,6 @@ public class OrderDetailRespDTO {
     private String procedureName;
     private boolean isUrgent;
     private List<String> listMold;
-    private List<MoldElementDTO> listMoldElement;
+    private List<MoldGroupDetailDTO> listMoldGroupDetail;
     private List<OrderStepRespDTO> listStep;
 }

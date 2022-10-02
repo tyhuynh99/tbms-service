@@ -2,7 +2,7 @@ package com.shop.tbms.dto.step.detail;
 
 import com.shop.tbms.dto.ChecklistDTO;
 import com.shop.tbms.dto.EvidenceDTO;
-import com.shop.tbms.dto.MoldElementDTO;
+import com.shop.tbms.dto.MoldGroupDetailDTO;
 import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.enumerate.step.StepType;
 import lombok.*;
@@ -35,8 +35,7 @@ public class StepDTO {
     private String note;
     private Boolean isPaid;
 
-    private List<MoldProgressInStepDTO> listMoldProgress = new ArrayList<>();
     private List<ChecklistDTO> checklist = new ArrayList<>();
     private List<EvidenceDTO> listEvidence = new ArrayList<>();
-    private List<MoldElementDTO> listMoldElement = new ArrayList<>();
+    private List<MoldGroupDetailDTO> listMoldElement = new ArrayList<>();
 }

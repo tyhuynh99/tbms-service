@@ -52,8 +52,6 @@ public class StepServiceImpl implements StepService {
     @Autowired
     private ChecklistRepository checklistRepository;
     @Autowired
-    private MoldElementRepository moldElementRepository;
-    @Autowired
     private PurchaseOrderRepository purchaseOrderRepository;
     @Autowired
     private StepSequenceRepository stepSequenceRepository;
@@ -87,7 +85,6 @@ public class StepServiceImpl implements StepService {
         List<MoldProgress> currentMoldProgress = moldProgressRepository.findAllByStepId(currentStep.getId());
         List<Checklist> currentChecklist = currentStep.getListChecklist();
         List<Evidence> currentEvidence = currentStep.getListEvidence();
-        List<MoldElement> currentMoldElement = currentOrder.getListMoldElement();
 
         /* validate */
         /* validate order status */
@@ -117,9 +114,6 @@ public class StepServiceImpl implements StepService {
 
         stepComponent.updateChecklist(currentChecklist, reportStepReqDTO.getChecklist());
         checklistRepository.saveAll(currentChecklist);
-
-        stepComponent.updateMoldElement(currentStep, currentMoldElement, reportStepReqDTO.getMoldElement());
-        moldElementRepository.saveAll(currentMoldElement);
 
         stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence());
 

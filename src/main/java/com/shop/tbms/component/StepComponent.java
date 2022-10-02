@@ -13,10 +13,8 @@ import com.shop.tbms.enumerate.step.StepType;
 import com.shop.tbms.repository.EvidenceRepository;
 import com.shop.tbms.repository.MoldProgressRepository;
 import com.shop.tbms.repository.PurchaseOrderRepository;
-import com.shop.tbms.repository.TemplateMoldElementRepository;
 import com.shop.tbms.service.FileService;
 import com.shop.tbms.util.EvidenceUtil;
-import com.shop.tbms.util.MoldElementUtil;
 import com.shop.tbms.util.StepUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +37,6 @@ public class StepComponent {
     private MoldProgressRepository moldProgressRepository;
     @Autowired
     private PurchaseOrderRepository purchaseOrderRepository;
-    @Autowired
-    private TemplateMoldElementRepository templateMoldElementRepository;
     @Autowired
     private EvidenceRepository evidenceRepository;
 
@@ -147,41 +143,6 @@ public class StepComponent {
                             .findFirst()
                             .orElse(currentProgress.getIsCompleted())
             );
-        });
-    }
-
-    public void updateMoldElement(Step currentStep, List<MoldElement> currentMoldElement, List<ReportMoldElementReqDTO> listReq) {
-        /* validate require update mold element */
-        if (stepConstant.getListStepNeedUpdateMoldElement().containsKey(currentStep.getCode())) {
-            if (CollectionUtils.isEmpty(listReq)) {
-                throw new BusinessException(
-                        String.format(
-                                "Step %s required mold element.",
-                                stepConstant.getListStepNeedUpdateMoldElement().get(currentStep.getCode())
-                        )
-                );
-            }
-        } else {
-            if (!CollectionUtils.isEmpty(listReq)) {
-                throw new BusinessException(String.format("Step %s is not allowed to update mold element", currentStep.getName()));
-            }
-        }
-
-        /* create map for get mold element by code */
-        Map<String, MoldElement> mappedElement = new HashMap<>();
-        currentMoldElement.forEach(element -> mappedElement.put(element.getCode(), element));
-
-        listReq.forEach(reqDTO -> {
-            MoldElement curElement = mappedElement.get(reqDTO.getCode());
-            if (Objects.isNull(curElement)) {
-                throw new BusinessException("Not found element with code " + reqDTO.getCode());
-            }
-
-            /* validate input */
-            MoldElementUtil.validateElementDescription(curElement, reqDTO);
-
-            /* update data */
-            curElement.setDescription(reqDTO.getDescription());
         });
     }
 

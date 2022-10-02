@@ -2,24 +2,16 @@ package com.shop.tbms.mapper;
 
 import com.shop.tbms.dto.UserAssignedStepDTO;
 import com.shop.tbms.dto.step.detail.StepDTO;
-import com.shop.tbms.entity.Mold;
-import com.shop.tbms.entity.MoldProgress;
 import com.shop.tbms.entity.Step;
 import com.shop.tbms.entity.TemplateStep;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", uses = {ChecklistMapper.class, EvidenceMapper.class, MoldElementMapper.class, MoldProgressMapper.class})
+@Mapper(componentModel = "spring", uses = {ChecklistMapper.class, EvidenceMapper.class, MoldGroupDetailMapper.class, MoldProgressMapper.class})
 public interface StepMapper {
     @Mapping(target = "checklist", source = "listChecklist")
-    @Mapping(target = "listMoldProgress", source = "listMoldProgresses")
-    @Mapping(target = "listMoldElement", source = "procedure.purchaseOrder.listMoldElement")
     @Mapping(target = "resettable", defaultValue = "false")
     @Mapping(target = "requiredEvidence", defaultValue = "false")
     @Mapping(target = "isStart", defaultValue = "false")
