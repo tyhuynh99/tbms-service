@@ -8,7 +8,7 @@ import com.shop.tbms.entity.Mold;
 import com.shop.tbms.entity.MoldElement;
 import com.shop.tbms.entity.PurchaseOrder;
 import com.shop.tbms.entity.Step;
-import com.shop.tbms.enumerate.OrderDisplayStatus;
+import com.shop.tbms.enumerate.order.OrderDisplayStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

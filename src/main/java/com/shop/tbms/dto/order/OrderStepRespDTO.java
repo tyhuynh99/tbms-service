@@ -1,8 +1,8 @@
 package com.shop.tbms.dto.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.shop.tbms.enumerate.StepStatus;
-import com.shop.tbms.enumerate.StepType;
+import com.shop.tbms.enumerate.step.StepStatus;
+import com.shop.tbms.enumerate.step.StepType;
 import lombok.*;
 
 import java.time.LocalDate;

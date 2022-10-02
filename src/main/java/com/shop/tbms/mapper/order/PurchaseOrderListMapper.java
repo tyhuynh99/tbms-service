@@ -2,7 +2,7 @@ package com.shop.tbms.mapper.order;
 
 import com.shop.tbms.dto.order.OrderListRespDTO;
 import com.shop.tbms.entity.PurchaseOrder;
-import com.shop.tbms.enumerate.OrderDisplayStatus;
+import com.shop.tbms.enumerate.order.OrderDisplayStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

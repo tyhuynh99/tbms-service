@@ -1,12 +1,7 @@
 package com.shop.tbms.dto;
 
-import com.shop.tbms.enumerate.MoldElementType;
+import com.shop.tbms.enumerate.mold.MoldElementType;
 import lombok.*;
-
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
 @Getter
 @Setter

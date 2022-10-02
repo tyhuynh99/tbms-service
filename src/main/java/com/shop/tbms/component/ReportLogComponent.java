@@ -4,7 +4,7 @@ import com.shop.tbms.dto.step.report.ReportStepReqDTO;
 import com.shop.tbms.dto.step.report_issue.ReportIssueStepReqDTO;
 import com.shop.tbms.entity.ReportLog;
 import com.shop.tbms.entity.Step;
-import com.shop.tbms.enumerate.ReportActionType;
+import com.shop.tbms.enumerate.step.ReportActionType;
 import com.shop.tbms.repository.ReportLogRepository;
 import com.shop.tbms.util.ReportLogUtil;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -5,7 +5,7 @@ import com.shop.tbms.entity.Procedure;
 import com.shop.tbms.entity.Procedure_;
 import com.shop.tbms.entity.PurchaseOrder;
 import com.shop.tbms.entity.PurchaseOrder_;
-import com.shop.tbms.enumerate.OrderStatus;
+import com.shop.tbms.enumerate.order.OrderStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Join;

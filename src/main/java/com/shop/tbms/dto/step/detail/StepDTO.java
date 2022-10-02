@@ -3,8 +3,8 @@ package com.shop.tbms.dto.step.detail;
 import com.shop.tbms.dto.ChecklistDTO;
 import com.shop.tbms.dto.EvidenceDTO;
 import com.shop.tbms.dto.MoldElementDTO;
-import com.shop.tbms.enumerate.StepStatus;
-import com.shop.tbms.enumerate.StepType;
+import com.shop.tbms.enumerate.step.StepStatus;
+import com.shop.tbms.enumerate.step.StepType;
 import lombok.*;
 
 import java.time.LocalDate;

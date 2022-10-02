@@ -1,7 +1,7 @@
 package com.shop.tbms.entity;
 
 import com.shop.tbms.entity.common.AbstractAuditingEntity;
-import com.shop.tbms.enumerate.MoldElementType;
+import com.shop.tbms.enumerate.mold.MoldElementType;
 import lombok.*;
 
 import javax.persistence.*;

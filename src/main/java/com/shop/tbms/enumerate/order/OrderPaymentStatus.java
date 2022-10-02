@@ -1,4 +1,4 @@
-package com.shop.tbms.enumerate;
+package com.shop.tbms.enumerate.order;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
