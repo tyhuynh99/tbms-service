@@ -10,12 +10,12 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity(name = "mold_group_detail")
+@Entity(name = "mold_group")
 @Data
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class MoldGroupDetail extends AbstractAuditingEntity {
+public class MoldGroup extends AbstractAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -48,34 +48,13 @@ public class MoldGroupDetail extends AbstractAuditingEntity {
     @Column(name = "num_of_plate", nullable = false)
     private Integer numOfPlate;
 
-    @Column(name = "has_nap", nullable = false)
-    private Boolean hasNap;
+    @OneToMany(mappedBy = "moldGroup", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<MoldGroupElement> listMoldGroupElement = new ArrayList<>();
 
-    @Column(name = "has_loi", nullable = false)
-    private Boolean hasLoi;
-
-    @Column(name = "has_de", nullable = false)
-    private Boolean hasDe;
-
-    @Column(name = "has_than", nullable = false)
-    private Boolean hasThan;
-
-    @Column(name = "has_trung_khoan", nullable = false)
-    private Boolean hasTrungKhoan;
-
-    @Column(name = "has_logo", nullable = false)
-    private Boolean hasLogo;
-
-    @Column(name = "has_tem", nullable = false)
-    private Boolean hasTem;
-
-    @OneToMany(mappedBy = "moldGroupDetail", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "moldGroup", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<Mold> listMold = new ArrayList<>();
-
-    @OneToMany(mappedBy = "moldGroupDetail", cascade = CascadeType.ALL)
-    @ToString.Exclude
-    private List<MoldGroupProgress> listMoldGroupProgress = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "purchase_order_id", nullable = false)

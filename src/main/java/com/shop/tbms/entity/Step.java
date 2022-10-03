@@ -113,5 +113,5 @@ public class Step extends AbstractAuditingEntity {
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<MoldGroupProgress> listMoldGroupProgress = new ArrayList<>();
+    private List<MoldGroupElementProgress> listMoldGroupElementProgresses = new ArrayList<>();
 }

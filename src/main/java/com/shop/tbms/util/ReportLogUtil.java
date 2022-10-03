@@ -5,7 +5,6 @@ import com.shop.tbms.dto.step.report_issue.ReportIssueStepReqDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -14,23 +13,21 @@ public class ReportLogUtil {
     private static final String DELIMETER = ", ";
 
     public static String generateDescription(ReportStepReqDTO reportStepReqDTO) {
-        return genMoldProgress(reportStepReqDTO.getMoldProgress())
+        return genMoldProgress(reportStepReqDTO.getProgress())
                 + StringUtils.LF
                 + genChecklist(reportStepReqDTO.getChecklist())
                 + StringUtils.LF
-                + genEvidence(reportStepReqDTO.getEvidence())
-                + StringUtils.LF
-                + genMoldElement(reportStepReqDTO.getMoldElement());
+                + genEvidence(reportStepReqDTO.getEvidence());
     }
 
-    private static String genMoldProgress(List<ReportMoldProgressReqDTO> moldProgressReqDTOList) {
+    private static String genMoldProgress(List<ReportProgressReqDTO> moldProgressReqDTOList) {
         if (CollectionUtils.isEmpty(moldProgressReqDTOList)) return StringUtils.EMPTY;
 
         return "moldProgress: "
                 + String.join(
                     DELIMETER,
                     moldProgressReqDTOList.stream()
-                            .map(ReportMoldProgressReqDTO::toString)
+                            .map(ReportProgressReqDTO::toString)
                             .collect(Collectors.toList())
                 );
     }
@@ -54,18 +51,6 @@ public class ReportLogUtil {
                 + String.join(
                 DELIMETER,
                 evidence.toString()
-        );
-    }
-
-    private static String genMoldElement(List<ReportMoldElementReqDTO> reportMoldElementReqDTOList) {
-        if (CollectionUtils.isEmpty(reportMoldElementReqDTOList)) return StringUtils.EMPTY;
-
-        return "moldElement: "
-                + String.join(
-                DELIMETER,
-                reportMoldElementReqDTOList.stream()
-                        .map(ReportMoldElementReqDTO::toString)
-                        .collect(Collectors.toList())
         );
     }
 

@@ -63,7 +63,7 @@ public class PurchaseOrder extends AbstractAuditingEntity {
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<MoldGroupDetail> listMoldGroupDetail = new ArrayList<>();
+    private List<MoldGroup> listMoldGroup = new ArrayList<>();
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     @ToString.Exclude

@@ -1,16 +1,18 @@
-package com.shop.tbms.dto.step.detail;
+package com.shop.tbms.dto.step.report;
 
 import lombok.*;
 
+import javax.validation.constraints.NotNull;
+
 @Getter
 @Setter
-@ToString
 @Builder
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class MoldProgressInStepDTO {
+public class ReportProgressReqDTO {
+    @NotNull
     private Long progressId;
+
     private Boolean isCompleted;
-    private Long moldId;
-    private String moldSize;
 }

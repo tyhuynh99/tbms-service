@@ -1,11 +1,11 @@
 package com.shop.tbms.mapper.order;
 
-import com.shop.tbms.dto.MoldDTO;
-import com.shop.tbms.dto.MoldGroupDetailDTO;
+import com.shop.tbms.dto.mold.MoldDTO;
+import com.shop.tbms.dto.mold.MoldGroupDetailDTO;
 import com.shop.tbms.dto.order.OrderDetailRespDTO;
 import com.shop.tbms.dto.order.OrderStepRespDTO;
 import com.shop.tbms.entity.Mold;
-import com.shop.tbms.entity.MoldGroupDetail;
+import com.shop.tbms.entity.MoldGroup;
 import com.shop.tbms.entity.PurchaseOrder;
 import com.shop.tbms.entity.Step;
 import com.shop.tbms.enumerate.order.OrderDisplayStatus;
@@ -36,8 +36,8 @@ public interface PurchaseOrderDetailMapper {
     List<MoldDTO> toMoldDTO(List<Mold> mold);
 
     /* MOLD ELEMENT */
-    MoldGroupDetailDTO toMoldGroupDetailDTO(MoldGroupDetail moldGroupDetail);
-    List<MoldGroupDetailDTO> toMoldGroupDetailDTO(List<MoldGroupDetail> moldGroupDetailList);
+    MoldGroupDetailDTO toMoldGroupDetailDTO(MoldGroup moldGroup);
+    List<MoldGroupDetailDTO> toMoldGroupDetailDTO(List<MoldGroup> moldGroupList);
 
     /* STEP */
     OrderStepRespDTO toStepDTO(Step step);
@@ -50,7 +50,7 @@ public interface PurchaseOrderDetailMapper {
 
     @Named("genListMoldGroupDetail")
     default List<MoldGroupDetailDTO> genListMoldGroupDetail(PurchaseOrder order) {
-        return toMoldGroupDetailDTO(order.getListMoldGroupDetail());
+        return toMoldGroupDetailDTO(order.getListMoldGroup());
     }
 
     @Named("genListStep")

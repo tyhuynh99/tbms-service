@@ -8,6 +8,7 @@ import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteRespDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.order.OrderStatus;
+import com.shop.tbms.enumerate.step.ReportType;
 import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.enumerate.step.StepType;
 import com.shop.tbms.mapper.order.PurchaseOrderDetailMapper;
@@ -17,7 +18,7 @@ import com.shop.tbms.repository.*;
 import com.shop.tbms.service.PurchaseOrderService;
 import com.shop.tbms.specification.PurchaseOrderSpecification;
 import com.shop.tbms.util.AuthenticationUtil;
-import com.shop.tbms.util.MoldProgressUtil;
+import com.shop.tbms.util.ProgressUtil;
 import com.shop.tbms.util.OrderUtil;
 import com.shop.tbms.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -119,13 +120,14 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         /* Insert data Checklist */
         checklistRepository.saveAll(listChecklist);
 
-        /* Generate process of begin step */
         List<MoldProgress> listMoldProgress = new ArrayList<>();
         procedure.getListStep().forEach(step -> {
             /* Process steps */
-            if (!StepType.FIXING.equals(step.getType())) {
-                if (Boolean.TRUE.equals(step.getIsStart())) step.setStatus(StepStatus.IN_PROGRESS);
-                listMoldProgress.addAll(MoldProgressUtil.generateProcess(listMold, step));
+            if (Boolean.TRUE.equals(step.getIsStart())) step.setStatus(StepStatus.IN_PROGRESS);
+
+            /* Generate mold progress */
+            if (!StepType.FIXING.equals(step.getType()) && ReportType.BY_MOLD.equals(step.getReportType())) {
+                listMoldProgress.addAll(ProgressUtil.generateMoldProcess(listMold, step));
             }
         });
 

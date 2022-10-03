@@ -1,15 +1,15 @@
 package com.shop.tbms.mapper;
 
-import com.shop.tbms.dto.MoldGroupDetailDTO;
-import com.shop.tbms.entity.MoldGroupDetail;
+import com.shop.tbms.dto.mold.MoldGroupDetailDTO;
+import com.shop.tbms.entity.MoldGroup;
 import org.mapstruct.Mapper;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface MoldGroupDetailMapper {
-    MoldGroupDetailDTO toDTO(MoldGroupDetail moldGroupDetail);
+    MoldGroupDetailDTO toDTO(MoldGroup moldGroup);
 
-    List<MoldGroupDetailDTO> toDTOs(List<MoldGroupDetail> moldGroupDetailList);
+    List<MoldGroupDetailDTO> toDTOs(List<MoldGroup> moldGroupList);
 
 }

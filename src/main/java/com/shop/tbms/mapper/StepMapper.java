@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {ChecklistMapper.class, EvidenceMapper.class, MoldGroupDetailMapper.class, MoldProgressMapper.class})
+@Mapper(componentModel = "spring", uses = {ChecklistMapper.class, EvidenceMapper.class})
 public interface StepMapper {
     @Mapping(target = "checklist", source = "listChecklist")
     @Mapping(target = "resettable", defaultValue = "false")

@@ -1,12 +1,11 @@
-package com.shop.tbms.dto;
+package com.shop.tbms.dto.mold;
 
 import com.shop.tbms.enumerate.mold.MoldPlatingType;
 import com.shop.tbms.enumerate.mold.MoldStructure;
 import com.shop.tbms.enumerate.mold.MoldType;
 import lombok.*;
 
-@Getter
-@Setter
+@Data
 @ToString
 @Builder
 @AllArgsConstructor

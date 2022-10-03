@@ -8,12 +8,12 @@ import lombok.ToString;
 
 import javax.persistence.*;
 
-@Entity(name = "mold_group_progress")
+@Entity(name = "mold_group_element_progress")
 @Data
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class MoldGroupProgress extends AbstractAuditingEntity {
+public class MoldGroupElementProgress extends AbstractAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -28,7 +28,12 @@ public class MoldGroupProgress extends AbstractAuditingEntity {
     private Step step;
 
     @ManyToOne
-    @JoinColumn(name = "mold_group_detail_id", nullable = false)
+    @JoinColumn(name = "mold_id", nullable = false)
     @ToString.Exclude
-    private MoldGroupDetail moldGroupDetail;
+    private Mold mold;
+
+    @ManyToOne
+    @JoinColumn(name = "mold_group_element_id", nullable = false)
+    @ToString.Exclude
+    private MoldGroupElement moldGroupElement;
 }

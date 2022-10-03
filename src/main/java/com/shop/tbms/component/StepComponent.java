@@ -25,7 +25,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.shop.tbms.constant.AppConstant.ZERO_LONG;
+import static com.shop.tbms.constant.AppConstant.ZERO;
 
 @Component
 @Slf4j
@@ -48,25 +48,12 @@ public class StepComponent {
             Step originStep = StepUtil.findStepById(respDTO.getId(), listOriginStep);
 
             if (StepStatus.INIT.equals(originStep.getStatus())) {
-                respDTO.setPercentComplete(ZERO_LONG);
+                respDTO.setPercentComplete(ZERO);
             } else {
-                respDTO.setPercentComplete(calPercent(originStep));
+                respDTO.setPercentComplete(StepUtil.calPercentComplete(originStep));
             }
         }
         return listStepDTO;
-    }
-
-    private Long calPercent(Step step) {
-        List<MoldProgress> listMoldProgress = moldProgressRepository.findAllByStepId(step.getId());
-
-        if (CollectionUtils.isEmpty(listMoldProgress)) return ZERO_LONG;
-
-        long completedMold = listMoldProgress.stream()
-                .filter(moldProgress -> Boolean.TRUE.equals(moldProgress.getIsCompleted()))
-                .count();
-        long totalMold =listMoldProgress.size();
-
-        return Math.floorDiv(completedMold, totalMold);
     }
 
     public void validateUpdateExpectedCompleteData(List<UpdateExpectedCompleteReqDTO> listReqDTO, List<Step> listCurStep) {
@@ -134,12 +121,36 @@ public class StepComponent {
         }
     }
 
-    public void updateMoldProgress(List<MoldProgress> currentMoldProgress, List<ReportMoldProgressReqDTO> listReq) {
+    public void updateMoldProgress(List<MoldProgress> currentMoldProgress, List<ReportProgressReqDTO> listReq) {
         currentMoldProgress.forEach(currentProgress -> {
             currentProgress.setIsCompleted(
                     listReq.stream()
                             .filter(req -> currentProgress.getId().equals(req.getProgressId()))
-                            .map(ReportMoldProgressReqDTO::getIsCompleted)
+                            .map(ReportProgressReqDTO::getIsCompleted)
+                            .findFirst()
+                            .orElse(currentProgress.getIsCompleted())
+            );
+        });
+    }
+
+    public void updateMoldElementProgress(List<MoldGroupElementProgress> currentElementProgress, List<ReportProgressReqDTO> listReq) {
+        currentElementProgress.forEach(currentProgress -> {
+            currentProgress.setIsCompleted(
+                    listReq.stream()
+                            .filter(req -> currentProgress.getId().equals(req.getProgressId()))
+                            .map(ReportProgressReqDTO::getIsCompleted)
+                            .findFirst()
+                            .orElse(currentProgress.getIsCompleted())
+            );
+        });
+    }
+
+    public void updateMoldDeliverProgress(List<MoldDeliverProgress> currentMoldDeliverProgress, List<ReportProgressReqDTO> listReq) {
+        currentMoldDeliverProgress.forEach(currentProgress -> {
+            currentProgress.setIsCompleted(
+                    listReq.stream()
+                            .filter(req -> currentProgress.getId().equals(req.getProgressId()))
+                            .map(ReportProgressReqDTO::getIsCompleted)
                             .findFirst()
                             .orElse(currentProgress.getIsCompleted())
             );

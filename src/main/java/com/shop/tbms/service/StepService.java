@@ -1,6 +1,6 @@
 package com.shop.tbms.service;
 
-import com.shop.tbms.dto.MoldDTO;
+import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.step.ResetMoldStepReqDTO;
 import com.shop.tbms.dto.step.detail.StepDTO;

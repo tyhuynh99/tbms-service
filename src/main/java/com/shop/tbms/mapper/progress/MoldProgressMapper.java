@@ -1,6 +1,6 @@
-package com.shop.tbms.mapper;
+package com.shop.tbms.mapper.progress;
 
-import com.shop.tbms.dto.step.detail.MoldProgressInStepDTO;
+import com.shop.tbms.dto.step.detail.progress.MoldProgressDTO;
 import com.shop.tbms.entity.MoldProgress;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,7 +12,7 @@ public interface MoldProgressMapper {
     @Mapping(target = "progressId", source = "id")
     @Mapping(target = "moldId", source = "mold.id")
     @Mapping(target = "moldSize", source = "mold.size")
-    MoldProgressInStepDTO toDTO(MoldProgress moldProgress);
+    MoldProgressDTO toDTO(MoldProgress moldProgress);
 
-    List<MoldProgressInStepDTO> toDTOs(List<MoldProgress> moldProgresses);
+    List<MoldProgressDTO> toDTOs(List<MoldProgress> moldProgresses);
 }

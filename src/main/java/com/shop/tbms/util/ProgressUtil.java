@@ -7,8 +7,8 @@ import com.shop.tbms.entity.Step;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MoldProgressUtil {
-    public static List<MoldProgress> generateProcess(List<Mold> listMold, Step step) {
+public class ProgressUtil {
+    public static List<MoldProgress> generateMoldProcess(List<Mold> listMold, Step step) {
         return listMold.stream().map(mold -> {
             MoldProgress moldProgress = new MoldProgress();
             moldProgress.setMold(mold);

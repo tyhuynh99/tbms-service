@@ -25,7 +25,7 @@ public class OrderStepRespDTO implements Comparable<OrderStepRespDTO> {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expectedCompleteDate;
     private StepStatus status;
-    private Long percentComplete;
+    private long percentComplete;
 
     @Override
     public int compareTo(OrderStepRespDTO o) {
