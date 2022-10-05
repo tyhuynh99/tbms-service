@@ -56,6 +56,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private StepComponent stepComponent;
     @Autowired
     private PurchaseOrderComponent purchaseOrderComponent;
+    @Autowired
+    private ProgressComponent progressComponent;
 
     /* Mapper */
     @Autowired
@@ -72,8 +74,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private StepSequenceRepository stepSequenceRepository;
     @Autowired
     private ChecklistRepository checklistRepository;
-    @Autowired
-    private MoldProgressRepository moldProgressRepository;
     @Autowired
     private StepRepository stepRepository;
 
@@ -120,19 +120,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         /* Insert data Checklist */
         checklistRepository.saveAll(listChecklist);
 
-        List<MoldProgress> listMoldProgress = new ArrayList<>();
+        /* Process steps */
         procedure.getListStep().forEach(step -> {
             /* Process steps */
             if (Boolean.TRUE.equals(step.getIsStart())) step.setStatus(StepStatus.IN_PROGRESS);
 
             /* Generate mold progress */
             if (!StepType.FIXING.equals(step.getType()) && ReportType.BY_MOLD.equals(step.getReportType())) {
-                listMoldProgress.addAll(ProgressUtil.generateMoldProcess(listMold, step));
+                progressComponent.generateProgressForStep(step);
             }
         });
-
-        /* Insert data MoldProgress */
-        moldProgressRepository.saveAll(listMoldProgress);
 
         /* Update status of Step */
         stepRepository.saveAll(procedure.getListStep());
