@@ -1,7 +1,9 @@
 package com.shop.tbms.controller;
 
+import com.shop.tbms.dto.ListWrapperRespDTO;
 import com.shop.tbms.dto.PositionDTO;
 import com.shop.tbms.service.PositionService;
+import com.shop.tbms.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +19,7 @@ public class PositionController {
     private PositionService positionService;
 
     @GetMapping
-    public ResponseEntity<List<PositionDTO>> getAllPosition() {
-        return ResponseEntity.ok(positionService.getListAllPosition());
+    public ResponseEntity<ListWrapperRespDTO<PositionDTO>> getAllPosition() {
+        return ResponseEntity.ok(ResponseUtil.wrapListToResp(positionService.getListAllPosition()));
     }
 }
