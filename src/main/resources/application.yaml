@@ -10,7 +10,7 @@ server:
 spring:
   profiles: default
   datasource:
-    url: jdbc:postgresql://58.84.1.74:5432/tbms
+    url: jdbc:postgresql://58.84.1.74:5432/tbms-dev
     username: admin
     password: 123
     sql-script-encoding: UTF-8
@@ -44,7 +44,7 @@ server:
 spring:
   profiles: dev
   datasource:
-    url: jdbc:postgresql://${DB_SERVER}:${DB_PORT}/tbms
+    url: jdbc:postgresql://${DB_SERVER}:${DB_PORT}/tbms-dev
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     sql-script-encoding: UTF-8
