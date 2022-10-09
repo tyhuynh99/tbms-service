@@ -3,22 +3,27 @@ package com.shop.tbms.service.impl;
 import com.shop.tbms.component.*;
 import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.constant.MessageConstant;
-import com.shop.tbms.dto.MoldDTO;
+import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.step.ResetMoldStepReqDTO;
 import com.shop.tbms.dto.step.detail.StepDTO;
+import com.shop.tbms.dto.step.detail.progress.MoldElementProgressDTO;
 import com.shop.tbms.dto.step.report.ReportStepReqDTO;
 import com.shop.tbms.dto.step.report_issue.ReportIssueStepReqDTO;
 import com.shop.tbms.dto.step.report_issue.ReportIssueToStepRespDTO;
 import com.shop.tbms.entity.*;
-import com.shop.tbms.enumerate.OrderPaymentStatus;
-import com.shop.tbms.enumerate.OrderStatus;
-import com.shop.tbms.enumerate.StepStatus;
+import com.shop.tbms.enumerate.order.OrderPaymentStatus;
+import com.shop.tbms.enumerate.order.OrderStatus;
+import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.mapper.MoldMapper;
 import com.shop.tbms.mapper.StepMapper;
 import com.shop.tbms.mapper.StepSequenceMapper;
+import com.shop.tbms.mapper.progress.MoldDeliverProgressMapper;
+import com.shop.tbms.mapper.progress.MoldElementProgressMapper;
+import com.shop.tbms.mapper.progress.MoldProgressMapper;
 import com.shop.tbms.repository.*;
 import com.shop.tbms.service.StepService;
+import com.shop.tbms.util.MoldElementUtil;
 import com.shop.tbms.util.StepUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,15 +49,23 @@ public class StepServiceImpl implements StepService {
     private StepSequenceMapper stepSequenceMapper;
     @Autowired
     private MoldMapper moldMapper;
+    @Autowired
+    private MoldProgressMapper moldProgressMapper;
+    @Autowired
+    private MoldDeliverProgressMapper moldDeliverProgressMapper;
+    @Autowired
+    private MoldElementProgressMapper moldElementProgressMapper;
 
     @Autowired
     private StepRepository stepRepository;
     @Autowired
     private MoldProgressRepository moldProgressRepository;
     @Autowired
-    private ChecklistRepository checklistRepository;
+    private MoldDeliverProgressRepository moldDeliverProgressRepository;
     @Autowired
-    private MoldElementRepository moldElementRepository;
+    private MoldGroupElementProgressRepository moldGroupElementProgressRepository;
+    @Autowired
+    private ChecklistRepository checklistRepository;
     @Autowired
     private PurchaseOrderRepository purchaseOrderRepository;
     @Autowired
@@ -76,7 +89,41 @@ public class StepServiceImpl implements StepService {
     @Override
     public StepDTO getStep(Long stepId) {
         Step step = stepRepository.findById(stepId).orElseThrow(EntityNotFoundException::new);
-        return stepMapper.toDTO(step);
+        StepDTO dto = stepMapper.toDTO(step);
+
+        /* Map progress dto */
+        switch (step.getReportType()) {
+            case BY_MOLD:
+                dto.setListMoldProgress(moldProgressMapper.toDTOs(step.getListMoldProgress()));
+                break;
+            case BY_MOLD_SEND_RECEIVE:
+                dto.setListMoldDeliverProgress(moldDeliverProgressMapper.toDTOs(step.getListMoldDeliverProgress()));
+                break;
+            case BY_MOLD_ELEMENT:
+                List<MoldElementProgressDTO> moldElementProgressDTOList = step.getProcedure().getPurchaseOrder()
+                        .getListMold().stream()
+                        .map(mold ->
+                                MoldElementProgressDTO.builder()
+                                        .moldSize(mold.getSize())
+                                        .percentCompleted(
+                                                MoldElementUtil.calPercentComplete(
+                                                        step.getListMoldGroupElementProgresses(), mold)
+                                        ).listElement(
+                                                moldElementProgressMapper.toDTOs(
+                                                        step.getListMoldGroupElementProgresses().stream()
+                                                                .filter(elementProgress ->
+                                                                        mold.getId().equals(elementProgress.getMold().getId()))
+                                                                .collect(Collectors.toList()))
+                                        ).build()
+                        )
+                        .collect(Collectors.toList());
+
+                dto.setListMoldElementProgress(moldElementProgressDTOList);
+                break;
+            default:
+        }
+
+        return dto;
     }
 
     @Override
@@ -84,22 +131,23 @@ public class StepServiceImpl implements StepService {
         log.info("Begin report step progress {}", reportStepReqDTO);
         Step currentStep = stepRepository.findById(reportStepReqDTO.getStepId()).orElseThrow(EntityNotFoundException::new);
         PurchaseOrder currentOrder = currentStep.getProcedure().getPurchaseOrder();
-        List<MoldProgress> currentMoldProgress = moldProgressRepository.findAllByStepId(currentStep.getId());
+        List<MoldProgress> currentMoldProgress = currentStep.getListMoldProgress();
+        List<MoldDeliverProgress> currentMoldDeliverProgress = currentStep.getListMoldDeliverProgress();
+        List<MoldGroupElementProgress> currentMoldElementProgress = currentStep.getListMoldGroupElementProgresses();
         List<Checklist> currentChecklist = currentStep.getListChecklist();
         List<Evidence> currentEvidence = currentStep.getListEvidence();
-        List<MoldElement> currentMoldElement = currentOrder.getListMoldElement();
 
         /* validate */
         /* validate order status */
+        log.info("validate order status of order {}", currentOrder);
         purchaseOrderComponent.canUpdateOrder(currentOrder);
 
         /* validate step status */
+        log.info("validate step status {}", currentStep);
         stepComponent.canReportProgress(currentStep);
-        moldComponent.validateMoldProgress(
-                getListCompletedMoldInPreviousStep(reportStepReqDTO.getStepId()),
-                reportStepReqDTO.getMoldProgress());
 
         if (Boolean.TRUE.equals(currentStep.getIsEnd())) {
+            log.info("Step is end. Start set value for end order");
             // TODO: validate complete all step
             currentOrder.setStatus(OrderStatus.COMPLETED);
 
@@ -112,22 +160,43 @@ public class StepServiceImpl implements StepService {
             purchaseOrderRepository.save(currentOrder);
         }
 
-        stepComponent.updateMoldProgress(currentMoldProgress, reportStepReqDTO.getMoldProgress());
-        moldProgressRepository.saveAll(currentMoldProgress);
+        /* update progress */
+        log.info("Start update progress of step {}", currentStep);
+        switch (currentStep.getReportType()) {
+            case BY_MOLD:
+                log.info("Start update progress of report type = BY_MOLD");
+                stepComponent.updateMoldProgress(currentMoldProgress, reportStepReqDTO.getProgress());
+                moldProgressRepository.saveAll(currentMoldProgress);
+                break;
+            case BY_MOLD_ELEMENT:
+                log.info("Start update progress of report type = BY_MOLD_ELEMENT");
+                stepComponent.updateMoldElementProgress(currentMoldElementProgress, reportStepReqDTO.getProgress());
+                moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
+                break;
+            case BY_MOLD_SEND_RECEIVE:
+                log.info("Start update progress of report type = BY_MOLD_SEND_RECEIVE");
+                stepComponent.updateMoldDeliverProgress(currentMoldDeliverProgress, reportStepReqDTO.getProgress());
+                moldDeliverProgressRepository.saveAll(currentMoldDeliverProgress);
+                break;
+            default:
+        }
 
+        log.info("Start update check list");
         stepComponent.updateChecklist(currentChecklist, reportStepReqDTO.getChecklist());
         checklistRepository.saveAll(currentChecklist);
 
-        stepComponent.updateMoldElement(currentStep, currentMoldElement, reportStepReqDTO.getMoldElement());
-        moldElementRepository.saveAll(currentMoldElement);
-
+        log.info("Start update evidences");
         stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence());
 
+        log.info("Start update step info");
         stepComponent.updateStep(currentStep, reportStepReqDTO);
         stepComponent.updateStepStatus(currentStep, currentMoldProgress);
+
+        log.info("Save step new info");
         stepRepository.save(currentStep);
 
         /* set status next step */
+        log.info("Start change status for next step");
         Step nextMainStep = StepUtil.getNextMainStep(stepSequenceRepository.findByStepBeforeId(currentStep.getId()));
         if (!StepStatus.IN_PROGRESS.equals(nextMainStep.getStatus())) {
             nextMainStep.setStatus(StepStatus.IN_PROGRESS);
@@ -135,6 +204,7 @@ public class StepServiceImpl implements StepService {
         }
 
         /* insert log */
+        log.info("Start insert log");
         reportLogComponent.insertReportLog(currentStep, reportStepReqDTO);
 
         log.info("End report step progress");

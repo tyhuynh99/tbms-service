@@ -1,9 +1,13 @@
 package com.shop.tbms.entity;
 
 import com.shop.tbms.entity.common.AbstractAuditingEntity;
-import com.shop.tbms.enumerate.StepStatus;
-import com.shop.tbms.enumerate.StepType;
-import lombok.*;
+import com.shop.tbms.enumerate.step.ReportType;
+import com.shop.tbms.enumerate.step.StepStatus;
+import com.shop.tbms.enumerate.step.StepType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -12,8 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "step")
-@Setter
-@Getter
+@Data
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,6 +32,9 @@ public class Step extends AbstractAuditingEntity {
     @Column(name = "type", nullable = false)
     private StepType type;
 
+    @Column(name = "report_type", nullable = false)
+    private ReportType reportType;
+
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -36,8 +42,6 @@ public class Step extends AbstractAuditingEntity {
     private Integer sequenceNo;
 
     @Column(name = "resettable")
-    // TODO: check if need this field
-    // or every step resettable
     private Boolean resettable;
 
     @Column(name = "required_evidence", nullable = false)
@@ -93,13 +97,21 @@ public class Step extends AbstractAuditingEntity {
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<MoldProgress> listMoldProgresses = new ArrayList<>();
-
-    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
-    @ToString.Exclude
     private List<Issue> listIssue = new ArrayList<>();
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<ReportLog> listReportLog = new ArrayList<>();
+
+    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<MoldProgress> listMoldProgress = new ArrayList<>();
+
+    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<MoldDeliverProgress> listMoldDeliverProgress = new ArrayList<>();
+
+    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<MoldGroupElementProgress> listMoldGroupElementProgresses = new ArrayList<>();
 }

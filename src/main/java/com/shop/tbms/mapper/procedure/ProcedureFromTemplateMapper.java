@@ -1,7 +1,7 @@
 package com.shop.tbms.mapper.procedure;
 
 import com.shop.tbms.entity.*;
-import com.shop.tbms.enumerate.StepStatus;
+import com.shop.tbms.enumerate.step.StepStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

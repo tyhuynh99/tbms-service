@@ -1,6 +1,6 @@
 package com.shop.tbms.mapper;
 
-import com.shop.tbms.dto.MoldDTO;
+import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.entity.Mold;
 import org.mapstruct.Mapper;
 

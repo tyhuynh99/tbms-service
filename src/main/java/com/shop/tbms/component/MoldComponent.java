@@ -1,14 +1,14 @@
 package com.shop.tbms.component;
 
 import com.shop.tbms.config.exception.BusinessException;
-import com.shop.tbms.dto.MoldDTO;
+import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.dto.order.OrderUpdateReqDTO;
-import com.shop.tbms.dto.step.report.ReportMoldProgressReqDTO;
+import com.shop.tbms.dto.step.report.ReportProgressReqDTO;
 import com.shop.tbms.entity.Mold;
 import com.shop.tbms.entity.MoldProgress;
 import com.shop.tbms.entity.PurchaseOrder;
 import com.shop.tbms.entity.Step;
-import com.shop.tbms.enumerate.StepStatus;
+import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.repository.IssueMoldDetailRepository;
 import com.shop.tbms.repository.MoldProgressRepository;
 import com.shop.tbms.repository.MoldRepository;
@@ -124,27 +124,5 @@ public class MoldComponent {
         }).collect(Collectors.toList());
 
         moldRepository.saveAll(listNewMold);
-    }
-
-    public void validateMoldProgress(List<MoldDTO> listCompletedMoldInPreStep, List<ReportMoldProgressReqDTO> moldProgressReqDTOList) {
-        log.info("Start validate mold progress of req = {} and list completed {}", moldProgressReqDTOList, listCompletedMoldInPreStep);
-
-        List<Long> listMoldIdCompleted = listCompletedMoldInPreStep.stream().map(MoldDTO::getId).collect(Collectors.toList());
-        List<Long> listMoldIdReqToComplete = moldProgressRepository
-                .findAllById(
-                        moldProgressReqDTOList.stream()
-                                .map(ReportMoldProgressReqDTO::getProgressId)
-                                .collect(Collectors.toList()))
-                .stream()
-                .map(MoldProgress::getId)
-                .collect(Collectors.toList());
-
-        listMoldIdReqToComplete.forEach(reqMoldId -> {
-            if (!listMoldIdCompleted.contains(reqMoldId)) {
-                throw new BusinessException(String.format("Mold ID %s is not complete in previous step", reqMoldId));
-            }
-        });
-
-        log.info("End validate mold progress without error. Validate pass.");
     }
 }

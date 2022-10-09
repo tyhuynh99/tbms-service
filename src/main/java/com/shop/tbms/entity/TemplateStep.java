@@ -1,7 +1,8 @@
 package com.shop.tbms.entity;
 
 import com.shop.tbms.entity.common.AbstractAuditingEntity;
-import com.shop.tbms.enumerate.StepType;
+import com.shop.tbms.enumerate.step.ReportType;
+import com.shop.tbms.enumerate.step.StepType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,6 +23,9 @@ public class TemplateStep extends AbstractAuditingEntity {
     @Column(name = "type", nullable = false)
     private StepType type;
 
+    @Column(name = "report_type", nullable = false)
+    private ReportType reportType;
+
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -29,8 +33,6 @@ public class TemplateStep extends AbstractAuditingEntity {
     private Integer sequenceNo;
 
     @Column(name = "resettable")
-    // TODO: check if need this field
-    // or every step resettable
     private Boolean resettable;
 
     @Column(name = "required_evidence", nullable = false)

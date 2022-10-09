@@ -1,6 +1,6 @@
 package com.shop.tbms.entity;
 
-import com.shop.tbms.enumerate.ReportActionType;
+import com.shop.tbms.enumerate.step.ReportActionType;
 import lombok.*;
 
 import javax.persistence.*;

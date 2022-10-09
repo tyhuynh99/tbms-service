@@ -1,8 +1,8 @@
 package com.shop.tbms.entity;
 
 import com.shop.tbms.entity.common.AbstractAuditingEntity;
-import com.shop.tbms.enumerate.OrderPaymentStatus;
-import com.shop.tbms.enumerate.OrderStatus;
+import com.shop.tbms.enumerate.order.OrderPaymentStatus;
+import com.shop.tbms.enumerate.order.OrderStatus;
 import lombok.*;
 
 import javax.persistence.*;
@@ -63,7 +63,7 @@ public class PurchaseOrder extends AbstractAuditingEntity {
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<MoldElement> listMoldElement = new ArrayList<>();
+    private List<MoldGroup> listMoldGroup = new ArrayList<>();
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     @ToString.Exclude

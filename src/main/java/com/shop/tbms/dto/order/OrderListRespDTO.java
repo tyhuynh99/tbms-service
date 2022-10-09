@@ -1,7 +1,7 @@
 package com.shop.tbms.dto.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.shop.tbms.enumerate.OrderDisplayStatus;
+import com.shop.tbms.enumerate.order.OrderDisplayStatus;
 import lombok.*;
 
 import java.time.LocalDate;

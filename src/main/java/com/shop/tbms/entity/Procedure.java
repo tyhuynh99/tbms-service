@@ -15,7 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 public class Procedure extends AbstractAuditingEntity {
     @Id
-    @Column(name = "order_id")
     private Long orderId;
 
     @Column(name = "code", nullable = false)

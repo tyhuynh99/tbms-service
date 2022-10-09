@@ -3,7 +3,7 @@ package com.shop.tbms.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shop.tbms.annotation.ValidRole;
-import com.shop.tbms.dto.MoldDTO;
+import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.step.ResetMoldStepReqDTO;
 import com.shop.tbms.dto.step.detail.StepDTO;

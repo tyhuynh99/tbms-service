@@ -29,11 +29,10 @@ public class ReportStepReqDTO {
 
     private Boolean isPaid;
 
-    private List<ReportMoldProgressReqDTO> moldProgress;
+    private List<ReportProgressReqDTO> progress;
 
     private List<ReportChecklistReqDTO> checklist;
 
     private ReportEvidenceReqDTO evidence;
 
-    private List<ReportMoldElementReqDTO> moldElement;
 }

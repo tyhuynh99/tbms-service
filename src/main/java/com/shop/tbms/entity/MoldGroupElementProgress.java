@@ -1,16 +1,19 @@
 package com.shop.tbms.entity;
 
 import com.shop.tbms.entity.common.AbstractAuditingEntity;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 
-@Entity(name = "mold_progress")
+@Entity(name = "mold_group_element_progress")
 @Data
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class MoldProgress extends AbstractAuditingEntity {
+public class MoldGroupElementProgress extends AbstractAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -28,4 +31,9 @@ public class MoldProgress extends AbstractAuditingEntity {
     @JoinColumn(name = "mold_id", nullable = false)
     @ToString.Exclude
     private Mold mold;
+
+    @ManyToOne
+    @JoinColumn(name = "mold_group_element_id", nullable = false)
+    @ToString.Exclude
+    private MoldGroupElement moldGroupElement;
 }

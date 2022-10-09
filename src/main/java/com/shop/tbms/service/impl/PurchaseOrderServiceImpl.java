@@ -7,9 +7,10 @@ import com.shop.tbms.dto.order.*;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteRespDTO;
 import com.shop.tbms.entity.*;
-import com.shop.tbms.enumerate.OrderStatus;
-import com.shop.tbms.enumerate.StepStatus;
-import com.shop.tbms.enumerate.StepType;
+import com.shop.tbms.enumerate.order.OrderStatus;
+import com.shop.tbms.enumerate.step.ReportType;
+import com.shop.tbms.enumerate.step.StepStatus;
+import com.shop.tbms.enumerate.step.StepType;
 import com.shop.tbms.mapper.order.PurchaseOrderDetailMapper;
 import com.shop.tbms.mapper.order.PurchaseOrderListMapper;
 import com.shop.tbms.mapper.order.PurchaseOrderMapper;
@@ -17,7 +18,7 @@ import com.shop.tbms.repository.*;
 import com.shop.tbms.service.PurchaseOrderService;
 import com.shop.tbms.specification.PurchaseOrderSpecification;
 import com.shop.tbms.util.AuthenticationUtil;
-import com.shop.tbms.util.MoldProgressUtil;
+import com.shop.tbms.util.ProgressUtil;
 import com.shop.tbms.util.OrderUtil;
 import com.shop.tbms.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private StepComponent stepComponent;
     @Autowired
     private PurchaseOrderComponent purchaseOrderComponent;
+    @Autowired
+    private ProgressComponent progressComponent;
 
     /* Mapper */
     @Autowired
@@ -71,8 +74,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private StepSequenceRepository stepSequenceRepository;
     @Autowired
     private ChecklistRepository checklistRepository;
-    @Autowired
-    private MoldProgressRepository moldProgressRepository;
     @Autowired
     private StepRepository stepRepository;
 
@@ -119,18 +120,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         /* Insert data Checklist */
         checklistRepository.saveAll(listChecklist);
 
-        /* Generate process of begin step */
-        List<MoldProgress> listMoldProgress = new ArrayList<>();
+        /* Process steps */
         procedure.getListStep().forEach(step -> {
             /* Process steps */
-            if (!StepType.FIXING.equals(step.getType())) {
-                if (Boolean.TRUE.equals(step.getIsStart())) step.setStatus(StepStatus.IN_PROGRESS);
-                listMoldProgress.addAll(MoldProgressUtil.generateProcess(listMold, step));
+            if (Boolean.TRUE.equals(step.getIsStart())) step.setStatus(StepStatus.IN_PROGRESS);
+
+            /* Generate mold progress */
+            if (!StepType.FIXING.equals(step.getType()) && ReportType.BY_MOLD.equals(step.getReportType())) {
+                progressComponent.generateProgressForStep(step);
             }
         });
-
-        /* Insert data MoldProgress */
-        moldProgressRepository.saveAll(listMoldProgress);
 
         /* Update status of Step */
         stepRepository.saveAll(procedure.getListStep());

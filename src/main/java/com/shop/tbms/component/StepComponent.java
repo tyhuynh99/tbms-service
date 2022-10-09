@@ -7,16 +7,14 @@ import com.shop.tbms.dto.order.OrderStepRespDTO;
 import com.shop.tbms.dto.step.report.*;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
 import com.shop.tbms.entity.*;
-import com.shop.tbms.enumerate.OrderStatus;
-import com.shop.tbms.enumerate.StepStatus;
-import com.shop.tbms.enumerate.StepType;
+import com.shop.tbms.enumerate.order.OrderStatus;
+import com.shop.tbms.enumerate.step.StepStatus;
+import com.shop.tbms.enumerate.step.StepType;
 import com.shop.tbms.repository.EvidenceRepository;
 import com.shop.tbms.repository.MoldProgressRepository;
 import com.shop.tbms.repository.PurchaseOrderRepository;
-import com.shop.tbms.repository.TemplateMoldElementRepository;
 import com.shop.tbms.service.FileService;
 import com.shop.tbms.util.EvidenceUtil;
-import com.shop.tbms.util.MoldElementUtil;
 import com.shop.tbms.util.StepUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +25,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.shop.tbms.constant.AppConstant.ZERO_LONG;
+import static com.shop.tbms.constant.AppConstant.ZERO;
 
 @Component
 @Slf4j
@@ -40,8 +38,6 @@ public class StepComponent {
     @Autowired
     private PurchaseOrderRepository purchaseOrderRepository;
     @Autowired
-    private TemplateMoldElementRepository templateMoldElementRepository;
-    @Autowired
     private EvidenceRepository evidenceRepository;
 
     @Autowired
@@ -52,25 +48,12 @@ public class StepComponent {
             Step originStep = StepUtil.findStepById(respDTO.getId(), listOriginStep);
 
             if (StepStatus.INIT.equals(originStep.getStatus())) {
-                respDTO.setPercentComplete(ZERO_LONG);
+                respDTO.setPercentComplete(ZERO);
             } else {
-                respDTO.setPercentComplete(calPercent(originStep));
+                respDTO.setPercentComplete(StepUtil.calPercentComplete(originStep));
             }
         }
         return listStepDTO;
-    }
-
-    private Long calPercent(Step step) {
-        List<MoldProgress> listMoldProgress = moldProgressRepository.findAllByStepId(step.getId());
-
-        if (CollectionUtils.isEmpty(listMoldProgress)) return ZERO_LONG;
-
-        long completedMold = listMoldProgress.stream()
-                .filter(moldProgress -> Boolean.TRUE.equals(moldProgress.getIsCompleted()))
-                .count();
-        long totalMold =listMoldProgress.size();
-
-        return Math.floorDiv(completedMold, totalMold);
     }
 
     public void validateUpdateExpectedCompleteData(List<UpdateExpectedCompleteReqDTO> listReqDTO, List<Step> listCurStep) {
@@ -138,50 +121,39 @@ public class StepComponent {
         }
     }
 
-    public void updateMoldProgress(List<MoldProgress> currentMoldProgress, List<ReportMoldProgressReqDTO> listReq) {
+    public void updateMoldProgress(List<MoldProgress> currentMoldProgress, List<ReportProgressReqDTO> listReq) {
         currentMoldProgress.forEach(currentProgress -> {
             currentProgress.setIsCompleted(
                     listReq.stream()
                             .filter(req -> currentProgress.getId().equals(req.getProgressId()))
-                            .map(ReportMoldProgressReqDTO::getIsCompleted)
+                            .map(ReportProgressReqDTO::getIsCompleted)
                             .findFirst()
                             .orElse(currentProgress.getIsCompleted())
             );
         });
     }
 
-    public void updateMoldElement(Step currentStep, List<MoldElement> currentMoldElement, List<ReportMoldElementReqDTO> listReq) {
-        /* validate require update mold element */
-        if (stepConstant.getListStepNeedUpdateMoldElement().containsKey(currentStep.getCode())) {
-            if (CollectionUtils.isEmpty(listReq)) {
-                throw new BusinessException(
-                        String.format(
-                                "Step %s required mold element.",
-                                stepConstant.getListStepNeedUpdateMoldElement().get(currentStep.getCode())
-                        )
-                );
-            }
-        } else {
-            if (!CollectionUtils.isEmpty(listReq)) {
-                throw new BusinessException(String.format("Step %s is not allowed to update mold element", currentStep.getName()));
-            }
-        }
+    public void updateMoldElementProgress(List<MoldGroupElementProgress> currentElementProgress, List<ReportProgressReqDTO> listReq) {
+        currentElementProgress.forEach(currentProgress -> {
+            currentProgress.setIsCompleted(
+                    listReq.stream()
+                            .filter(req -> currentProgress.getId().equals(req.getProgressId()))
+                            .map(ReportProgressReqDTO::getIsCompleted)
+                            .findFirst()
+                            .orElse(currentProgress.getIsCompleted())
+            );
+        });
+    }
 
-        /* create map for get mold element by code */
-        Map<String, MoldElement> mappedElement = new HashMap<>();
-        currentMoldElement.forEach(element -> mappedElement.put(element.getCode(), element));
-
-        listReq.forEach(reqDTO -> {
-            MoldElement curElement = mappedElement.get(reqDTO.getCode());
-            if (Objects.isNull(curElement)) {
-                throw new BusinessException("Not found element with code " + reqDTO.getCode());
-            }
-
-            /* validate input */
-            MoldElementUtil.validateElementDescription(curElement, reqDTO);
-
-            /* update data */
-            curElement.setDescription(reqDTO.getDescription());
+    public void updateMoldDeliverProgress(List<MoldDeliverProgress> currentMoldDeliverProgress, List<ReportProgressReqDTO> listReq) {
+        currentMoldDeliverProgress.forEach(currentProgress -> {
+            currentProgress.setIsCompleted(
+                    listReq.stream()
+                            .filter(req -> currentProgress.getId().equals(req.getProgressId()))
+                            .map(ReportProgressReqDTO::getIsCompleted)
+                            .findFirst()
+                            .orElse(currentProgress.getIsCompleted())
+            );
         });
     }
 
