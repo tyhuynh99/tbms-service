@@ -6,8 +6,7 @@ public enum StepType {
     NORMAL(0),
     THIRD_PARTY(1),
     DELIVERY(2),
-    FIXING(3),
-    CONDITIONAL(4);
+    FIXING(3);
 
     private int value;
 

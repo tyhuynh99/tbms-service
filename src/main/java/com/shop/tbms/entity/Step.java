@@ -53,6 +53,9 @@ public class Step extends AbstractAuditingEntity {
     @Column(name = "is_end", nullable = false)
     private Boolean isEnd;
 
+    @Column(name = "has_condition")
+    private Boolean hasCondition;
+
     @Column(name = "expected_complete_date")
     private LocalDate expectedCompleteDate;
 

@@ -44,6 +44,9 @@ public class TemplateStep extends AbstractAuditingEntity {
     @Column(name = "is_end", nullable = false)
     private Boolean isEnd;
 
+    @Column(name = "has_condition")
+    private Boolean hasCondition;
+
     @ManyToOne
     @JoinColumn(name = "template_procedure_id", nullable = false)
     @ToString.Exclude
