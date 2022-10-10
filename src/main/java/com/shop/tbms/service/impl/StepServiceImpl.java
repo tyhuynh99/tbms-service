@@ -85,19 +85,39 @@ public class StepServiceImpl implements StepService {
     private IssueComponent issueComponent;
     @Autowired
     private MoldComponent moldComponent;
+    @Autowired
+    private ProgressComponent progressComponent;
 
     @Override
     public StepDTO getStep(Long stepId) {
         Step step = stepRepository.findById(stepId).orElseThrow(EntityNotFoundException::new);
         StepDTO dto = stepMapper.toDTO(step);
 
+        boolean notStartStep = Boolean.FALSE.equals(step.getIsStart());
+
         /* Map progress dto */
         switch (step.getReportType()) {
             case BY_MOLD:
                 dto.setListMoldProgress(moldProgressMapper.toDTOs(step.getListMoldProgress()));
+                if (notStartStep) {
+                    dto.setListMoldProgress(
+                            progressComponent.setCanCheckForMoldProgress(
+                                    StepUtil.getPreMainStep(step.getListStepBefore()),
+                                    dto.getListMoldProgress()
+                            )
+                    );
+                }
                 break;
             case BY_MOLD_SEND_RECEIVE:
                 dto.setListMoldDeliverProgress(moldDeliverProgressMapper.toDTOs(step.getListMoldDeliverProgress()));
+                if (notStartStep) {
+                    dto.setListMoldDeliverProgress(
+                            progressComponent.setCanCheckForDeliveryProgress(
+                                    StepUtil.getPreMainStep(step.getListStepBefore()),
+                                    dto.getListMoldDeliverProgress()
+                            )
+                    );
+                }
                 break;
             case BY_MOLD_ELEMENT:
                 List<MoldElementProgressDTO> moldElementProgressDTOList = step.getProcedure().getPurchaseOrder()
@@ -119,6 +139,15 @@ public class StepServiceImpl implements StepService {
                         .collect(Collectors.toList());
 
                 dto.setListMoldElementProgress(moldElementProgressDTOList);
+
+                if (notStartStep) {
+                    dto.setListMoldElementProgress(
+                            progressComponent.setCanCheckForMoldElementProgress(
+                                    StepUtil.getPreMainStep(step.getListStepBefore()),
+                                    dto.getListMoldElementProgress()
+                            )
+                    );
+                }
                 break;
             default:
         }
@@ -135,7 +164,6 @@ public class StepServiceImpl implements StepService {
         List<MoldDeliverProgress> currentMoldDeliverProgress = currentStep.getListMoldDeliverProgress();
         List<MoldGroupElementProgress> currentMoldElementProgress = currentStep.getListMoldGroupElementProgresses();
         List<Checklist> currentChecklist = currentStep.getListChecklist();
-        List<Evidence> currentEvidence = currentStep.getListEvidence();
 
         /* validate */
         /* validate order status */
@@ -146,36 +174,22 @@ public class StepServiceImpl implements StepService {
         log.info("validate step status {}", currentStep);
         stepComponent.canReportProgress(currentStep);
 
-        if (Boolean.TRUE.equals(currentStep.getIsEnd())) {
-            log.info("Step is end. Start set value for end order");
-            // TODO: validate complete all step
-            currentOrder.setStatus(OrderStatus.COMPLETED);
-
-            if (Boolean.TRUE.equals(reportStepReqDTO.getIsPaid())) {
-                currentOrder.setPaymentStatus(OrderPaymentStatus.PAID);
-            } else {
-                currentOrder.setPaymentStatus(OrderPaymentStatus.NOT_PAID);
-            }
-
-            purchaseOrderRepository.save(currentOrder);
-        }
-
         /* update progress */
         log.info("Start update progress of step {}", currentStep);
         switch (currentStep.getReportType()) {
             case BY_MOLD:
                 log.info("Start update progress of report type = BY_MOLD");
-                stepComponent.updateMoldProgress(currentMoldProgress, reportStepReqDTO.getProgress());
+                stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress());
                 moldProgressRepository.saveAll(currentMoldProgress);
                 break;
             case BY_MOLD_ELEMENT:
                 log.info("Start update progress of report type = BY_MOLD_ELEMENT");
-                stepComponent.updateMoldElementProgress(currentMoldElementProgress, reportStepReqDTO.getProgress());
+                stepComponent.updateMoldElementProgress(currentStep, reportStepReqDTO.getProgress());
                 moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
                 break;
             case BY_MOLD_SEND_RECEIVE:
                 log.info("Start update progress of report type = BY_MOLD_SEND_RECEIVE");
-                stepComponent.updateMoldDeliverProgress(currentMoldDeliverProgress, reportStepReqDTO.getProgress());
+                stepComponent.updateMoldDeliverProgress(currentStep, reportStepReqDTO.getProgress());
                 moldDeliverProgressRepository.saveAll(currentMoldDeliverProgress);
                 break;
             default:
@@ -206,6 +220,25 @@ public class StepServiceImpl implements StepService {
         /* insert log */
         log.info("Start insert log");
         reportLogComponent.insertReportLog(currentStep, reportStepReqDTO);
+
+        if (Boolean.TRUE.equals(currentStep.getIsEnd())) {
+            if (Boolean.TRUE.equals(reportStepReqDTO.getIsPaid())) {
+                currentOrder.setPaymentStatus(OrderPaymentStatus.PAID);
+            } else {
+                currentOrder.setPaymentStatus(OrderPaymentStatus.NOT_PAID);
+            }
+
+            boolean isCompleteAllMold = StepUtil.isCompleteAllMold(currentStep);
+
+            if (isCompleteAllMold) {
+                log.info("Step {} is complete for all progress", currentStep);
+                log.info("Step is end. Start set value for end order");
+
+                currentOrder.setStatus(OrderStatus.COMPLETED);
+            }
+
+            purchaseOrderRepository.save(currentOrder);
+        }
 
         log.info("End report step progress");
 

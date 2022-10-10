@@ -11,4 +11,5 @@ public class MoldElementProgressDetailDTO {
     private Long progressId;
     private String elementName;
     private boolean isCompleted;
+    private boolean canCheck;
 }

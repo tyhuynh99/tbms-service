@@ -51,6 +51,12 @@ public class StepController {
         return processReportStep(reportStepReqDTO, listFile);
     }
 
+    @PostMapping(value = "/report_without_file")
+    @ValidRole(role = {Role.EMPLOYEE})
+    public ResponseEntity testShowReportDTO(ReportStepReqDTO reportStepReqDTO) {
+        return processReportStep(reportStepReqDTO, null);
+    }
+
     private ResponseEntity<SuccessRespDTO> processReportStep(
             @Valid ReportStepReqDTO reportStepReqDTO,
             List<MultipartFile> listFile) {
@@ -65,12 +71,6 @@ public class StepController {
         }
 
         return ResponseEntity.ok(stepService.reportStepProgress(reportStepReqDTO));
-    }
-
-    @PostMapping(value = "/test/report", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ValidRole(role = {Role.EMPLOYEE})
-    public ResponseEntity testShowReportDTO(ReportStepReqDTO reportStepReqDTO) {
-        return ResponseEntity.ok(null);
     }
 
     @PostMapping("/report_issue")

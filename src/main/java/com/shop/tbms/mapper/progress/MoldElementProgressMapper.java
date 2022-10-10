@@ -11,6 +11,7 @@ import java.util.List;
 public interface MoldElementProgressMapper {
     @Mapping(target = "progressId", source = "id")
     @Mapping(target = "elementName", source = "moldGroupElement.name")
+    @Mapping(target = "canCheck", constant = "true")
     MoldElementProgressDetailDTO toDTO(MoldGroupElementProgress entity);
 
     List<MoldElementProgressDetailDTO> toDTOs(List<MoldGroupElementProgress> entities);

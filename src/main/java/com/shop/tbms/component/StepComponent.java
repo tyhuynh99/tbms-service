@@ -23,6 +23,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.shop.tbms.constant.AppConstant.ZERO;
@@ -42,6 +43,9 @@ public class StepComponent {
 
     @Autowired
     private StepConstant stepConstant;
+
+    @Autowired
+    private ProgressComponent progressComponent;
 
     public List<OrderStepRespDTO> setPercentProgress(List<OrderStepRespDTO> listStepDTO, List<Step> listOriginStep) {
         for (OrderStepRespDTO respDTO : listStepDTO) {
@@ -121,39 +125,94 @@ public class StepComponent {
         }
     }
 
-    public void updateMoldProgress(List<MoldProgress> currentMoldProgress, List<ReportProgressReqDTO> listReq) {
-        currentMoldProgress.forEach(currentProgress -> {
-            currentProgress.setIsCompleted(
-                    listReq.stream()
-                            .filter(req -> currentProgress.getId().equals(req.getProgressId()))
-                            .map(ReportProgressReqDTO::getIsCompleted)
-                            .findFirst()
-                            .orElse(currentProgress.getIsCompleted())
-            );
+    public void updateMoldProgress(Step currentStep, List<ReportProgressReqDTO> listReq) {
+        List<MoldProgress> listNotComplete = currentStep.getListMoldProgress().stream()
+                .filter(Predicate.not(MoldProgress::getIsCompleted))
+                .collect(Collectors.toList());
+
+        listNotComplete.stream()
+                .forEach(moldProgress -> {
+                    boolean isUpdateToComplete = listReq.stream().anyMatch(reportProgressReqDTO ->
+                            moldProgress.getId().equals(reportProgressReqDTO.getProgressId())
+                                    && Boolean.TRUE.equals(reportProgressReqDTO.getIsCompleted()));
+
+                    if (isUpdateToComplete) {
+                        /* validate complete in prestep */
+                        if (Boolean.FALSE.equals(currentStep.getIsStart())) {
+                            Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepBefore()));
+                            boolean canCheckComplete = progressComponent.canCheckCompleteBySize(
+                                    preStep,
+                                    moldProgress.getMold().getSize()
+                            );
+
+                            if (!canCheckComplete) {
+                                log.error("Mold {} is not complete in prestep {}", moldProgress.getMold(), preStep);
+                                throw new BusinessException("Mold " + moldProgress.getMold().getSize() +  " is not complete in prestep");
+                            }
+                        }
+
+                        moldProgress.setIsCompleted(Boolean.TRUE);
+                    }
+                });
+    }
+
+    public void updateMoldElementProgress(Step currentStep, List<ReportProgressReqDTO> listReq) {
+        List<MoldGroupElementProgress> listNotComplete = currentStep.getListMoldGroupElementProgresses().stream()
+                .filter(Predicate.not(MoldGroupElementProgress::getIsCompleted))
+                .collect(Collectors.toList());
+
+        listNotComplete.forEach(moldGroupElementProgress -> {
+            boolean isUpdateToComplete = listReq.stream().anyMatch(reportProgressReqDTO ->
+                    moldGroupElementProgress.getId().equals(reportProgressReqDTO.getProgressId())
+                            && Boolean.TRUE.equals(reportProgressReqDTO.getIsCompleted()));
+
+            if (isUpdateToComplete) {
+                /* validate complete in prestep */
+                if (Boolean.FALSE.equals(currentStep.getIsStart())) {
+                    Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepBefore()));
+                    boolean canCheckComplete = progressComponent.canCheckCompleteBySize(
+                            preStep,
+                            moldGroupElementProgress.getMold().getSize()
+                    );
+
+                    if (!canCheckComplete) {
+                        log.error("Mold {} is not complete in prestep {}", moldGroupElementProgress.getMold(), preStep);
+                        throw new BusinessException("Mold " + moldGroupElementProgress.getMold().getSize() +  " is not complete in prestep");
+                    }
+                }
+
+                moldGroupElementProgress.setIsCompleted(Boolean.TRUE);
+            }
         });
     }
 
-    public void updateMoldElementProgress(List<MoldGroupElementProgress> currentElementProgress, List<ReportProgressReqDTO> listReq) {
-        currentElementProgress.forEach(currentProgress -> {
-            currentProgress.setIsCompleted(
-                    listReq.stream()
-                            .filter(req -> currentProgress.getId().equals(req.getProgressId()))
-                            .map(ReportProgressReqDTO::getIsCompleted)
-                            .findFirst()
-                            .orElse(currentProgress.getIsCompleted())
-            );
-        });
-    }
+    public void updateMoldDeliverProgress(Step currentStep, List<ReportProgressReqDTO> listReq) {
+        List<MoldDeliverProgress> listNotComplete = currentStep.getListMoldDeliverProgress().stream()
+                .filter(Predicate.not(MoldDeliverProgress::getIsCompleted)).
+                collect(Collectors.toList());
 
-    public void updateMoldDeliverProgress(List<MoldDeliverProgress> currentMoldDeliverProgress, List<ReportProgressReqDTO> listReq) {
-        currentMoldDeliverProgress.forEach(currentProgress -> {
-            currentProgress.setIsCompleted(
-                    listReq.stream()
-                            .filter(req -> currentProgress.getId().equals(req.getProgressId()))
-                            .map(ReportProgressReqDTO::getIsCompleted)
-                            .findFirst()
-                            .orElse(currentProgress.getIsCompleted())
-            );
+        listNotComplete.forEach(moldDeliverProgress -> {
+            boolean isUpdateToComplete = listReq.stream().anyMatch(reportProgressReqDTO ->
+                    moldDeliverProgress.getId().equals(reportProgressReqDTO.getProgressId())
+                            && Boolean.TRUE.equals(reportProgressReqDTO.getIsCompleted()));
+
+            if (isUpdateToComplete) {
+                /* validate complete in prestep */
+                if (Boolean.FALSE.equals(currentStep.getIsStart())) {
+                    Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepBefore()));
+                    boolean canCheckComplete = progressComponent.canCheckCompleteBySize(
+                            preStep,
+                            moldDeliverProgress.getMold().getSize()
+                    );
+
+                    if (!canCheckComplete) {
+                        log.error("Mold {} is not complete in prestep {}", moldDeliverProgress.getMold(), preStep);
+                        throw new BusinessException("Mold " + moldDeliverProgress.getMold().getSize() +  " is not complete in prestep");
+                    }
+                }
+
+                moldDeliverProgress.setIsCompleted(Boolean.TRUE);
+            }
         });
     }
 

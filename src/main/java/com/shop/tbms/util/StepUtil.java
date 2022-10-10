@@ -89,4 +89,20 @@ public class StepUtil {
 
         return Math.floorDiv(completedMoldDeliver, totalMoldDeliver);
     }
+
+    public static boolean isCompleteAllMold(Step step) {
+        switch (step.getReportType()) {
+            case BY_MOLD:
+                return step.getListMoldProgress().stream()
+                        .allMatch(MoldProgress::getIsCompleted);
+            case BY_MOLD_ELEMENT:
+                return step.getListMoldGroupElementProgresses().stream()
+                        .allMatch(MoldGroupElementProgress::getIsCompleted);
+            case BY_MOLD_SEND_RECEIVE:
+                return step.getListMoldDeliverProgress().stream()
+                        .allMatch(MoldDeliverProgress::getIsCompleted);
+            default:
+                return false;
+        }
+    }
 }

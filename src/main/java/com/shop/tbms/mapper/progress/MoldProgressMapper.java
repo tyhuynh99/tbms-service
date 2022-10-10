@@ -12,6 +12,7 @@ public interface MoldProgressMapper {
     @Mapping(target = "progressId", source = "id")
     @Mapping(target = "moldId", source = "mold.id")
     @Mapping(target = "moldSize", source = "mold.size")
+    @Mapping(target = "canCheck", constant = "true")
     MoldProgressDTO toDTO(MoldProgress moldProgress);
 
     List<MoldProgressDTO> toDTOs(List<MoldProgress> moldProgresses);

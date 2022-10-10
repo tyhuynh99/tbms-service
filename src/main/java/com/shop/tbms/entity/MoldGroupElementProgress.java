@@ -24,16 +24,13 @@ public class MoldGroupElementProgress extends AbstractAuditingEntity {
 
     @ManyToOne
     @JoinColumn(name = "step_id", nullable = false)
-    @ToString.Exclude
     private Step step;
 
     @ManyToOne
     @JoinColumn(name = "mold_id", nullable = false)
-    @ToString.Exclude
     private Mold mold;
 
     @ManyToOne
     @JoinColumn(name = "mold_group_element_id", nullable = false)
-    @ToString.Exclude
     private MoldGroupElement moldGroupElement;
 }

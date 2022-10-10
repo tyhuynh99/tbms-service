@@ -32,11 +32,9 @@ public class MoldDeliverProgress {
 
     @ManyToOne
     @JoinColumn(name = "step_id", nullable = false)
-    @ToString.Exclude
     private Step step;
 
     @ManyToOne
     @JoinColumn(name = "mold_id", nullable = false)
-    @ToString.Exclude
     private Mold mold;
 }
