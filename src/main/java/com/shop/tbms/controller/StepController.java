@@ -53,7 +53,7 @@ public class StepController {
 
     @PostMapping(value = "/report_without_file")
     @ValidRole(role = {Role.EMPLOYEE})
-    public ResponseEntity testShowReportDTO(ReportStepReqDTO reportStepReqDTO) {
+    public ResponseEntity reportWithoutFile(@RequestBody ReportStepReqDTO reportStepReqDTO) {
         return processReportStep(reportStepReqDTO, null);
     }
 
