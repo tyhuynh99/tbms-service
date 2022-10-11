@@ -30,7 +30,9 @@ public class MoldController {
 
     @GetMapping("/order")
     public ResponseEntity<ListWrapperRespDTO<MoldGroupDetailDTO>> getListMoldGroupOfOrder(@RequestParam("orderId") Long orderId) {
-        return ResponseEntity.ok(ResponseUtil.wrapListToResp(List.of(MoldGroupDetailDTO.builder().build())));
+        return ResponseEntity.ok(ResponseUtil.wrapListToResp(
+                moldService.getListElementOfOrder(orderId)
+        ));
     }
 
     @PostMapping("/save")

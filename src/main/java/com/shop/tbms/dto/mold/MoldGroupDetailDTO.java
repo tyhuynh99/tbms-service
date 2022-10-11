@@ -1,6 +1,5 @@
 package com.shop.tbms.dto.mold;
 
-import com.shop.tbms.dto.MoldElementDTO;
 import com.shop.tbms.enumerate.mold.MoldPlatingType;
 import com.shop.tbms.enumerate.mold.MoldStructure;
 import com.shop.tbms.enumerate.mold.MoldType;
@@ -8,7 +7,6 @@ import lombok.*;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data

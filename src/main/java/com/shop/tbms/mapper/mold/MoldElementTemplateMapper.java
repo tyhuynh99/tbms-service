@@ -1,4 +1,4 @@
-package com.shop.tbms.mapper;
+package com.shop.tbms.mapper.mold;
 
 import com.shop.tbms.dto.mold.MoldElementTemplateDTO;
 import com.shop.tbms.entity.TemplateMoldElement;

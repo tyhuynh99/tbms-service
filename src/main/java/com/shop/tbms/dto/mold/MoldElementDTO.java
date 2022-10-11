@@ -1,4 +1,4 @@
-package com.shop.tbms.dto;
+package com.shop.tbms.dto.mold;
 
 import lombok.*;
 

@@ -15,7 +15,7 @@ import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.order.OrderPaymentStatus;
 import com.shop.tbms.enumerate.order.OrderStatus;
 import com.shop.tbms.enumerate.step.StepStatus;
-import com.shop.tbms.mapper.MoldMapper;
+import com.shop.tbms.mapper.mold.MoldMapper;
 import com.shop.tbms.mapper.StepMapper;
 import com.shop.tbms.mapper.StepSequenceMapper;
 import com.shop.tbms.mapper.progress.MoldDeliverProgressMapper;
