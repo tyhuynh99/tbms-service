@@ -1,6 +1,6 @@
 package com.shop.tbms.controller;
 
-import com.shop.tbms.dto.ListWrapperRespDTO;
+import com.shop.tbms.dto.ListWrapperDTO;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.mold.MoldElementTemplateDTO;
 import com.shop.tbms.dto.mold.MoldGroupDetailDTO;
@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/mold")
 public class MoldController {
@@ -20,7 +18,7 @@ public class MoldController {
     private MoldService moldService;
 
     @GetMapping("/element")
-    public ResponseEntity<ListWrapperRespDTO<MoldElementTemplateDTO>> getAllElementTemplate() {
+    public ResponseEntity<ListWrapperDTO<MoldElementTemplateDTO>> getAllElementTemplate() {
         return ResponseEntity.ok(
                 ResponseUtil.wrapListToResp(
                         moldService.getListElementTemplate()
@@ -29,7 +27,7 @@ public class MoldController {
     }
 
     @GetMapping("/order")
-    public ResponseEntity<ListWrapperRespDTO<MoldGroupDetailDTO>> getListMoldGroupOfOrder(@RequestParam("orderId") Long orderId) {
+    public ResponseEntity<ListWrapperDTO<MoldGroupDetailDTO>> getListMoldGroupOfOrder(@RequestParam("orderId") Long orderId) {
         return ResponseEntity.ok(ResponseUtil.wrapListToResp(
                 moldService.getListElementOfOrder(orderId)
         ));

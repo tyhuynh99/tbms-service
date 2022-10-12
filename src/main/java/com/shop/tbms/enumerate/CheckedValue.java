@@ -8,6 +8,9 @@ public enum CheckedValue {
     UNCHECKED,
     CHECKED;
 
+    @JsonValue
+    public int getValue() {return ordinal();}
+
     public static CheckedValue fromValue(String value) {
         int intVal = Integer.parseInt(value);
 

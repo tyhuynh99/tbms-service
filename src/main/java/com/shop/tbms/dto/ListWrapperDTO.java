@@ -9,6 +9,6 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class ListWrapperRespDTO<X> {
+public class ListWrapperDTO<X> {
     List<X> data;
 }

@@ -1,6 +1,6 @@
 package com.shop.tbms.util;
 
-import com.shop.tbms.dto.ListWrapperRespDTO;
+import com.shop.tbms.dto.ListWrapperDTO;
 import com.shop.tbms.dto.PageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +17,7 @@ public interface ResponseUtil {
         PageResponse<X> body = new PageResponse(page.getContent(), page.getTotalPages(), page.getTotalElements());
         return ((ResponseEntity.BodyBuilder)ResponseEntity.ok().headers(headers)).body(body);
     }
-    static <X> ListWrapperRespDTO<X> wrapListToResp(List<X> listData) {
-        return new ListWrapperRespDTO<X>(listData);
+    static <X> ListWrapperDTO<X> wrapListToResp(List<X> listData) {
+        return new ListWrapperDTO<X>(listData);
     }
 }
