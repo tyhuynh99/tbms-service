@@ -13,5 +13,5 @@ public class EmployeeInListDTO {
     private Long id;
     private String username;
     private String fullname;
-    private String assignedStep;
+    private String position;
 }
