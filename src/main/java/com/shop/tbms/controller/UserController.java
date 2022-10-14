@@ -4,6 +4,9 @@ import com.shop.tbms.annotation.ValidRole;
 import com.shop.tbms.config.security.TbmsUserDetails;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.account.CreateAccountReqDTO;
+import com.shop.tbms.dto.account.UpdateProfileReqDTO;
+import com.shop.tbms.dto.authen.LoginReqDTO;
+import com.shop.tbms.dto.authen.LoginResDTO;
 import com.shop.tbms.enumerate.Role;
 import com.shop.tbms.service.AccountService;
 import com.shop.tbms.service.UserService;
@@ -32,5 +35,10 @@ public class UserController {
     @ValidRole(role = {Role.PRESIDENT, Role.ACCOUNTANT})
     public ResponseEntity<SuccessRespDTO> createAccount(@RequestBody @Valid CreateAccountReqDTO createAccountReqDTO) {
         return ResponseEntity.ok(accountService.createAccount(createAccountReqDTO));
+    }
+
+    @PostMapping("/update_profile")
+    public ResponseEntity<LoginResDTO> updateProfile(@RequestBody UpdateProfileReqDTO updateProfileReqDTO) {
+        return ResponseEntity.ok(accountService.updateProfile(updateProfileReqDTO));
     }
 }

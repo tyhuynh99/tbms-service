@@ -4,6 +4,7 @@ import com.shop.tbms.dto.UserAssignedStepDTO;
 import com.shop.tbms.enumerate.Role;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,6 +21,7 @@ public class TbmsUserDetails {
     private Role role;
     private Boolean active;
     private String position;
+    private LocalDateTime updatedDate;
 
     @Override
     public boolean equals(Object obj) {

@@ -5,6 +5,7 @@ import com.shop.tbms.config.security.TbmsUserDetails;
 import com.shop.tbms.constant.AuthenticateConstant;
 import com.shop.tbms.dto.authen.LoginReqDTO;
 import com.shop.tbms.entity.Account;
+import com.shop.tbms.util.DateTimeUtil;
 import com.shop.tbms.util.PasswordUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -36,6 +37,7 @@ public class AuthenticateComponent {
                 .claim(FULLNAME, userDetails.getFullname())
                 .claim(ROLE, userDetails.getRole())
                 .claim(IS_ACTIVE, userDetails.getActive())
+                .claim(UPDATED_DATE, DateTimeUtil.formatDate(userDetails.getUpdatedDate()))
                 .compact();
     }
 

@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import static com.shop.tbms.constant.AuthenticateConstant.*;
 import static com.shop.tbms.constant.CommonConstant.RES_JSON_TYPE;
@@ -39,6 +40,7 @@ public class JWTUtil {
                 .username((String) claims.get(USERNAME))
                 .fullname((String) claims.get(FULLNAME))
                 .active((Boolean) claims.get(IS_ACTIVE))
+                .updatedDate(DateTimeUtil.covert((String) claims.get(UPDATED_DATE)))
                 .role(Role.fromValue((int) claims.get(ROLE)))
                 .build();
     }
