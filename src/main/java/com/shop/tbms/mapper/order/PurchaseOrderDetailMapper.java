@@ -14,6 +14,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
@@ -45,7 +46,10 @@ public interface PurchaseOrderDetailMapper {
 
     @Named("genListMold")
     default List<String> genListMold(PurchaseOrder order) {
-        return order.getListMold().stream().map(Mold::getSize).collect(Collectors.toList());
+        return order.getListMold().stream().map(mold -> {
+            if (Objects.nonNull(mold.getMoldGroup())) return mold.getSize() + "#" + mold.getMoldGroup().getType().name();
+            return mold.getSize();
+        }).collect(Collectors.toList());
     }
 
     @Named("genListMoldGroupDetail")

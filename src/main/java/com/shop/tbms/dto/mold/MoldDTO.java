@@ -11,4 +11,5 @@ import lombok.*;
 public class MoldDTO {
     private Long id;
     private String size;
+    private String sizeWithType;
 }

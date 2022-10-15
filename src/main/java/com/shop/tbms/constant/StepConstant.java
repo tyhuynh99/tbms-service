@@ -150,4 +150,7 @@ public class StepConstant {
     @Value("${step.description.GIAO_HANG}")
     private String descriptionGIAO_HANG;
 
+    public String getStepToResetToStepWhenChangeMoldDetail() {
+        return this.getCodeCAM_GO();
+    }
 }

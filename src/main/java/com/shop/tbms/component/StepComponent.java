@@ -279,42 +279,4 @@ public class StepComponent {
             evidenceRepository.saveAll(listNewEvidence);
         }
     }
-
-    public void resetProgress(Step step, List<Mold> listMold) {
-        log.info("Begin reset progress mold {} of step {}", listMold, step);
-
-        /* set status to IN PROGRESS */
-        if (!StepStatus.IN_PROGRESS.equals(step.getStatus())) step.setStatus(StepStatus.IN_PROGRESS);
-
-        List<MoldProgress> moldProgressList = moldProgressRepository.findAllByStepId(step.getId());
-        log.info("get list progress list of step {} get result {}", step, moldProgressList);
-        List<MoldProgress> listUpdatedProgress = new ArrayList<>();
-
-        listMold.forEach(mold -> {
-            log.info("Start change complete mold {} of step {}", mold, step);
-            Optional<MoldProgress> optionalMoldProgress = moldProgressList.stream()
-                    .filter(moldProgress -> moldProgress.getMold().getId().equals(mold.getId()))
-                    .findFirst();
-
-            if (optionalMoldProgress.isPresent()) {
-                MoldProgress moldProgress = optionalMoldProgress.get();
-                log.info("mold progress is exited {}. Change complete to FALSE", moldProgress);
-                moldProgress.setIsCompleted(Boolean.FALSE);
-
-                listUpdatedProgress.add(moldProgress);
-            } else {
-                log.info("mold progress is not existed. create new mold progress.");
-                MoldProgress moldProgress = new MoldProgress();
-                moldProgress.setMold(mold);
-                moldProgress.setStep(step);
-                moldProgress.setIsCompleted(Boolean.FALSE);
-
-                listUpdatedProgress.add(moldProgress);
-            }
-        });
-
-        log.info("Updated progress {}", listUpdatedProgress);
-        moldProgressRepository.saveAll(listUpdatedProgress);
-        log.info("End reset mold progress to fixing step.");
-    }
 }

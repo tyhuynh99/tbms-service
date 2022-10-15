@@ -322,7 +322,7 @@ public class StepServiceImpl implements StepService {
         /* reset if not normal flow */
         if (!isNormalFlow) {
             Step resetStep = stepRepository.findById(reportIssueStepReqDTO.getChangeToStepId()).orElseThrow();
-            stepComponent.resetProgress(resetStep, listReportedMold);
+            progressComponent.resetProgress(resetStep, listReportedMold);
         }
 
         /* insert log */
@@ -378,7 +378,7 @@ public class StepServiceImpl implements StepService {
         } while (!Objects.equals(Objects.requireNonNull(step).getId(), resetMoldStepReqDTO.getResetToStepId()));
 
         List<Mold> listMold = moldRepository.findAllById(resetMoldStepReqDTO.getListMoldId());
-        listResetStep.forEach(stepAction -> stepComponent.resetProgress(stepAction, listMold));
+        listResetStep.forEach(stepAction -> progressComponent.resetProgress(stepAction, listMold));
 
         log.info("End reset mold to step");
         return SuccessRespDTO.builder()

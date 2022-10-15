@@ -10,7 +10,6 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MoldElementDTO {
-    private Long id;
     @NotBlank
     private String name;
     private boolean checked;

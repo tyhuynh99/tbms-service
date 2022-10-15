@@ -50,7 +50,9 @@ public class ProgressUtil {
         if (!CollectionUtils.isEmpty(moldGroupList)) {
             for (MoldGroup moldGroup : moldGroupList) {
                 List<Mold> moldList = moldGroup.getListMold();
-                List<MoldGroupElement> moldGroupElementList = moldGroup.getListMoldGroupElement();
+                List<MoldGroupElement> moldGroupElementList = moldGroup.getListMoldGroupElement().stream()
+                        .filter(MoldGroupElement::getChecked)
+                        .collect(Collectors.toList());
 
                 for (Mold mold : moldList) {
                     for (MoldGroupElement moldGroupElement : moldGroupElementList) {
@@ -65,6 +67,23 @@ public class ProgressUtil {
                     }
                 }
             }
+        }
+
+        return result;
+    }
+
+    public static List<MoldGroupElementProgress> generateMoldGroupElementProgress(Step step, Mold mold) {
+        List<MoldGroupElementProgress> result = new ArrayList<>();
+
+        for (MoldGroupElement moldGroupElement : mold.getMoldGroup().getListMoldGroupElement()) {
+            MoldGroupElementProgress progress = new MoldGroupElementProgress();
+            progress.setMoldGroupElement(moldGroupElement);
+            progress.setMold(mold);
+            progress.setStep(step);
+
+            progress.setIsCompleted(Boolean.FALSE);
+
+            result.add(progress);
         }
 
         return result;

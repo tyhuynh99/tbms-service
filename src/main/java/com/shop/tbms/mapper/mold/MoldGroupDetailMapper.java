@@ -5,6 +5,7 @@ import com.shop.tbms.entity.Mold;
 import com.shop.tbms.entity.MoldGroup;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 import java.util.List;
@@ -26,4 +27,6 @@ public interface MoldGroupDetailMapper {
                 .map(Mold::getSize)
                 .collect(Collectors.toList());
     }
+
+    void partialUpdate(@MappingTarget MoldGroup moldGroup, MoldGroupDetailDTO detailDTO);
 }
