@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChecklistDTO {
-    private Long id;
+    private Long checklistId;
     private String content;
     private Boolean isChecked;
 }
