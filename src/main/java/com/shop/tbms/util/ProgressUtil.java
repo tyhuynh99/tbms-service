@@ -21,6 +21,17 @@ public class ProgressUtil {
         }).collect(Collectors.toList());
     }
 
+    public static List<MoldProgress> generateMoldProcessForConditionStep(Step step, List<Mold> moldList) {
+        return moldList.stream().map(mold -> {
+            MoldProgress moldProgress = new MoldProgress();
+            moldProgress.setMold(mold);
+            moldProgress.setStep(step);
+            moldProgress.setIsCompleted(Boolean.FALSE);
+
+            return moldProgress;
+        }).collect(Collectors.toList());
+    }
+
     public static List<MoldDeliverProgress> generateMoldDeliverProcess(Step step) {
         List<MoldDeliverProgress> result = new ArrayList<>();
 

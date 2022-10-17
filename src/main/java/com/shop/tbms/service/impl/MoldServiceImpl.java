@@ -3,22 +3,20 @@ package com.shop.tbms.service.impl;
 import com.shop.tbms.component.ProgressComponent;
 import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.constant.MessageConstant;
+import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.mold.MoldElementDTO;
 import com.shop.tbms.dto.mold.MoldElementTemplateDTO;
 import com.shop.tbms.dto.mold.MoldGroupDetailDTO;
 import com.shop.tbms.dto.mold.MoldGroupReqDTO;
-import com.shop.tbms.entity.Mold;
-import com.shop.tbms.entity.MoldGroup;
-import com.shop.tbms.entity.MoldGroupElement;
-import com.shop.tbms.entity.PurchaseOrder;
+import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.order.OrderStatus;
 import com.shop.tbms.mapper.mold.MoldElementTemplateMapper;
 import com.shop.tbms.mapper.mold.MoldGroupDetailMapper;
-import com.shop.tbms.repository.MoldGroupRepository;
-import com.shop.tbms.repository.PurchaseOrderRepository;
-import com.shop.tbms.repository.TemplateMoldElementRepository;
+import com.shop.tbms.repository.*;
 import com.shop.tbms.service.MoldService;
+import com.shop.tbms.util.ProgressUtil;
+import com.shop.tbms.util.StepConditionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,6 +39,8 @@ public class MoldServiceImpl implements MoldService {
     private PurchaseOrderRepository orderRepository;
     @Autowired
     private MoldGroupRepository moldGroupRepository;
+    @Autowired
+    private MoldProgressRepository moldProgressRepository;
 
     @Autowired
     private MoldElementTemplateMapper moldElementTemplateMapper;
@@ -49,6 +49,9 @@ public class MoldServiceImpl implements MoldService {
 
     @Autowired
     private ProgressComponent progressComponent;
+
+    @Autowired
+    private StepConstant stepConstant;
 
     @Override
     public List<MoldElementTemplateDTO> getListElementTemplate() {
@@ -81,6 +84,39 @@ public class MoldServiceImpl implements MoldService {
             }
 
             MoldGroup moldGroup = mold.getMoldGroup();
+            /* check option Ban Dien */
+            if (Boolean.FALSE.equals(moldGroup.getHasBanDien()) && detailDTO.isHasBanDien()) {
+                /* Check to has Ban Dien */
+                /* Generate progress for step Phong Dien */
+                log.info("Check hasBanDien, create progress for mold {} at step PHONG DIEN", mold);
+                Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
+                log.info("Step PHONG DIEN {}", phongDienStep);
+
+                List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForConditionStep(
+                        phongDienStep,
+                        List.of(mold));
+
+                phongDienStep.setListMoldProgress(moldProgressListForConditionStep);
+
+                log.info("Insert progress {}", moldProgressListForConditionStep);
+                moldProgressRepository.saveAll(moldProgressListForConditionStep);
+            } else if (Boolean.TRUE.equals(moldGroup.getHasBanDien()) && !detailDTO.isHasBanDien()) {
+                /* Uncheck to has Ban Dien */
+                /* Delete progress for step Phong Dien */
+                log.info("Uncheck hasBanDien, delete progress for mold {} at step PHONG DIEN", mold);
+                Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
+                log.info("Step PHONG DIEN {}", phongDienStep);
+
+                List<MoldProgress> listProgressNeedRemoved = phongDienStep.getListMoldProgress().stream()
+                        .filter(moldProgress ->
+                                mold.getSize().equalsIgnoreCase(moldProgress.getMold().getSize()))
+                        .collect(Collectors.toList());
+                phongDienStep.getListMoldProgress().removeAll(listProgressNeedRemoved);
+
+                log.info("Delete progress {}", listProgressNeedRemoved);
+                moldProgressRepository.deleteAll(listProgressNeedRemoved);
+            }
+
             boolean isChangeMoldGroupType = !detailDTO.getType().equals(moldGroup.getType());
             boolean isChangeElement = false;
 

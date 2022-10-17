@@ -144,7 +144,7 @@ public class StepComponent {
 
                             /* validate not complete in next-step */
                             if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
-                                Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepAfter()));
+                                Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepAfter(), moldProgress.getMold()));
                                 boolean canCheckComplete = progressComponent.canUnCheckCompleteBySize(
                                         nextStep,
                                         moldProgress.getMold().getSize()
@@ -163,7 +163,7 @@ public class StepComponent {
 
                             /* validate complete in pre-step */
                             if (Boolean.FALSE.equals(currentStep.getIsStart())) {
-                                Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepBefore()));
+                                Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepBefore(), moldProgress.getMold()));
                                 boolean canCheckComplete = progressComponent.canCheckCompleteBySize(
                                         preStep,
                                         moldProgress.getMold().getSize()
@@ -199,7 +199,7 @@ public class StepComponent {
 
                     /* validate not complete in next-step */
                     if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
-                        Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepAfter()));
+                        Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepAfter(), moldGroupElementProgress.getMold()));
                         boolean canCheckComplete = progressComponent.canUnCheckCompleteBySize(
                                 nextStep,
                                 moldGroupElementProgress.getMold().getSize()
@@ -218,7 +218,7 @@ public class StepComponent {
 
                     /* validate complete in pre-step */
                     if (Boolean.FALSE.equals(currentStep.getIsStart())) {
-                        Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepBefore()));
+                        Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepBefore(), moldGroupElementProgress.getMold()));
                         boolean canCheckComplete = progressComponent.canCheckCompleteBySize(
                                 preStep,
                                 moldGroupElementProgress.getMold().getSize()
@@ -256,7 +256,7 @@ public class StepComponent {
 
                     /* validate not complete in next-step */
                     if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
-                        Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepAfter()));
+                        Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepAfter(), moldDeliverProgress.getMold()));
                         boolean canCheckComplete = progressComponent.canUnCheckCompleteBySize(
                                 nextStep,
                                 moldDeliverProgress.getMold().getSize()
@@ -275,7 +275,7 @@ public class StepComponent {
 
                     /* validate complete in pre-step */
                     if (Boolean.FALSE.equals(currentStep.getIsStart())) {
-                        Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepBefore()));
+                        Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepBefore(), moldDeliverProgress.getMold()));
                         boolean canCheckComplete = progressComponent.canCheckCompleteBySize(
                                 preStep,
                                 moldDeliverProgress.getMold().getSize()

@@ -83,6 +83,7 @@ public class Step extends AbstractAuditingEntity {
     private Procedure procedure;
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @OrderBy("createdDate asc")
     @ToString.Exclude
     private List<Checklist> listChecklist = new ArrayList<>();
 

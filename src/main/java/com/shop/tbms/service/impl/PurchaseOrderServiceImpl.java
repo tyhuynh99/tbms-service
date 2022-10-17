@@ -2,6 +2,7 @@ package com.shop.tbms.service.impl;
 
 import com.shop.tbms.component.*;
 import com.shop.tbms.constant.MessageConstant;
+import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.order.*;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
@@ -17,10 +18,7 @@ import com.shop.tbms.mapper.order.PurchaseOrderMapper;
 import com.shop.tbms.repository.*;
 import com.shop.tbms.service.PurchaseOrderService;
 import com.shop.tbms.specification.PurchaseOrderSpecification;
-import com.shop.tbms.util.AuthenticationUtil;
-import com.shop.tbms.util.ProgressUtil;
-import com.shop.tbms.util.OrderUtil;
-import com.shop.tbms.util.TemplateUtil;
+import com.shop.tbms.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -77,6 +75,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Autowired
     private StepRepository stepRepository;
 
+    /* Constant */
+    @Autowired
+    private StepConstant stepConstant;
+
     @Override
     public SuccessRespDTO createOrder(OrderCreateReqDTO orderCreateReqDTO) {
         /* Generate PurchaseOrder entity */
@@ -126,7 +128,9 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
             if (Boolean.TRUE.equals(step.getIsStart())) step.setStatus(StepStatus.IN_PROGRESS);
 
             /* Generate mold progress */
-            if (!StepType.FIXING.equals(step.getType()) && ReportType.BY_MOLD.equals(step.getReportType())) {
+            if (!StepType.FIXING.equals(step.getType())
+                    && !ReportType.BY_MOLD_ELEMENT.equals(step.getReportType())
+                    && StepConditionUtil.canGenProgressWhenCreateOrder(step, stepConstant)) {
                 progressComponent.generateProgressForStep(step);
             }
         });
