@@ -33,7 +33,7 @@ public class MoldController {
         ));
     }
 
-    @PostMapping("/save")
+    @PostMapping("/element/save")
     public ResponseEntity<SuccessRespDTO> save(@RequestBody MoldGroupReqDTO moldGroupReqDTO) {
         return ResponseEntity.ok(SuccessRespDTO.builder().build());
     }

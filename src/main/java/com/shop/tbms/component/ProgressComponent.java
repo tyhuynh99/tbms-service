@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Component
@@ -95,7 +96,7 @@ public class ProgressComponent {
             case BY_MOLD:
                 log.info("Check complete of mold size {} with preStep mold progress {}", moldSize, preStep.getListMoldProgress());
                 return preStep.getListMoldProgress().stream()
-                        .anyMatch(moldProgress ->
+                        .allMatch(moldProgress ->
                                 moldSize.equals(moldProgress.getMold().getSize())
                                     && Boolean.TRUE.equals(moldProgress.getIsCompleted())
                         );
@@ -111,6 +112,32 @@ public class ProgressComponent {
                         .filter(moldDeliverProgress ->
                                 moldSize.equals(moldDeliverProgress.getMold().getSize()))
                         .allMatch(MoldDeliverProgress::getIsCompleted);
+            default:
+                return false;
+        }
+    }
+
+    public boolean canUnCheckCompleteBySize(Step nextStep, String moldSize) {
+        switch (nextStep.getReportType()) {
+            case BY_MOLD:
+                log.info("Check complete of mold size {} with preStep mold progress {}", moldSize, nextStep.getListMoldProgress());
+                return nextStep.getListMoldProgress().stream()
+                        .allMatch(moldProgress ->
+                                moldSize.equals(moldProgress.getMold().getSize())
+                                        && Boolean.FALSE.equals(moldProgress.getIsCompleted())
+                        );
+            case BY_MOLD_ELEMENT:
+                log.info("Check complete of mold size {} with preStep mold element progress {}", moldSize, nextStep.getListMoldGroupElementProgresses());
+                return nextStep.getListMoldGroupElementProgresses().stream()
+                        .filter(moldGroupElementProgress ->
+                                moldSize.equals(moldGroupElementProgress.getMold().getSize()))
+                        .anyMatch(Predicate.not(MoldGroupElementProgress::getIsCompleted));
+            case BY_MOLD_SEND_RECEIVE:
+                log.info("Check complete of mold size {} with preStep mold deliver progress {}", moldSize, nextStep.getListMoldDeliverProgress());
+                return nextStep.getListMoldDeliverProgress().stream()
+                        .filter(moldDeliverProgress ->
+                                moldSize.equals(moldDeliverProgress.getMold().getSize()))
+                        .allMatch(Predicate.not(MoldDeliverProgress::getIsCompleted));
             default:
                 return false;
         }

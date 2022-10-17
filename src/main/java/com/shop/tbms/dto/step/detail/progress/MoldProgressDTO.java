@@ -12,5 +12,6 @@ public class MoldProgressDTO {
     private Boolean isCompleted;
     private Long moldId;
     private String moldSize;
+    private String moldSizeWithType;
     private boolean canCheck;
 }
