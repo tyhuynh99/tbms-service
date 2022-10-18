@@ -30,4 +30,9 @@ public class Evidence extends AbstractAuditingEntity {
     @JoinColumn(name = "step_id", nullable = false)
     @ToString.Exclude
     private Step step;
+
+    @ManyToOne
+    @JoinColumn(name = "report_log_id", nullable = false)
+    @ToString.Exclude
+    private ReportLog reportLog;
 }

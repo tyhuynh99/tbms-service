@@ -1,9 +1,11 @@
 package com.shop.tbms.entity;
 
-import com.shop.tbms.enumerate.step.ReportActionType;
+import com.shop.tbms.entity.common.AbstractAuditingEntity;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity(name = "report_log")
 @Setter
@@ -11,15 +13,11 @@ import javax.persistence.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportLog {
+public class ReportLog extends AbstractAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-
-    @Column(name = "action")
-    @Enumerated(EnumType.STRING)
-    private ReportActionType action;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
@@ -28,4 +26,8 @@ public class ReportLog {
     @JoinColumn(name = "step_id", nullable = false)
     @ToString.Exclude
     private Step step;
+
+    @OneToMany(mappedBy = "reportLog", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Evidence> evidenceList = new ArrayList<>();
 }

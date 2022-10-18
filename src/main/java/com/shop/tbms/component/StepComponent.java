@@ -305,7 +305,7 @@ public class StepComponent {
         });
     }
 
-    public void updateEvidence(Step currentStep, ReportEvidenceReqDTO reqDTO) {
+    public void updateEvidence(Step currentStep, ReportEvidenceReqDTO reqDTO, ReportLog reportLog) {
         List<Evidence> currentEvidence = currentStep.getListEvidence();
         log.info("Update Evidence with current {} and req {}", currentEvidence, reqDTO);
         if (Objects.isNull(reqDTO.getListDeleteEvidenceId())) reqDTO.setListDeleteEvidenceId(new ArrayList<>());
@@ -343,7 +343,8 @@ public class StepComponent {
                         null,
                         multipartFile.getOriginalFilename(),
                         fileDTO.getUrl(),
-                        currentStep
+                        currentStep,
+                        reportLog
                 );
             }).collect(Collectors.toList());
 

@@ -53,8 +53,4 @@ public class ReportLogUtil {
                 evidence.toString()
         );
     }
-
-    public static String generateDescription(ReportIssueStepReqDTO reportIssueStepReqDTO) {
-        return reportIssueStepReqDTO.toString();
-    }
 }

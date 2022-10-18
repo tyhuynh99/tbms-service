@@ -15,6 +15,7 @@ import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.order.OrderPaymentStatus;
 import com.shop.tbms.enumerate.order.OrderStatus;
 import com.shop.tbms.enumerate.step.StepStatus;
+import com.shop.tbms.enumerate.step.StepType;
 import com.shop.tbms.mapper.mold.MoldMapper;
 import com.shop.tbms.mapper.StepMapper;
 import com.shop.tbms.mapper.StepSequenceMapper;
@@ -164,6 +165,7 @@ public class StepServiceImpl implements StepService {
         List<MoldDeliverProgress> currentMoldDeliverProgress = currentStep.getListMoldDeliverProgress();
         List<MoldGroupElementProgress> currentMoldElementProgress = currentStep.getListMoldGroupElementProgresses();
         List<Checklist> currentChecklist = currentStep.getListChecklist();
+        ReportLog reportLog = new ReportLog();
 
         /* validate */
         /* validate order status */
@@ -200,7 +202,7 @@ public class StepServiceImpl implements StepService {
         checklistRepository.saveAll(currentChecklist);
 
         log.info("Start update evidences");
-        stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence());
+        stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence(), reportLog);
 
         log.info("Start update step info");
         stepComponent.updateStep(currentStep, reportStepReqDTO);
@@ -219,7 +221,7 @@ public class StepServiceImpl implements StepService {
 
         /* insert log */
         log.info("Start insert log");
-        reportLogComponent.insertReportLog(currentStep, reportStepReqDTO);
+        reportLogComponent.insertReportLog(currentStep, reportStepReqDTO, reportLog);
 
         if (Boolean.TRUE.equals(currentStep.getIsEnd())) {
             if (Boolean.TRUE.equals(reportStepReqDTO.getIsPaid())) {
@@ -322,11 +324,13 @@ public class StepServiceImpl implements StepService {
         /* reset if not normal flow */
         if (!isNormalFlow) {
             Step resetStep = stepRepository.findById(reportIssueStepReqDTO.getChangeToStepId()).orElseThrow();
-            progressComponent.resetProgress(resetStep, listReportedMold);
-        }
 
-        /* insert log */
-        reportLogComponent.insertReportLog(currentStep, reportIssueStepReqDTO);
+            if (StepType.FIXING.equals(resetStep.getType())) {
+                progressComponent.resetProgress(resetStep, listReportedMold);
+            } else {
+                resetMoldProgressToStep(currentStep, resetStep.getId(), reportIssueStepReqDTO.getListMoldId());
+            }
+        }
 
         return SuccessRespDTO.builder()
                 .message(MessageConstant.UPDATE_SUCCESS)
@@ -367,23 +371,26 @@ public class StepServiceImpl implements StepService {
             );
         }
 
-        List<Step> listResetStep = new ArrayList<>();
-        Step step = currentStep;
-
-        /* loop to get all main previous step of current step until reset step */
-        do {
-            List<StepSequence> stepSequenceList = stepSequenceRepository.findByStepAfterId(step.getId());
-            step = StepUtil.getPreMainStep(stepSequenceList);
-            listResetStep.add(step);
-        } while (!Objects.equals(Objects.requireNonNull(step).getId(), resetMoldStepReqDTO.getResetToStepId()));
-
-        List<Mold> listMold = moldRepository.findAllById(resetMoldStepReqDTO.getListMoldId());
-        listResetStep.forEach(stepAction -> progressComponent.resetProgress(stepAction, listMold));
-
+        resetMoldProgressToStep(currentStep, resetMoldStepReqDTO.getResetToStepId(), resetMoldStepReqDTO.getListMoldId());
         log.info("End reset mold to step");
         return SuccessRespDTO.builder()
                 .message(MessageConstant.UPDATE_SUCCESS)
                 .build();
+    }
+
+    private void resetMoldProgressToStep(Step currentStep, Long resetToStepId, List<Long> listMoldId) {
+        /* loop to get all main previous step of current step until reset step */
+        List<Step> listResetStep = new ArrayList<>();
+        Step step = currentStep;
+
+        do {
+            List<StepSequence> stepSequenceList = stepSequenceRepository.findByStepAfterId(step.getId());
+            step = StepUtil.getPreMainStep(stepSequenceList);
+            listResetStep.add(step);
+        } while (!Objects.equals(Objects.requireNonNull(step).getId(), resetToStepId));
+
+        List<Mold> listMold = moldRepository.findAllById(listMoldId);
+        listResetStep.forEach(stepAction -> progressComponent.resetProgress(stepAction, listMold));
     }
 
     @Override
