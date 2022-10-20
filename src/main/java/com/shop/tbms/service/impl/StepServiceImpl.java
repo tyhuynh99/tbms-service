@@ -3,8 +3,10 @@ package com.shop.tbms.service.impl;
 import com.shop.tbms.component.*;
 import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.constant.MessageConstant;
+import com.shop.tbms.constant.NotificationConstant;
 import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.dto.SuccessRespDTO;
+import com.shop.tbms.dto.noti.FBNotificationRequestDTO;
 import com.shop.tbms.dto.step.ResetMoldStepReqDTO;
 import com.shop.tbms.dto.step.detail.StepDTO;
 import com.shop.tbms.dto.step.detail.progress.MoldElementProgressDTO;
@@ -12,6 +14,8 @@ import com.shop.tbms.dto.step.report.ReportStepReqDTO;
 import com.shop.tbms.dto.step.report_issue.ReportIssueStepReqDTO;
 import com.shop.tbms.dto.step.report_issue.ReportIssueToStepRespDTO;
 import com.shop.tbms.entity.*;
+import com.shop.tbms.enumerate.NotificationType;
+import com.shop.tbms.enumerate.Role;
 import com.shop.tbms.enumerate.order.OrderPaymentStatus;
 import com.shop.tbms.enumerate.order.OrderStatus;
 import com.shop.tbms.enumerate.step.StepStatus;
@@ -23,8 +27,12 @@ import com.shop.tbms.mapper.progress.MoldDeliverProgressMapper;
 import com.shop.tbms.mapper.progress.MoldElementProgressMapper;
 import com.shop.tbms.mapper.progress.MoldProgressMapper;
 import com.shop.tbms.repository.*;
+import com.shop.tbms.service.NotificationService;
 import com.shop.tbms.service.StepService;
+import com.shop.tbms.specification.AccountSpecification;
+import com.shop.tbms.specification.StepSpecification;
 import com.shop.tbms.util.MoldElementUtil;
+import com.shop.tbms.util.NotificationUtil;
 import com.shop.tbms.util.StepUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,6 +80,10 @@ public class StepServiceImpl implements StepService {
     private IssueRepository issueRepository;
     @Autowired
     private MoldRepository moldRepository;
+    @Autowired
+    private AccountRepository accountRepository;
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Autowired
     private StepComponent stepComponent;
@@ -88,6 +97,12 @@ public class StepServiceImpl implements StepService {
     private MoldComponent moldComponent;
     @Autowired
     private ProgressComponent progressComponent;
+
+    @Autowired
+    private NotificationConstant notificationConstant;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public StepDTO getStep(Long stepId) {
@@ -307,7 +322,7 @@ public class StepServiceImpl implements StepService {
 
             if (!reqNextStepIsValid) {
                 throw new BusinessException(
-                        "Cannot found valid next step id with step id = "+ reportIssueStepReqDTO.getChangeToStepId()
+                        "Cannot found valid next step id with step id = " + reportIssueStepReqDTO.getChangeToStepId()
                 );
             }
             isNormalFlow = false;
@@ -410,5 +425,78 @@ public class StepServiceImpl implements StepService {
                         .map(MoldProgress::getMold)
                         .collect(Collectors.toList())
         );
+    }
+
+    @Override
+    public void notiStepNearlyLate() {
+        List<Step> stepListNearlyLate = stepRepository.findAll(StepSpecification.getStepNearlyLate());
+        log.info("List step nearly late {}", stepListNearlyLate);
+
+        List<TbmsNotification> notificationList = List.of();
+        stepListNearlyLate.stream().map(step -> {
+                    List<Account> receiverList = accountRepository
+                            .findAll(AccountSpecification.genGetListByRoleAndPosition(
+                                    List.of(Role.EMPLOYEE),
+                                    List.of(step.getCode()))
+                            );
+
+                    return receiverList.stream().map(receiver -> {
+                        FBNotificationRequestDTO fbNotificationRequestDTO = NotificationUtil.genNotiStepNearlyLate(step, notificationConstant, receiver.getUsername());
+                        notificationList.add(
+                                NotificationUtil.genEntityNotification(
+                                        fbNotificationRequestDTO,
+                                        step,
+                                        NotificationType.STEP_NEARLY_LATE)
+                        );
+
+                        return fbNotificationRequestDTO;
+                    }).collect(Collectors.toList());
+                }).flatMap(Collection::stream)
+                .forEach(fbNotificationRequestDTO -> {
+                    try {
+                        notificationService.sendPnsToTopic(fbNotificationRequestDTO);
+                    } catch (Exception e) {
+                        log.error("Error while send notification {}", fbNotificationRequestDTO);
+                    }
+                });
+
+        notificationRepository.saveAll(notificationList);
+    }
+
+    @Override
+    public void notiStepLate() {
+        List<Step> stepListLate = stepRepository.findAll(StepSpecification.getStepLate());
+        log.info("List step late {}", stepListLate);
+
+        List<TbmsNotification> notificationList = List.of();
+
+        stepListLate.stream().map(step -> {
+                    List<Account> receiverList = accountRepository
+                            .findAll(AccountSpecification.genGetListByRoleAndPosition(
+                                    List.of(Role.EMPLOYEE),
+                                    List.of(step.getCode()))
+                            );
+
+                    return receiverList.stream().map(receiver -> {
+                        FBNotificationRequestDTO fbNotificationRequestDTO = NotificationUtil.genNotiStepLate(step, notificationConstant, receiver.getUsername());
+                        notificationList.add(
+                                NotificationUtil.genEntityNotification(
+                                        fbNotificationRequestDTO,
+                                        step,
+                                        NotificationType.STEP_LATE)
+                        );
+
+                        return fbNotificationRequestDTO;
+                    }).collect(Collectors.toList());
+                }).flatMap(Collection::stream)
+                .forEach(fbNotificationRequestDTO -> {
+                    try {
+                        notificationService.sendPnsToTopic(fbNotificationRequestDTO);
+                    } catch (Exception e) {
+                        log.error("Error while send notification {}", fbNotificationRequestDTO);
+                    }
+                });
+
+        notificationRepository.saveAll(notificationList);
     }
 }

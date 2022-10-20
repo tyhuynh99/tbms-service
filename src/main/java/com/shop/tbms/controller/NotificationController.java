@@ -4,7 +4,7 @@ import com.shop.tbms.dto.ListWrapperDTO;
 import com.shop.tbms.dto.NotificationDTO;
 import com.shop.tbms.dto.PageResponse;
 import com.shop.tbms.dto.SuccessRespDTO;
-import com.shop.tbms.dto.noti.NotificationRequestDTO;
+import com.shop.tbms.dto.noti.FBNotificationRequestDTO;
 import com.shop.tbms.dto.noti.SubscriptionRequestDTO;
 import com.shop.tbms.entity.TbmsNotification_;
 import com.shop.tbms.service.NotificationService;
@@ -33,8 +33,8 @@ public class NotificationController {
     }
 
     @PostMapping("/topic")
-    public String sendPnsToTopic(@RequestBody NotificationRequestDTO notificationRequestDto) throws Exception {
-        return notificationService.sendPnsToTopic(notificationRequestDto);
+    public String sendPnsToTopic(@RequestBody FBNotificationRequestDTO FBNotificationRequestDto) throws Exception {
+        return notificationService.sendPnsToTopic(FBNotificationRequestDto);
     }
 
     @GetMapping("/list")
@@ -50,5 +50,10 @@ public class NotificationController {
     @PostMapping("/read")
     public ResponseEntity<SuccessRespDTO> readNotification(@RequestBody ListWrapperDTO<Long> listId) {
         return ResponseEntity.ok(notificationService.readNotification(listId.getData()));
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<SuccessRespDTO> testNoti(@RequestBody FBNotificationRequestDTO notiReq) throws Exception {
+        return ResponseEntity.ok(notificationService.testNoti(notiReq));
     }
 }

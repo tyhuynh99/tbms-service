@@ -13,6 +13,8 @@ import javax.persistence.criteria.JoinType;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import static com.shop.tbms.constant.AppConstant.NEARLY_LATE_DAYS;
+
 public class PurchaseOrderSpecification {
     public static Specification<PurchaseOrder> buildSpecForList(OrderFilterReqDTO orderFilterReqDTO) {
         /* order not deleted */
@@ -85,6 +87,35 @@ public class PurchaseOrderSpecification {
                                         root.get(PurchaseOrder_.IS_DELETED),
                                         Boolean.FALSE)
                 );
+        return specification;
+    }
+
+    public static Specification<PurchaseOrder> getListNearlyDueOrder() {
+        Specification<PurchaseOrder> specification = Specification.where(null);
+        LocalDate today = LocalDate.now();
+        LocalDate chkDate = LocalDate.now().plusDays(NEARLY_LATE_DAYS);
+
+        specification = specification.and(
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.notEqual(
+                                root.get(PurchaseOrder_.STATUS),
+                                OrderStatus.COMPLETED)
+        ).and( /* is delete flase */
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(
+                                root.get(PurchaseOrder_.IS_DELETED),
+                                Boolean.FALSE)
+        ).and( /* deliver date > today */
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.greaterThan(
+                                root.get(PurchaseOrder_.DELIVERED_DATE),
+                                today)
+        ).and( /* deliver date <= today + 2 days */
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.lessThanOrEqualTo(
+                                root.get(PurchaseOrder_.DELIVERED_DATE),
+                                chkDate)
+        );
         return specification;
     }
 }

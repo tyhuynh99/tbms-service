@@ -10,7 +10,6 @@ import com.shop.tbms.dto.account.DeleteEmployeeReqDTO;
 import com.shop.tbms.dto.account.EmployeeInListDTO;
 import com.shop.tbms.dto.account.UpdateProfileReqDTO;
 import com.shop.tbms.dto.account.error.CreateAccountErrorDTO;
-import com.shop.tbms.dto.authen.LoginReqDTO;
 import com.shop.tbms.dto.authen.LoginResDTO;
 import com.shop.tbms.entity.Account;
 import com.shop.tbms.enumerate.Role;
@@ -20,8 +19,7 @@ import com.shop.tbms.mapper.account.EmployeeMapper;
 import com.shop.tbms.repository.AccountRepository;
 import com.shop.tbms.repository.PositionRepository;
 import com.shop.tbms.service.AccountService;
-import com.shop.tbms.service.AuthenticateService;
-import com.shop.tbms.specification.EmployeeSpecification;
+import com.shop.tbms.specification.AccountSpecification;
 import com.shop.tbms.util.AuthenticationUtil;
 import com.shop.tbms.util.PasswordUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +60,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Page<EmployeeInListDTO> getListEmployee(Pageable pageable) {
-        Specification<Account> specification = EmployeeSpecification.genGetListEmployee();
+        Specification<Account> specification = AccountSpecification.genGetListEmployee();
         return accountRepository.findAll(specification, pageable).map(employeeMapper::toListEmployee);
     }
 

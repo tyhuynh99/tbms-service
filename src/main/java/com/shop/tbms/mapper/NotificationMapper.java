@@ -1,6 +1,7 @@
 package com.shop.tbms.mapper;
 
 import com.shop.tbms.dto.NotificationDTO;
+import com.shop.tbms.dto.noti.FBNotificationRequestDTO;
 import com.shop.tbms.entity.TbmsNotification;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,6 +18,7 @@ public interface NotificationMapper {
 
     @Mapping(target = "createdDateDisplay", source = "createdDate", qualifiedByName = "genCreatedDateDisplay")
     NotificationDTO toDTO(TbmsNotification entity);
+
 
     List<NotificationDTO> toDTOs(List<TbmsNotification> entities);
 

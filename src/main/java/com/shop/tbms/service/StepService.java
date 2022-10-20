@@ -17,4 +17,6 @@ public interface StepService {
     SuccessRespDTO reportIssueStep(ReportIssueStepReqDTO reportIssueStepReqDTO);
     SuccessRespDTO resetMold(ResetMoldStepReqDTO resetMoldStepReqDTO);
     List<MoldDTO> getListCompletedMoldInPreviousStep(Long stepId);
+    void notiStepNearlyLate();
+    void notiStepLate();
 }

@@ -11,6 +11,7 @@ import com.shop.tbms.dto.authen.LoginReqDTO;
 import com.shop.tbms.dto.authen.LoginResDTO;
 import com.shop.tbms.dto.authen.LogoutReqDTO;
 import com.shop.tbms.dto.authen.RefreshTokenReqDTO;
+import com.shop.tbms.dto.noti.SubscriptionRequestDTO;
 import com.shop.tbms.entity.Account;
 import com.shop.tbms.entity.Device;
 import com.shop.tbms.enumerate.Role;
@@ -19,6 +20,7 @@ import com.shop.tbms.repository.AccountRepository;
 import com.shop.tbms.repository.DeviceRepository;
 import com.shop.tbms.repository.TemplateStepRepository;
 import com.shop.tbms.service.AuthenticateService;
+import com.shop.tbms.service.NotificationService;
 import com.shop.tbms.util.AuthenticationUtil;
 import com.shop.tbms.util.JWTUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +53,9 @@ public class AuthenticateServiceImpl implements AuthenticateService {
     @Autowired
     private AccountToUserDetailsMapper accountToUserDetailsMapper;
 
+    @Autowired
+    private NotificationService notificationService;
+
 
     @Override
     public LoginResDTO login(LoginReqDTO loginReqDTO) {
@@ -73,6 +78,13 @@ public class AuthenticateServiceImpl implements AuthenticateService {
         deviceRepository.save(device);
 
         TbmsUserDetails userDetails = accountToUserDetailsMapper.toUserDetails(account);
+
+        /* subcribe to topic */
+        notificationService.subscribeToTopic(
+                SubscriptionRequestDTO.builder()
+                        .topicName(account.getUsername())
+                        .tokens(List.of(loginReqDTO.getDeviceToken())).build()
+        );
 
         String accessToken = authenticateComponent.generateToken(true, userDetails);
         String refreshToken = authenticateComponent.generateToken(false, userDetails);
@@ -126,6 +138,14 @@ public class AuthenticateServiceImpl implements AuthenticateService {
                             userDetails.getUsername())
                     .orElseThrow(() ->
                             new BusinessException("Not found device id with username"));
+
+            /* unsubcribe topic */
+            notificationService.unsubscribeFromTopic(
+                    SubscriptionRequestDTO.builder()
+                            .topicName(userDetails.getUsername())
+                            .tokens(List.of(device.getDeviceId()))
+                            .build());
+
             deviceRepository.delete(device);
 
             return SuccessRespDTO.builder()

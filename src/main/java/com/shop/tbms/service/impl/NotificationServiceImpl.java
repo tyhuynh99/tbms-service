@@ -10,13 +10,15 @@ import com.google.firebase.messaging.Notification;
 import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.dto.NotificationDTO;
 import com.shop.tbms.dto.SuccessRespDTO;
-import com.shop.tbms.dto.noti.NotificationRequestDTO;
+import com.shop.tbms.dto.noti.FBNotificationRequestDTO;
 import com.shop.tbms.dto.noti.SubscriptionRequestDTO;
 import com.shop.tbms.entity.TbmsNotification;
+import com.shop.tbms.enumerate.NotificationType;
 import com.shop.tbms.mapper.NotificationMapper;
 import com.shop.tbms.repository.NotificationRepository;
 import com.shop.tbms.service.NotificationService;
 import com.shop.tbms.util.AuthenticationUtil;
+import com.shop.tbms.util.NotificationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,6 +69,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void subscribeToTopic(SubscriptionRequestDTO requestDTO) {
+        log.info("Start subcribe topic {}", requestDTO);
         try {
             FirebaseMessaging.getInstance(firebaseApp).subscribeToTopic(requestDTO.getTokens(), requestDTO.getTopicName());
         } catch (FirebaseMessagingException e) {
@@ -78,6 +81,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void unsubscribeFromTopic(SubscriptionRequestDTO requestDTO) {
+        log.info("Start unsubcribe topic {}", requestDTO);
         try {
             FirebaseMessaging.getInstance(firebaseApp).unsubscribeFromTopic(requestDTO.getTokens(), requestDTO.getTopicName());
         } catch (FirebaseMessagingException e) {
@@ -88,10 +92,11 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public String sendPnsToTopic(NotificationRequestDTO requestDTO) throws Exception {
+    public String sendPnsToTopic(FBNotificationRequestDTO requestDTO) throws Exception {
+        log.info("Start send noti {}", requestDTO);
         String title = requestDTO.getTitle();
         String body = requestDTO.getBody();
-        String target = requestDTO.getTarget();
+        String topic = requestDTO.getTopic();
 
         Notification notification = Notification.builder()
                 .setBody(body)
@@ -99,7 +104,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
 
         Message message = Message.builder()
-                .setTopic(target)
+                .setTopic(topic)
                 .setNotification(notification)
                 .putData("content", title)
                 .putData("body", body)
@@ -136,5 +141,13 @@ public class NotificationServiceImpl implements NotificationService {
         return SuccessRespDTO.builder()
                 .message(MessageConstant.UPDATE_SUCCESS)
                 .build();
+    }
+
+    @Override
+    public SuccessRespDTO testNoti(FBNotificationRequestDTO requestDTO) throws Exception {
+        sendPnsToTopic(requestDTO);
+        notificationRepository.save(NotificationUtil.genEntityNotification(requestDTO, null, NotificationType.OTHER));
+
+        return null;
     }
 }

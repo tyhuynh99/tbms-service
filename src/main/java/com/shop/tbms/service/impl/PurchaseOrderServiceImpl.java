@@ -2,12 +2,15 @@ package com.shop.tbms.service.impl;
 
 import com.shop.tbms.component.*;
 import com.shop.tbms.constant.MessageConstant;
+import com.shop.tbms.constant.NotificationConstant;
 import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.order.*;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteRespDTO;
 import com.shop.tbms.entity.*;
+import com.shop.tbms.enumerate.NotificationType;
+import com.shop.tbms.enumerate.Role;
 import com.shop.tbms.enumerate.order.OrderStatus;
 import com.shop.tbms.enumerate.step.ReportType;
 import com.shop.tbms.enumerate.step.StepStatus;
@@ -16,7 +19,9 @@ import com.shop.tbms.mapper.order.PurchaseOrderDetailMapper;
 import com.shop.tbms.mapper.order.PurchaseOrderListMapper;
 import com.shop.tbms.mapper.order.PurchaseOrderMapper;
 import com.shop.tbms.repository.*;
+import com.shop.tbms.service.NotificationService;
 import com.shop.tbms.service.PurchaseOrderService;
+import com.shop.tbms.specification.AccountSpecification;
 import com.shop.tbms.specification.PurchaseOrderSpecification;
 import com.shop.tbms.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +62,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Autowired
     private ProgressComponent progressComponent;
 
+    /* Service */
+    @Autowired
+    private NotificationService notificationService;
+
     /* Mapper */
     @Autowired
     private PurchaseOrderMapper purchaseOrderMapper;
@@ -74,10 +83,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private ChecklistRepository checklistRepository;
     @Autowired
     private StepRepository stepRepository;
+    @Autowired
+    private AccountRepository accountRepository;
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     /* Constant */
     @Autowired
     private StepConstant stepConstant;
+    @Autowired
+    private NotificationConstant notificationConstant;
 
     @Override
     public SuccessRespDTO createOrder(OrderCreateReqDTO orderCreateReqDTO) {
@@ -247,6 +262,67 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
         listLateOrder.forEach(order -> order.setIsLate(Boolean.TRUE));
 
+        /* send noti all president and secretary */
+        List<Account> listReceiver = accountRepository.findAll(
+                AccountSpecification.genGetListByRole(List.of(Role.PRESIDENT, Role.SECRETARY)));
+
+        log.info("Start send noti of overdue order to {} ", listReceiver.stream().map(Account::getUsername).collect(Collectors.toList()));
+
+        List<TbmsNotification> notificationList = listReceiver.stream()
+                .map(receiver ->
+                        listLateOrder.stream()
+                                .map(order -> NotificationUtil.genNotiOrderOverdue(
+                                        order,
+                                        notificationConstant,
+                                        receiver.getUsername()))
+                                .collect(Collectors.toList()))
+                .flatMap(List::stream)
+                .map(requestDTO -> {
+                    try {
+                        notificationService.sendPnsToTopic(requestDTO);
+                    } catch (Exception e) {
+                        log.error("Error while send notification {}", requestDTO);
+                    }
+
+                    return NotificationUtil.genEntityNotification(requestDTO, null, NotificationType.ORDER_OVERDUE);
+                }).collect(Collectors.toList());
+
+        log.info("Complete send noti of overdue order");
         purchaseOrderRepository.saveAll(listLateOrder);
+        notificationRepository.saveAll(notificationList);
+    }
+
+    @Override
+    public void notiNearlyDueOrder() {
+        List<PurchaseOrder> orderNearlyDue = purchaseOrderRepository.findAll(PurchaseOrderSpecification.getListNearlyDueOrder());
+        log.info("Get list of order nearly due get {}", orderNearlyDue);
+
+        /* send noti all president and secretary */
+        List<Account> listReceiver = accountRepository.findAll(
+                AccountSpecification.genGetListByRole(List.of(Role.PRESIDENT, Role.SECRETARY)));
+
+        log.info("Start send noti of nearly due order to {} ", listReceiver.stream().map(Account::getUsername).collect(Collectors.toList()));
+
+        List<TbmsNotification> notificationList = listReceiver.stream()
+                .map(receiver ->
+                        orderNearlyDue.stream()
+                                .map(order -> NotificationUtil.genNotiOrderNearlyDue(
+                                        order,
+                                        notificationConstant,
+                                        receiver.getUsername()))
+                                .collect(Collectors.toList()))
+                .flatMap(List::stream)
+                .map(requestDTO -> {
+                    try {
+                        notificationService.sendPnsToTopic(requestDTO);
+                    } catch (Exception e) {
+                        log.error("Error while send notification {}", requestDTO);
+                    }
+
+                    return NotificationUtil.genEntityNotification(requestDTO, null, NotificationType.ORDER_NEARLY_DUE);
+                }).collect(Collectors.toList());
+
+        log.info("Complete send noti for nearly due order");
+        notificationRepository.saveAll(notificationList);
     }
 }

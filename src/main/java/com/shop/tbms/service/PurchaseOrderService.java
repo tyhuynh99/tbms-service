@@ -18,4 +18,5 @@ public interface PurchaseOrderService {
     Page<OrderListRespDTO> getListOrder(OrderFilterReqDTO filterReqDTO, Pageable pageable);
     List<UpdateExpectedCompleteRespDTO> updateStepExpectedComplete(List<UpdateExpectedCompleteReqDTO> listReqDTO);
     void checkLateOrder();
+    void notiNearlyDueOrder();
 }
