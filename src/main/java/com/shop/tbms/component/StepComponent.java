@@ -1,6 +1,7 @@
 package com.shop.tbms.component;
 
 import com.shop.tbms.config.exception.BusinessException;
+import com.shop.tbms.constant.LogConstant;
 import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.FileDTO;
 import com.shop.tbms.dto.order.OrderStepRespDTO;
@@ -15,6 +16,7 @@ import com.shop.tbms.repository.MoldProgressRepository;
 import com.shop.tbms.repository.PurchaseOrderRepository;
 import com.shop.tbms.service.FileService;
 import com.shop.tbms.util.EvidenceUtil;
+import com.shop.tbms.util.ReportLogUtil;
 import com.shop.tbms.util.StepUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,8 @@ public class StepComponent {
 
     @Autowired
     private StepConstant stepConstant;
+    @Autowired
+    private LogConstant logConstant;
 
     @Autowired
     private ProgressComponent progressComponent;
@@ -125,8 +129,10 @@ public class StepComponent {
         }
     }
 
-    public void updateMoldProgress(Step currentStep, List<ReportProgressReqDTO> listReq) {
+    public void updateMoldProgress(Step currentStep, List<ReportProgressReqDTO> listReq, List<String> logDetail) {
         List<MoldProgress> progressList = currentStep.getListMoldProgress();
+        final List<MoldProgress> listUpdateToComplete = new ArrayList<>();
+        final List<MoldProgress> listUpdateToUnComplete = new ArrayList<>();
 
         progressList.stream()
                 .forEach(moldProgress -> {
@@ -152,10 +158,11 @@ public class StepComponent {
 
                                 if (!canCheckComplete) {
                                     log.error("Mold {} is complete in next step {}", moldProgress.getMold(), nextStep);
-                                    throw new BusinessException("Mold " + moldProgress.getMold().getSize() +  " is complete in next step");
+                                    throw new BusinessException("Mold " + moldProgress.getMold().getSize() + " is complete in next step");
                                 }
                             }
 
+                            listUpdateToUnComplete.add(moldProgress);
                             moldProgress.setIsCompleted(Boolean.FALSE);
                         } else if (Boolean.FALSE.equals(moldProgress.getIsCompleted()) && Boolean.TRUE.equals(reqDTO.getIsCompleted())) {
                             /* update to complete */
@@ -171,18 +178,23 @@ public class StepComponent {
 
                                 if (!canCheckComplete) {
                                     log.error("Mold {} is not complete in prestep {}", moldProgress.getMold(), preStep);
-                                    throw new BusinessException("Mold " + moldProgress.getMold().getSize() +  " is not complete in prestep");
+                                    throw new BusinessException("Mold " + moldProgress.getMold().getSize() + " is not complete in prestep");
                                 }
                             }
 
+                            listUpdateToComplete.add(moldProgress);
                             moldProgress.setIsCompleted(Boolean.TRUE);
                         }
                     }
                 });
+
+        logDetail.addAll(ReportLogUtil.genLogForMoldProgress(listUpdateToComplete, listUpdateToUnComplete, logConstant));
     }
 
-    public void updateMoldElementProgress(Step currentStep, List<ReportProgressReqDTO> listReq) {
+    public void updateMoldElementProgress(Step currentStep, List<ReportProgressReqDTO> listReq, List<String> logDetail) {
         List<MoldGroupElementProgress> progressList = currentStep.getListMoldGroupElementProgresses();
+        final List<MoldGroupElementProgress> listUpdateToComplete = new ArrayList<>();
+        final List<MoldGroupElementProgress> listUpdateToUnComplete = new ArrayList<>();
 
         progressList.forEach(moldGroupElementProgress -> {
             Optional<ReportProgressReqDTO> reqChk = listReq.stream()
@@ -207,10 +219,11 @@ public class StepComponent {
 
                         if (!canCheckComplete) {
                             log.error("Mold {} is complete in next step {}", moldGroupElementProgress.getMold(), nextStep);
-                            throw new BusinessException("Mold " + moldGroupElementProgress.getMold().getSize() +  " is complete in next step");
+                            throw new BusinessException("Mold " + moldGroupElementProgress.getMold().getSize() + " is complete in next step");
                         }
                     }
 
+                    listUpdateToUnComplete.add(moldGroupElementProgress);
                     moldGroupElementProgress.setIsCompleted(Boolean.FALSE);
                 } else if (Boolean.FALSE.equals(moldGroupElementProgress.getIsCompleted()) && Boolean.TRUE.equals(reqDTO.getIsCompleted())) {
                     /* update to complete */
@@ -226,20 +239,25 @@ public class StepComponent {
 
                         if (!canCheckComplete) {
                             log.error("Mold {} is not complete in prestep {}", moldGroupElementProgress.getMold(), preStep);
-                            throw new BusinessException("Mold " + moldGroupElementProgress.getMold().getSize() +  " is not complete in prestep");
+                            throw new BusinessException("Mold " + moldGroupElementProgress.getMold().getSize() + " is not complete in prestep");
                         }
                     }
 
+                    listUpdateToComplete.add(moldGroupElementProgress);
                     moldGroupElementProgress.setIsCompleted(Boolean.TRUE);
                 }
             }
         });
+
+        logDetail.addAll(ReportLogUtil.genLogForMoldElementProgress(listUpdateToComplete, listUpdateToUnComplete, logConstant));
     }
 
-    public void updateMoldDeliverProgress(Step currentStep, List<ReportProgressReqDTO> listReq) {
+    public void updateMoldDeliverProgress(Step currentStep, List<ReportProgressReqDTO> listReq, List<String> logDetail) {
         List<MoldDeliverProgress> progressList = currentStep.getListMoldDeliverProgress().stream()
                 .filter(Predicate.not(MoldDeliverProgress::getIsCompleted)).
                 collect(Collectors.toList());
+        final List<MoldDeliverProgress> listUpdateToComplete = new ArrayList<>();
+        final List<MoldDeliverProgress> listUpdateToUnComplete = new ArrayList<>();
 
         progressList.forEach(moldDeliverProgress -> {
             Optional<ReportProgressReqDTO> reqChk = listReq.stream()
@@ -264,10 +282,11 @@ public class StepComponent {
 
                         if (!canCheckComplete) {
                             log.error("Mold {} is complete in next step {}", moldDeliverProgress.getMold(), nextStep);
-                            throw new BusinessException("Mold " + moldDeliverProgress.getMold().getSize() +  " is complete in next step");
+                            throw new BusinessException("Mold " + moldDeliverProgress.getMold().getSize() + " is complete in next step");
                         }
                     }
 
+                    listUpdateToUnComplete.add(moldDeliverProgress);
                     moldDeliverProgress.setIsCompleted(Boolean.FALSE);
                 } else if (Boolean.FALSE.equals(moldDeliverProgress.getIsCompleted()) && Boolean.TRUE.equals(reqDTO.getIsCompleted())) {
                     /* update to complete */
@@ -283,26 +302,44 @@ public class StepComponent {
 
                         if (!canCheckComplete) {
                             log.error("Mold {} is not complete in prestep {}", moldDeliverProgress.getMold(), preStep);
-                            throw new BusinessException("Mold " + moldDeliverProgress.getMold().getSize() +  " is not complete in prestep");
+                            throw new BusinessException("Mold " + moldDeliverProgress.getMold().getSize() + " is not complete in prestep");
                         }
                     }
 
+                    listUpdateToComplete.add(moldDeliverProgress);
                     moldDeliverProgress.setIsCompleted(Boolean.TRUE);
                 }
             }
         });
+        logDetail.addAll(ReportLogUtil.genLogForMoldDeliverProgress(listUpdateToComplete, listUpdateToUnComplete, logConstant));
     }
 
-    public void updateChecklist(List<Checklist> currentChecklist, List<ReportChecklistReqDTO> listReq) {
+    public void updateChecklist(List<Checklist> currentChecklist, List<ReportChecklistReqDTO> listReq, List<String> logDetail) {
+        final List<Checklist> listChangeToChecked = new ArrayList<>();
+        final List<Checklist> listChangeToUnchecked = new ArrayList<>();
+
         currentChecklist.forEach(checklist -> {
-            checklist.setIsChecked(
-                    listReq.stream()
-                            .filter(req -> checklist.getId().equals(req.getChecklistId()))
-                            .map(ReportChecklistReqDTO::getIsChecked)
-                            .findFirst()
-                            .orElse(checklist.getIsChecked())
-            );
+            Optional<ReportChecklistReqDTO> chkReq = listReq.stream()
+                    .filter(req -> checklist.getId().equals(req.getChecklistId()))
+                    .findFirst();
+
+            if (chkReq.isPresent()) {
+                ReportChecklistReqDTO reqDTO = chkReq.get();
+
+                if (!Objects.equals(checklist.getIsChecked(), reqDTO.getIsChecked())) {
+                    log.info("Update checklist req {} to {}", reqDTO, checklist);
+
+                    if (Boolean.TRUE.equals(reqDTO.getIsChecked())) {
+                        listChangeToChecked.add(checklist);
+                    } else {
+                        listChangeToUnchecked.add(checklist);
+                    }
+                    checklist.setIsChecked(reqDTO.getIsChecked());
+                }
+            }
         });
+
+        logDetail.addAll(ReportLogUtil.genLogForCheckList(listChangeToChecked, listChangeToUnchecked, logConstant));
     }
 
     public void updateEvidence(Step currentStep, ReportEvidenceReqDTO reqDTO, ReportLog reportLog) {
@@ -310,16 +347,17 @@ public class StepComponent {
         log.info("Update Evidence with current {} and req {}", currentEvidence, reqDTO);
         if (Objects.isNull(reqDTO.getListDeleteEvidenceId())) reqDTO.setListDeleteEvidenceId(new ArrayList<>());
 
-        /* validate delete evidence */
+        /* delete evidence */
         List<Evidence> listDeleteEvidence = currentEvidence.stream()
                 .filter(evidence ->
                         reqDTO.getListDeleteEvidenceId()
                                 .contains(evidence.getId()))
-                .collect(Collectors.toList());
-        /* delete evidence */
-        if (!CollectionUtils.isEmpty(listDeleteEvidence)) {
-            evidenceRepository.deleteAll(listDeleteEvidence);
-        }
+                .map(evidence -> {
+                    evidence.setIsDelete(Boolean.TRUE);
+                    evidence.setDeleteAtReportLog(reportLog);
+                    return evidence;
+                }).collect(Collectors.toList());
+        evidenceRepository.saveAll(listDeleteEvidence);
 
         /* validate required evidence */
         if (Boolean.TRUE.equals(currentStep.getRequiredEvidence())) {
@@ -343,8 +381,10 @@ public class StepComponent {
                         null,
                         multipartFile.getOriginalFilename(),
                         fileDTO.getUrl(),
+                        Boolean.FALSE,
                         currentStep,
-                        reportLog
+                        reportLog,
+                        null
                 );
             }).collect(Collectors.toList());
 

@@ -14,7 +14,6 @@ public class MoldDeliverProgressDTO {
     private Long progressId;
     private boolean isCompleted;
     private MoldDeliverProgressType type;
-    private LocalDateTime actionAt;
     private String moldSize;
     private String moldSizeWithType;
     private boolean canCheck;

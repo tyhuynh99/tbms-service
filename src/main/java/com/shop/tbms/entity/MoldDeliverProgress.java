@@ -1,5 +1,6 @@
 package com.shop.tbms.entity;
 
+import com.shop.tbms.entity.common.AbstractAuditingEntity;
 import com.shop.tbms.enumerate.mold.MoldDeliverProgressType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class MoldDeliverProgress {
+public class MoldDeliverProgress extends AbstractAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -26,9 +27,6 @@ public class MoldDeliverProgress {
     @Column(name = "type", nullable = false)
     @Enumerated(value = EnumType.STRING)
     private MoldDeliverProgressType type;
-
-    @Column(name = "action_at")
-    private LocalDateTime actionAt;
 
     @ManyToOne
     @JoinColumn(name = "step_id", nullable = false)

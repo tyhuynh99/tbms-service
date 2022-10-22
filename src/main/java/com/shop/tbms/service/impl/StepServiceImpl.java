@@ -181,6 +181,7 @@ public class StepServiceImpl implements StepService {
         List<MoldGroupElementProgress> currentMoldElementProgress = currentStep.getListMoldGroupElementProgresses();
         List<Checklist> currentChecklist = currentStep.getListChecklist();
         ReportLog reportLog = new ReportLog();
+        List<String> logDetail = new ArrayList<>();
 
         /* validate */
         /* validate order status */
@@ -196,24 +197,24 @@ public class StepServiceImpl implements StepService {
         switch (currentStep.getReportType()) {
             case BY_MOLD:
                 log.info("Start update progress of report type = BY_MOLD");
-                stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress());
+                stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
                 moldProgressRepository.saveAll(currentMoldProgress);
                 break;
             case BY_MOLD_ELEMENT:
                 log.info("Start update progress of report type = BY_MOLD_ELEMENT");
-                stepComponent.updateMoldElementProgress(currentStep, reportStepReqDTO.getProgress());
+                stepComponent.updateMoldElementProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
                 moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
                 break;
             case BY_MOLD_SEND_RECEIVE:
                 log.info("Start update progress of report type = BY_MOLD_SEND_RECEIVE");
-                stepComponent.updateMoldDeliverProgress(currentStep, reportStepReqDTO.getProgress());
+                stepComponent.updateMoldDeliverProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
                 moldDeliverProgressRepository.saveAll(currentMoldDeliverProgress);
                 break;
             default:
         }
 
         log.info("Start update check list");
-        stepComponent.updateChecklist(currentChecklist, reportStepReqDTO.getChecklist());
+        stepComponent.updateChecklist(currentChecklist, reportStepReqDTO.getChecklist(), logDetail);
         checklistRepository.saveAll(currentChecklist);
 
         log.info("Start update evidences");
@@ -236,7 +237,7 @@ public class StepServiceImpl implements StepService {
 
         /* insert log */
         log.info("Start insert log");
-        reportLogComponent.insertReportLog(currentStep, reportStepReqDTO, reportLog);
+        reportLogComponent.insertReportLog(currentStep, reportLog, logDetail);
 
         if (Boolean.TRUE.equals(currentStep.getIsEnd())) {
             if (Boolean.TRUE.equals(reportStepReqDTO.getIsPaid())) {
@@ -251,6 +252,7 @@ public class StepServiceImpl implements StepService {
                 log.info("Step {} is complete for all progress", currentStep);
                 log.info("Step is end. Start set value for end order");
 
+                // TODO: delete evidence
                 currentOrder.setStatus(OrderStatus.COMPLETED);
             }
 
@@ -269,7 +271,7 @@ public class StepServiceImpl implements StepService {
         List<StepSequence> listStepSequence = stepSequenceRepository.findByStepBeforeId(stepId);
 
         /* return empty if there is only one option for step */
-        if (CollectionUtils.isEmpty(listStepSequence) || listStepSequence.size() == 1) return List.of();
+        if (CollectionUtils.isEmpty(listStepSequence) || listStepSequence.size() == 1) return new ArrayList<>();
 
         listStepSequence.sort(Comparator.comparing(o -> o.getStepAfter().getSequenceNo()));
         listStepSequence.remove(listStepSequence.size() - 1);
@@ -432,7 +434,7 @@ public class StepServiceImpl implements StepService {
         List<Step> stepListNearlyLate = stepRepository.findAll(StepSpecification.getStepNearlyLate());
         log.info("List step nearly late {}", stepListNearlyLate);
 
-        List<TbmsNotification> notificationList = List.of();
+        List<TbmsNotification> notificationList = new ArrayList<>();
         stepListNearlyLate.stream().map(step -> {
                     List<Account> receiverList = accountRepository
                             .findAll(AccountSpecification.genGetListByRoleAndPosition(
@@ -468,7 +470,7 @@ public class StepServiceImpl implements StepService {
         List<Step> stepListLate = stepRepository.findAll(StepSpecification.getStepLate());
         log.info("List step late {}", stepListLate);
 
-        List<TbmsNotification> notificationList = List.of();
+        List<TbmsNotification> notificationList = new ArrayList<>();
 
         stepListLate.stream().map(step -> {
                     List<Account> receiverList = accountRepository

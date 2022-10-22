@@ -25,6 +25,8 @@ public class Issue extends AbstractAuditingEntity {
     @Column(name = "change_to_step_id")
     private Long changeToStepId;
 
+    private Boolean isNeedSupport;
+
     @ManyToOne
     @JoinColumn(name = "step_id", nullable = false)
     @ToString.Exclude

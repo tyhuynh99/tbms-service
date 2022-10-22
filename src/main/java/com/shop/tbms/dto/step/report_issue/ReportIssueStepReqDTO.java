@@ -20,7 +20,6 @@ public class ReportIssueStepReqDTO {
     @NotNull
     private List<Long> listMoldId;
 
-    @NotNull
     private Boolean isNeedSupport;
 
     private Long changeToStepId;

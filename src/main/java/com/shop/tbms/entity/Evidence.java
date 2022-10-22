@@ -26,13 +26,21 @@ public class Evidence extends AbstractAuditingEntity {
     @Column(name = "url", length = 1000, nullable = false)
     private String url;
 
+    @Column(name = "is_delete", nullable = false)
+    private Boolean isDelete = Boolean.FALSE;
+
     @ManyToOne
     @JoinColumn(name = "step_id", nullable = false)
     @ToString.Exclude
     private Step step;
 
     @ManyToOne
-    @JoinColumn(name = "report_log_id", nullable = false)
+    @JoinColumn(name = "create_at_report_log_id", nullable = false)
     @ToString.Exclude
-    private ReportLog reportLog;
+    private ReportLog createAtReportLog;
+
+    @ManyToOne
+    @JoinColumn(name = "delete_at_report_log_id")
+    @ToString.Exclude
+    private ReportLog deleteAtReportLog;
 }

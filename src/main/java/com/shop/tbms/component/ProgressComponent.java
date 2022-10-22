@@ -1,11 +1,13 @@
 package com.shop.tbms.component;
 
 import com.shop.tbms.constant.StepConstant;
+import com.shop.tbms.dto.log.ReportProgressCompleteDTO;
 import com.shop.tbms.dto.step.detail.progress.MoldDeliverProgressDTO;
 import com.shop.tbms.dto.step.detail.progress.MoldElementProgressDTO;
 import com.shop.tbms.dto.step.detail.progress.MoldElementProgressDetailDTO;
 import com.shop.tbms.dto.step.detail.progress.MoldProgressDTO;
 import com.shop.tbms.entity.*;
+import com.shop.tbms.entity.common.AbstractAuditingEntity;
 import com.shop.tbms.enumerate.mold.MoldDeliverProgressType;
 import com.shop.tbms.enumerate.step.ReportType;
 import com.shop.tbms.enumerate.step.StepStatus;
@@ -13,14 +15,15 @@ import com.shop.tbms.repository.MoldDeliverProgressRepository;
 import com.shop.tbms.repository.MoldGroupElementProgressRepository;
 import com.shop.tbms.repository.MoldProgressRepository;
 import com.shop.tbms.repository.StepRepository;
+import com.shop.tbms.util.MoldUtil;
 import com.shop.tbms.util.ProgressUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -293,8 +296,8 @@ public class ProgressComponent {
             List<MoldGroupElement> elementList = mold.getMoldGroup().getListMoldGroupElement();
             List<MoldGroupElementProgress> listProgress = moldGroupElementProgressRepository.findAllByStepId(step.getId());
 
-            List<MoldGroupElementProgress> deletedProgress = List.of();
-            List<MoldGroupElementProgress> addedProgress = List.of();
+            List<MoldGroupElementProgress> deletedProgress = new ArrayList<>();
+            List<MoldGroupElementProgress> addedProgress = new ArrayList<>();
 
             for (MoldGroupElement element : elementList) {
                 Optional<MoldGroupElementProgress> chkProgress = listProgress.stream()
@@ -323,5 +326,123 @@ public class ProgressComponent {
 
             moldGroupElementProgressRepository.saveAll(listProgress);
         }
+    }
+
+    public List<ReportProgressCompleteDTO> getListCompleteReport(Step step) {
+        switch (step.getReportType()) {
+            case BY_MOLD:
+                return getListCompleteReportByMold(step);
+            case BY_MOLD_ELEMENT:
+                return getListCompleteReportByElement(step);
+            case BY_MOLD_SEND_RECEIVE:
+                return getListCompleteReportByDeliver(step);
+            default:
+                return List.of();
+        }
+    }
+
+    public List<ReportProgressCompleteDTO> getListCompleteReportByMold(Step step) {
+        List<MoldProgress> progressList = step.getListMoldProgress();
+
+        List<ReportProgressCompleteDTO> dtoList = new ArrayList<>();
+        progressList.forEach(progress -> {
+            if (Boolean.TRUE.equals(progress.getIsCompleted())) {
+                dtoList.add(
+                        ReportProgressCompleteDTO
+                                .builder()
+                                .completeAt(progress.getUpdatedDate().toLocalDate())
+                                .mold(MoldUtil.getMoldName(progress.getMold()))
+                                .build()
+                );
+            }
+        });
+
+        return dtoList;
+    }
+
+    public List<ReportProgressCompleteDTO> getListCompleteReportByDeliver(Step step) {
+        List<MoldDeliverProgress> progressList = step.getListMoldDeliverProgress();
+        Map<Mold, List<MoldDeliverProgress>> mapProgressByMold = new HashMap<>();
+
+        progressList.forEach(moldDeliverProgresses -> {
+            Mold mold = moldDeliverProgresses.getMold();
+            if (mapProgressByMold.containsKey(mold)) {
+                mapProgressByMold.get(mold).add(moldDeliverProgresses);
+            } else {
+                List<MoldDeliverProgress> progressListByMold = Arrays.asList(moldDeliverProgresses);
+                mapProgressByMold.put(mold, progressListByMold);
+            }
+        });
+
+        List<ReportProgressCompleteDTO> dtoList = new ArrayList<>();
+
+        mapProgressByMold.keySet().forEach(mold -> {
+            List<MoldDeliverProgress> progressListByMold = mapProgressByMold.get(mold);
+
+            boolean isMoldComplete = progressListByMold.stream()
+                    .map(MoldDeliverProgress::getIsCompleted)
+                    .allMatch(Predicate.isEqual(Boolean.TRUE));
+
+            if (isMoldComplete) {
+                LocalDate completedDay = progressListByMold.stream()
+                        .map(AbstractAuditingEntity::getUpdatedDate)
+                        .max(LocalDateTime::compareTo)
+                        .orElseThrow()
+                        .toLocalDate();
+
+                dtoList.add(
+                        ReportProgressCompleteDTO
+                                .builder()
+                                .completeAt(completedDay)
+                                .mold(MoldUtil.getMoldName(mold))
+                                .build()
+                );
+            }
+        });
+
+        return dtoList;
+    }
+
+    public List<ReportProgressCompleteDTO> getListCompleteReportByElement(Step step) {
+        List<MoldGroupElementProgress> progressList = step.getListMoldGroupElementProgresses();
+        Map<Mold, List<MoldGroupElementProgress>> mapProgressByMold = new HashMap<>();
+
+        progressList.forEach(progress -> {
+            Mold mold = progress.getMold();
+            if (mapProgressByMold.containsKey(mold)) {
+                mapProgressByMold.get(mold).add(progress);
+            } else {
+                List<MoldGroupElementProgress> progressListByMold = Arrays.asList(progress);
+                mapProgressByMold.put(mold, progressListByMold);
+            }
+        });
+
+        List<ReportProgressCompleteDTO> dtoList = new ArrayList<>();
+
+        mapProgressByMold.keySet().forEach(mold -> {
+            List<MoldGroupElementProgress> progressListByMold = mapProgressByMold.get(mold);
+
+            boolean isMoldComplete = progressListByMold.stream()
+                    .map(MoldGroupElementProgress::getIsCompleted)
+                    .allMatch(Predicate.isEqual(Boolean.TRUE));
+
+            if (isMoldComplete) {
+                LocalDate completedDay = progressListByMold.stream()
+                        .map(AbstractAuditingEntity::getUpdatedDate)
+                        .max(LocalDateTime::compareTo)
+                        .orElseThrow()
+                        .toLocalDate();
+
+                dtoList.add(
+                        ReportProgressCompleteDTO
+                                .builder()
+                                .completeAt(completedDay)
+                                .mold(MoldUtil.getMoldName(mold))
+                                .build()
+                );
+            }
+        });
+
+        return dtoList;
     }
 }

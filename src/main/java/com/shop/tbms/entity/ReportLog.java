@@ -27,7 +27,11 @@ public class ReportLog extends AbstractAuditingEntity {
     @ToString.Exclude
     private Step step;
 
-    @OneToMany(mappedBy = "reportLog", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "createAtReportLog", cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<Evidence> evidenceList = new ArrayList<>();
+    private List<Evidence> evidenceCreateList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "deleteAtReportLog", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Evidence> evidenceDeleteList = new ArrayList<>();
 }

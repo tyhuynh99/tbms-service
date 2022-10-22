@@ -2,6 +2,7 @@ package com.shop.tbms.mapper.mold;
 
 import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.entity.Mold;
+import com.shop.tbms.util.MoldUtil;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -18,9 +19,6 @@ public interface MoldMapper {
 
     @Named("getSizeWithType")
     default String getSizeWithType(Mold mold) {
-        if (Objects.nonNull(mold.getMoldGroup())) {
-            return mold.getSize() + "#" + mold.getMoldGroup().getType().name();
-        }
-        return mold.getSize();
+        return MoldUtil.getMoldName(mold);
     }
 }

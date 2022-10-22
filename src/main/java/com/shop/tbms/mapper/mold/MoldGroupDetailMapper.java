@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,7 +23,7 @@ public interface MoldGroupDetailMapper {
     @Named("getMoldList")
     default List<String> getMoldList(MoldGroup moldGroup) {
         return Optional.ofNullable(moldGroup.getListMold())
-                .orElse(List.of())
+                .orElse(new ArrayList<>())
                 .stream()
                 .map(Mold::getSize)
                 .collect(Collectors.toList());
