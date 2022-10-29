@@ -24,6 +24,7 @@ public class NotificationUtil {
                 .title(notificationConstant.getOrderOverdueTitle())
                 .body(String.format(notificationConstant.getOrderOverdueContent(), order.getCode()))
                 .topic(receiverUsername)
+                .orderId(order.getId())
                 .build();
     }
 
@@ -32,6 +33,7 @@ public class NotificationUtil {
                 .title(notificationConstant.getStepNearlyDueTitle())
                 .body(String.format(notificationConstant.getStepNearlyDueContent(), step.getName(), step.getProcedure().getPurchaseOrder().getCode()))
                 .topic(receiverUsername)
+                .orderId(step.getProcedure().getOrderId())
                 .build();
     }
 
@@ -40,6 +42,7 @@ public class NotificationUtil {
                 .title(notificationConstant.getStepOverdueTitle())
                 .body(String.format(notificationConstant.getStepOverdueContent(), step.getName(), step.getProcedure().getPurchaseOrder().getCode()))
                 .topic(receiverUsername)
+                .orderId(step.getProcedure().getOrderId())
                 .build();
     }
 
@@ -50,7 +53,11 @@ public class NotificationUtil {
         notification.setReceiverUsername(fbNotificationRequestDTO.getTopic());
         notification.setContent(fbNotificationRequestDTO.getBody());
         notification.setType(type);
-        notification.setStepId(Optional.ofNullable(step).map(Step::getId).orElse(null));
+        notification.setOrderId(Optional
+                .ofNullable(step)
+                .map(step1 -> step.getProcedure().getOrderId())
+                .orElse(null)
+        );
 
         return notification;
     }

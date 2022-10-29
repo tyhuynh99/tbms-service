@@ -97,6 +97,7 @@ public class NotificationServiceImpl implements NotificationService {
         String title = requestDTO.getTitle();
         String body = requestDTO.getBody();
         String topic = requestDTO.getTopic();
+        Long orderId = requestDTO.getOrderId();
 
         Notification notification = Notification.builder()
                 .setBody(body)
@@ -108,6 +109,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .setNotification(notification)
                 .putData("content", title)
                 .putData("body", body)
+                .putData("orderId", String.valueOf(orderId))
                 .build();
 
         try {

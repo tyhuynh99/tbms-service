@@ -13,4 +13,5 @@ public class FBNotificationRequestDTO {
     private String topic;
     private String title;
     private String body;
+    private Long orderId;
 }

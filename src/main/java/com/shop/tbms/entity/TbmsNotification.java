@@ -23,8 +23,8 @@ public class TbmsNotification extends AbstractAuditingEntity {
     @Column(name = "content", length = 5000)
     private String content;
 
-    @Column(name = "step_id")
-    private Long stepId;
+    @Column(name = "order_id")
+    private Long orderId;
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
