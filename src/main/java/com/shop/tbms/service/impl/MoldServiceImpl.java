@@ -72,11 +72,12 @@ public class MoldServiceImpl implements MoldService {
 
         for (Mold mold : moldList) {
             /* get mold from request */
-            MoldGroupDetailDTO detailDTO = reqDTO.getMoldGroups().stream()
-                    .filter(moldGroupDetailDTO
-                            -> moldGroupDetailDTO.getMoldList().contains(mold.getSize()))
-                    .findFirst()
-                    .orElseThrow();
+            MoldGroupDetailDTO detailDTO = reqDTO.getMoldGroup();
+            boolean hasDetailReq = detailDTO.getMoldList().contains(mold.getSize());
+
+            if (!hasDetailReq) {
+                continue;
+            }
 
             /* check current mold group */
             if (Objects.isNull(mold.getMoldGroup())) {

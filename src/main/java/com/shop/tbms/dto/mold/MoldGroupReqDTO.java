@@ -11,5 +11,5 @@ import java.util.List;
 @NoArgsConstructor
 public class MoldGroupReqDTO {
     private long orderId;
-    private List<MoldGroupDetailDTO> moldGroups;
+    private MoldGroupDetailDTO moldGroup;
 }
