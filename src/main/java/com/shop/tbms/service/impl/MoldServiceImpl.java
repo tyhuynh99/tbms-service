@@ -184,7 +184,7 @@ public class MoldServiceImpl implements MoldService {
             }
 
             // save entity
-            moldGroupRepository.saveAndFlush(moldGroup);
+            moldGroupRepository.save(moldGroup);
 
             if (isChangeMoldGroupType) {
                 /* reset progress to step CAM_GO */
