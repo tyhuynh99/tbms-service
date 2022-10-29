@@ -81,7 +81,9 @@ public class MoldServiceImpl implements MoldService {
 
             /* check current mold group */
             if (Objects.isNull(mold.getMoldGroup())) {
-                mold.setMoldGroup(new MoldGroup());
+                MoldGroup newMoldGroup = new MoldGroup();
+                newMoldGroup.setPurchaseOrder(order);
+                mold.setMoldGroup(newMoldGroup);
             }
 
             MoldGroup moldGroup = mold.getMoldGroup();
@@ -118,7 +120,7 @@ public class MoldServiceImpl implements MoldService {
                 moldProgressRepository.deleteAll(listProgressNeedRemoved);
             }
 
-            boolean isChangeMoldGroupType = !detailDTO.getType().equals(moldGroup.getType());
+            boolean isChangeMoldGroupType = Objects.nonNull(moldGroup.getType()) && !detailDTO.getType().equals(moldGroup.getType());
             boolean isChangeElement = false;
 
             moldGroupDetailMapper.partialUpdate(moldGroup, detailDTO);
@@ -167,7 +169,9 @@ public class MoldServiceImpl implements MoldService {
             }
 
             if (!CollectionUtils.isEmpty(reqElementListNotInEntity)) {
-                isChangeElement = true;
+                if (!CollectionUtils.isEmpty(moldGroupElementList)) {
+                    isChangeElement = true;
+                }
 
                 reqElementListNotInEntity.forEach(moldElementDTO -> {
                     MoldGroupElement moldGroupElement = new MoldGroupElement();
