@@ -292,7 +292,7 @@ public class ProgressComponent {
     }
 
     public void resetMoldGroupProgressChangeElement(Mold mold, Step step) {
-        if (ReportType.BY_MOLD_ELEMENT.equals(step.getReportType())) {
+        if (ReportType.BY_MOLD_ELEMENT.equals(step.getReportType()) && StepStatus.IN_PROGRESS.equals(step.getStatus())) {
             List<MoldGroupElement> elementList = mold.getMoldGroup().getListMoldGroupElement();
             List<MoldGroupElementProgress> listProgress = moldGroupElementProgressRepository.findAllByStepId(step.getId());
 

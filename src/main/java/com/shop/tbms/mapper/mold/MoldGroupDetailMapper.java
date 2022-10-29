@@ -29,5 +29,6 @@ public interface MoldGroupDetailMapper {
                 .collect(Collectors.toList());
     }
 
+    @Mapping(target = "id", ignore = true)
     void partialUpdate(@MappingTarget MoldGroup moldGroup, MoldGroupDetailDTO detailDTO);
 }
