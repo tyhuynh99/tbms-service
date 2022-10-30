@@ -7,7 +7,7 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity(name = "notification")
-@Data
+@Getter @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor

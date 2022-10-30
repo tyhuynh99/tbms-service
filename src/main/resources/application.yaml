@@ -2,7 +2,7 @@
 server:
   port: 8888
   error:
-    include-stacktrace: never
+    include-stacktrace: always
   servlet:
     context-path: /tbms_service
 
@@ -23,6 +23,9 @@ spring:
     hibernate:
       ddl-auto: update
     generate-ddl: true
+    properties:
+      hibernate:
+        show_sql: true
 
 # firebase
 firebase:

@@ -11,7 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "mold_group")
-@Data
+@Getter
+@Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor

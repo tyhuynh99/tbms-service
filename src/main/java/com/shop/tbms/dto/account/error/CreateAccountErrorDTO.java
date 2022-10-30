@@ -2,7 +2,7 @@ package com.shop.tbms.dto.account.error;
 
 import lombok.*;
 
-@Data
+@Getter @Setter
 @Builder
 @ToString
 @AllArgsConstructor

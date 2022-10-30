@@ -20,10 +20,12 @@ import com.shop.tbms.util.StepConditionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -67,136 +69,280 @@ public class MoldServiceImpl implements MoldService {
             throw new BusinessException("Order status cannot update mold group");
         }
 
-        /* get current mold */
-        List<Mold> moldList = order.getListMold();
+        if (Objects.nonNull(reqDTO.getMoldGroup().getId())) {
+            /* update */
+            updateMoldGroup(order, reqDTO);
+        } else {
+            /* create */
+            createNewMoldGroup(order, reqDTO);
+        }
 
-        for (Mold mold : moldList) {
-            /* get mold from request */
-            MoldGroupDetailDTO detailDTO = reqDTO.getMoldGroup();
-            boolean hasDetailReq = detailDTO.getMoldList().contains(mold.getSize());
+        /* delete group has no mold */
+        deleteGroupHasNoMold(order);
 
-            if (!hasDetailReq) {
-                continue;
+        return SuccessRespDTO.builder().message(MessageConstant.UPDATE_SUCCESS).build();
+    }
+
+    private void createNewMoldGroup(PurchaseOrder order, MoldGroupReqDTO reqDTO) {
+        List<Mold> listUpdateMold = order.getListMold().stream()
+                .filter(mold -> reqDTO.getMoldGroup().getMoldList().contains(mold.getSize()))
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(listUpdateMold)) {
+            throw new BusinessException("Not found any mold size " +  reqDTO.getMoldGroup().getMoldList() + " in order " + order.getCode());
+        }
+
+        MoldGroup moldGroup = new MoldGroup();
+        moldGroup.setPurchaseOrder(order);
+        moldGroup.setListMold(listUpdateMold);
+
+        /* Validate current mold group */
+        listUpdateMold.forEach(mold -> {
+            if (Objects.nonNull(mold.getMoldGroup())) {
+                throw new BusinessException(
+                        "Mold " + mold.getSize() + " is currently in mold group "
+                                + mold.getMoldGroup().getId() + " " + mold.getMoldGroup().getType());
             }
 
-            /* check current mold group */
-            if (Objects.isNull(mold.getMoldGroup())) {
-                MoldGroup newMoldGroup = new MoldGroup();
-                newMoldGroup.setPurchaseOrder(order);
-                mold.setMoldGroup(newMoldGroup);
-            }
+            mold.setMoldGroup(moldGroup);
+        });
+        moldGroupDetailMapper.partialUpdate(moldGroup, reqDTO.getMoldGroup());
 
-            MoldGroup moldGroup = mold.getMoldGroup();
-            /* check option Ban Dien */
-            if (Boolean.FALSE.equals(moldGroup.getHasBanDien()) && detailDTO.isHasBanDien()) {
-                /* Check to has Ban Dien */
-                /* Generate progress for step Phong Dien */
-                log.info("Check hasBanDien, create progress for mold {} at step PHONG DIEN", mold);
-                Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
-                log.info("Step PHONG DIEN {}", phongDienStep);
+        List<MoldGroupElement> moldGroupElementList = new ArrayList<>();
+        reqDTO.getMoldGroup().getMoldElementList().forEach(moldElementDTO -> {
+            MoldGroupElement moldGroupElement = new MoldGroupElement();
+            moldGroupElement.setMoldGroup(moldGroup);
+            moldGroupElement.setChecked(moldElementDTO.isChecked());
+            moldGroupElement.setName(moldElementDTO.getName());
 
-                List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForConditionStep(
-                        phongDienStep,
-                        List.of(mold));
+            moldGroupElementList.add(moldGroupElement);
+        });
 
-                phongDienStep.setListMoldProgress(moldProgressListForConditionStep);
+        moldGroup.setListMoldGroupElement(moldGroupElementList);
 
-                log.info("Insert progress {}", moldProgressListForConditionStep);
-                moldProgressRepository.saveAll(moldProgressListForConditionStep);
-            } else if (Boolean.TRUE.equals(moldGroup.getHasBanDien()) && !detailDTO.isHasBanDien()) {
-                /* Uncheck to has Ban Dien */
-                /* Delete progress for step Phong Dien */
-                log.info("Uncheck hasBanDien, delete progress for mold {} at step PHONG DIEN", mold);
-                Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
-                log.info("Step PHONG DIEN {}", phongDienStep);
+        if (reqDTO.getMoldGroup().isHasBanDien()) {
+            /* Check to has Ban Dien */
+            /* Generate progress for step Phong Dien */
+            log.info("Check hasBanDien, create progress for mold {} at step PHONG DIEN", listUpdateMold);
+            Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
+            log.info("Step PHONG DIEN {}", phongDienStep);
 
-                List<MoldProgress> listProgressNeedRemoved = phongDienStep.getListMoldProgress().stream()
-                        .filter(moldProgress ->
-                                mold.getSize().equalsIgnoreCase(moldProgress.getMold().getSize()))
-                        .collect(Collectors.toList());
-                phongDienStep.getListMoldProgress().removeAll(listProgressNeedRemoved);
+            List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForConditionStep(
+                    phongDienStep,
+                    listUpdateMold);
 
-                log.info("Delete progress {}", listProgressNeedRemoved);
-                moldProgressRepository.deleteAll(listProgressNeedRemoved);
-            }
+            phongDienStep.setListMoldProgress(moldProgressListForConditionStep);
 
-            boolean isChangeMoldGroupType = Objects.nonNull(moldGroup.getType()) && !detailDTO.getType().equals(moldGroup.getType());
-            boolean isChangeElement = false;
+            log.info("Insert progress {}", moldProgressListForConditionStep);
+            moldProgressRepository.saveAll(moldProgressListForConditionStep);
+        }
 
-            moldGroupDetailMapper.partialUpdate(moldGroup, detailDTO);
+        moldGroupRepository.save(moldGroup);
 
-            /* check mold group element */
-            List<MoldGroupElement> moldGroupElementList = moldGroup.getListMoldGroupElement();
-            List<MoldElementDTO> reqElementList = detailDTO.getMoldElementList();
-            List<MoldElementDTO> reqElementListNotInEntity = reqElementList.stream()
-                    .filter(moldElementDTO ->
-                            !moldGroupElementList
-                                    .stream()
-                                    .map(MoldGroupElement::getName)
-                                    .collect(Collectors.toList())
-                                    .contains(moldElementDTO.getName())
-                    ).collect(Collectors.toList());
+        /* generate progress for step in progress */
+        listUpdateMold.forEach(progressComponent::resetMoldGroupProgressChangeType);
+    }
 
-            for (MoldGroupElement groupElement : moldGroupElementList) {
-                Optional<MoldElementDTO> elementDTOChk = reqElementList.stream()
-                        .filter(moldElementDTO
-                                -> moldElementDTO.getName().equalsIgnoreCase(groupElement.getName()))
-                        .findFirst();
+    private void updateMoldGroup(PurchaseOrder order, MoldGroupReqDTO reqDTO) {
+        List<Mold> listUpdateMold = order.getListMold().stream()
+                .filter(mold -> reqDTO.getMoldGroup().getMoldList().contains(mold.getSize()))
+                .collect(Collectors.toList());
 
-                if (elementDTOChk.isPresent()) {
-                    if (elementDTOChk.get().isChecked()) {
-                        /* req checked = true */
-                        if (!Boolean.TRUE.equals(groupElement.getChecked())) {
-                            /* current checked is not true, request is true */
-                            /* update check to current element */
-                            groupElement.setChecked(Boolean.TRUE);
-                            isChangeElement = true;
-                        }
-                    } else {
-                        /* req checked = false */
-                        if (!Boolean.FALSE.equals(groupElement.getChecked())) {
-                            /* current checked is not false, request is false */
-                            /* update check to current element */
-                            groupElement.setChecked(Boolean.FALSE);
-                            isChangeElement = true;
-                        }
+        MoldGroupDetailDTO moldGroupReq = reqDTO.getMoldGroup();
+        MoldGroup curMoldGroup = order.getListMoldGroup().stream()
+                .filter(moldGroupInOrder ->
+                        reqDTO.getMoldGroup().getId().equals(moldGroupInOrder.getId()))
+                .findFirst()
+                .orElseThrow(() ->
+                        new BusinessException(
+                                "Not found mold group id "
+                                        + reqDTO.getMoldGroup().getId()
+                                        + " in order "
+                                        + reqDTO.getOrderId()
+                        )
+                );
+
+        /* delete mold in group */
+        List<Mold> listMoldRmOutGroup = curMoldGroup.getListMold().stream()
+                .filter(mold -> !listUpdateMold.contains(mold))
+                .collect(Collectors.toList());
+
+        listMoldRmOutGroup.forEach(mold -> {
+            mold.setMoldGroup(null);
+            /* change mold group */
+            /* reset progress to step CAM_GO */
+            progressComponent.resetMoldGroupProgressChangeType(mold);
+        });
+        curMoldGroup.setListMold(listUpdateMold);
+
+        final boolean isChangeMoldGroupType = !moldGroupReq.getType().equals(curMoldGroup.getType());
+        final boolean isChangeElement = updateMoldElement(curMoldGroup, moldGroupReq);
+        processUpdateMoldGroup(curMoldGroup, moldGroupReq, listUpdateMold, order, isChangeElement, isChangeMoldGroupType);
+
+        moldGroupDetailMapper.partialUpdate(curMoldGroup, moldGroupReq);
+
+        moldGroupRepository.save(curMoldGroup);
+    }
+
+    private boolean updateMoldElement(MoldGroup curMoldGroup, MoldGroupDetailDTO moldGroupReq) {
+        boolean isChangeElement = false;
+        List<MoldGroupElement> moldGroupElementList = curMoldGroup.getListMoldGroupElement();
+        List<MoldElementDTO> reqElementList = moldGroupReq.getMoldElementList();
+        List<MoldElementDTO> reqElementListNotInEntity = reqElementList.stream()
+                .filter(moldElementDTO ->
+                        !moldGroupElementList
+                                .stream()
+                                .map(MoldGroupElement::getName)
+                                .collect(Collectors.toList())
+                                .contains(moldElementDTO.getName())
+                ).collect(Collectors.toList());
+
+        for (MoldGroupElement groupElement : moldGroupElementList) {
+            Optional<MoldElementDTO> elementDTOChk = reqElementList.stream()
+                    .filter(moldElementDTO
+                            -> moldElementDTO.getName().equalsIgnoreCase(groupElement.getName()))
+                    .findFirst();
+
+            if (elementDTOChk.isPresent()) {
+                if (elementDTOChk.get().isChecked()) {
+                    /* req checked = true */
+                    if (!Boolean.TRUE.equals(groupElement.getChecked())) {
+                        /* current checked is not true, request is true */
+                        /* update check to current element */
+                        groupElement.setChecked(Boolean.TRUE);
+                        isChangeElement = true;
                     }
                 } else {
-                    /* element exist but not have in request -> delete element */
-                    isChangeElement = true;
-                    groupElement.setChecked(Boolean.FALSE);
+                    /* req checked = false */
+                    if (!Boolean.FALSE.equals(groupElement.getChecked())) {
+                        /* current checked is not false, request is false */
+                        /* update check to current element */
+                        groupElement.setChecked(Boolean.FALSE);
+                        isChangeElement = true;
+                    }
                 }
-            }
-
-            if (!CollectionUtils.isEmpty(reqElementListNotInEntity)) {
-                if (!CollectionUtils.isEmpty(moldGroupElementList)) {
-                    isChangeElement = true;
-                }
-
-                reqElementListNotInEntity.forEach(moldElementDTO -> {
-                    MoldGroupElement moldGroupElement = new MoldGroupElement();
-                    moldGroupElement.setMoldGroup(moldGroup);
-                    moldGroupElement.setChecked(moldElementDTO.isChecked());
-                    moldGroupElement.setName(moldElementDTO.getName());
-
-                    moldGroupElementList.add(moldGroupElement);
-                });
-            }
-
-            // save entity
-            moldGroupRepository.save(moldGroup);
-
-            if (isChangeMoldGroupType) {
-                /* reset progress to step CAM_GO */
-                progressComponent.resetMoldGroupProgressChangeType(mold);
-            } else if (isChangeElement) {
-                /* reset progress of element */
-                progressComponent.resetMoldGroupProgressChangeElement(mold);
+            } else {
+                /* element exist but not have in request -> delete element */
+                isChangeElement = true;
+                groupElement.setChecked(Boolean.FALSE);
             }
         }
 
-        /**/
-        return SuccessRespDTO.builder().message(MessageConstant.UPDATE_SUCCESS).build();
+        if (!CollectionUtils.isEmpty(reqElementListNotInEntity)) {
+            if (!CollectionUtils.isEmpty(moldGroupElementList)) {
+                isChangeElement = true;
+            }
+
+            reqElementListNotInEntity.forEach(moldElementDTO -> {
+                MoldGroupElement moldGroupElement = new MoldGroupElement();
+                moldGroupElement.setMoldGroup(curMoldGroup);
+                moldGroupElement.setChecked(moldElementDTO.isChecked());
+                moldGroupElement.setName(moldElementDTO.getName());
+
+                moldGroupElementList.add(moldGroupElement);
+            });
+        }
+
+        return isChangeElement;
+    }
+
+    private void processUpdateMoldGroup(
+            MoldGroup curMoldGroup,
+            MoldGroupDetailDTO moldGroupReq,
+            List<Mold> listUpdateMold,
+            PurchaseOrder order,
+            final boolean isChangeElement,
+            final boolean isChangeMoldGroupType) {
+        for (Mold mold : listUpdateMold) {
+            if (Objects.isNull(mold.getMoldGroup())) {
+                /* add mold group */
+                mold.setMoldGroup(curMoldGroup);
+
+                /* generate progress */
+                /* reset progress also can generate new progress */
+                progressComponent.resetMoldGroupProgressChangeType(mold);
+
+                /* check phong dien */
+                if (moldGroupReq.isHasBanDien()) {
+                    /* Check to has Ban Dien */
+                    /* Generate progress for step Phong Dien */
+                    log.info("Check hasBanDien, create progress for mold {} at step PHONG DIEN", mold);
+                    Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
+                    log.info("Step PHONG DIEN {}", phongDienStep);
+
+                    List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForConditionStep(
+                            phongDienStep,
+                            List.of(mold));
+
+                    phongDienStep.setListMoldProgress(moldProgressListForConditionStep);
+
+                    log.info("Insert progress {}", moldProgressListForConditionStep);
+                    moldProgressRepository.saveAll(moldProgressListForConditionStep);
+                }
+            } else if (!moldGroupReq.getId().equals(mold.getMoldGroup().getId())) {
+                /* When update, mold must not in any group */
+                throw new BusinessException(
+                        "Mold " + mold.getSize() + " is in mold group "
+                                + mold.getMoldGroup().getId() + " " + mold.getMoldGroup().getType()
+                );
+            } else {
+                /* not change mold group */
+
+                if (isChangeMoldGroupType) {
+                    /* reset progress to step CAM_GO */
+                    progressComponent.resetMoldGroupProgressChangeType(mold);
+                } else if (isChangeElement) {
+                    /* reset progress of element */
+                    progressComponent.resetMoldGroupProgressChangeElement(mold);
+                }
+
+                /* check option Ban Dien */
+                if (Boolean.FALSE.equals(curMoldGroup.getHasBanDien()) && moldGroupReq.isHasBanDien()) {
+                    /* Check to has Ban Dien */
+                    /* Generate progress for step Phong Dien */
+                    log.info("Check hasBanDien, create progress for mold {} at step PHONG DIEN", mold);
+                    Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
+                    log.info("Step PHONG DIEN {}", phongDienStep);
+
+                    List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForConditionStep(
+                            phongDienStep,
+                            List.of(mold));
+
+                    phongDienStep.setListMoldProgress(moldProgressListForConditionStep);
+
+                    log.info("Insert progress {}", moldProgressListForConditionStep);
+                    moldProgressRepository.saveAll(moldProgressListForConditionStep);
+                } else if (Boolean.TRUE.equals(curMoldGroup.getHasBanDien()) && !moldGroupReq.isHasBanDien()) {
+                    /* Uncheck to has Ban Dien */
+                    /* Delete progress for step Phong Dien */
+                    log.info("Uncheck hasBanDien, delete progress for mold {} at step PHONG DIEN", mold);
+                    Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
+                    log.info("Step PHONG DIEN {}", phongDienStep);
+
+                    List<MoldProgress> listProgressNeedRemoved = phongDienStep.getListMoldProgress().stream()
+                            .filter(moldProgress ->
+                                    mold.getSize().equalsIgnoreCase(moldProgress.getMold().getSize()))
+                            .collect(Collectors.toList());
+                    phongDienStep.getListMoldProgress().removeAll(listProgressNeedRemoved);
+
+                    log.info("Delete progress {}", listProgressNeedRemoved);
+                    moldProgressRepository.deleteAll(listProgressNeedRemoved);
+                }
+            }
+        }
+    }
+
+    private void deleteGroupHasNoMold(PurchaseOrder order) {
+        if (Objects.nonNull(order.getListMoldGroup())) {
+            List<MoldGroup> groupHasNoMold = order.getListMoldGroup().stream()
+                    .filter(group -> CollectionUtils.isEmpty(group.getListMold()))
+                    .collect(Collectors.toList());
+
+            order.getListMoldGroup().removeAll(groupHasNoMold);
+
+            moldGroupRepository.deleteAll(groupHasNoMold);
+            log.info("Delete group {} has no mold", groupHasNoMold);
+        }
     }
 
     @Override

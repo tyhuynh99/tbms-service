@@ -6,7 +6,7 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity(name = "mold_progress")
-@Data
+@Getter @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor

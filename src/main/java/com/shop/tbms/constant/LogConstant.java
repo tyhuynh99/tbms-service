@@ -1,12 +1,15 @@
 package com.shop.tbms.constant;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 @Component
-@Data
+@Getter
+@Setter
 @PropertySource("classpath:log-constant.properties")
 public class LogConstant {
     @Value("${checklist.checked}")

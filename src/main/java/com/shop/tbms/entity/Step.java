@@ -4,10 +4,7 @@ import com.shop.tbms.entity.common.AbstractAuditingEntity;
 import com.shop.tbms.enumerate.step.ReportType;
 import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.enumerate.step.StepType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -16,7 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "step")
-@Data
+@Getter
+@Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor

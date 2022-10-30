@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", uses = {MoldGroupElementMapper.class})
 public interface MoldGroupDetailMapper {
     @Mapping(target = "moldList", source = "moldGroup", qualifiedByName = "getMoldList")
+    @Mapping(target = "moldElementList", source = "listMoldGroupElement")
     MoldGroupDetailDTO toDTO(MoldGroup moldGroup);
 
     List<MoldGroupDetailDTO> toDTOs(List<MoldGroup> moldGroupList);

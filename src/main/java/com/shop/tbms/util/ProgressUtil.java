@@ -6,6 +6,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ProgressUtil {
@@ -86,15 +87,17 @@ public class ProgressUtil {
     public static List<MoldGroupElementProgress> generateMoldGroupElementProgress(Step step, Mold mold) {
         List<MoldGroupElementProgress> result = new ArrayList<>();
 
-        for (MoldGroupElement moldGroupElement : mold.getMoldGroup().getListMoldGroupElement()) {
-            MoldGroupElementProgress progress = new MoldGroupElementProgress();
-            progress.setMoldGroupElement(moldGroupElement);
-            progress.setMold(mold);
-            progress.setStep(step);
+        if (Objects.nonNull(mold.getMoldGroup())) {
+            for (MoldGroupElement moldGroupElement : mold.getMoldGroup().getListMoldGroupElement()) {
+                MoldGroupElementProgress progress = new MoldGroupElementProgress();
+                progress.setMoldGroupElement(moldGroupElement);
+                progress.setMold(mold);
+                progress.setStep(step);
 
-            progress.setIsCompleted(Boolean.FALSE);
+                progress.setIsCompleted(Boolean.FALSE);
 
-            result.add(progress);
+                result.add(progress);
+            }
         }
 
         return result;

@@ -20,6 +20,7 @@ import com.shop.tbms.util.ProgressUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Component
+@Transactional
 @Slf4j
 public class ProgressComponent {
     @Autowired
@@ -150,22 +152,26 @@ public class ProgressComponent {
         log.info("Begin reset progress mold {} of step {}", listMold, step);
 
         /* set status to IN PROGRESS */
+        if (StepStatus.INIT.equals(step.getStatus())) return;
         if (!StepStatus.IN_PROGRESS.equals(step.getStatus())) step.setStatus(StepStatus.IN_PROGRESS);
 
         switch (step.getReportType()) {
             case BY_MOLD:
                 resetMoldProgress(step, listMold);
                 break;
-            case BY_MOLD_SEND_RECEIVE:
+            case BY_MOLD_ELEMENT:
                 resetMoldGroupProgress(step, listMold);
                 break;
-            case BY_MOLD_ELEMENT:
+            case BY_MOLD_SEND_RECEIVE:
                 resetMoldDeliverProgress(step, listMold);
                 break;
         }
     }
 
     private void resetMoldProgress(Step step, List<Mold> listMold) {
+        if (StepStatus.INIT.equals(step.getStatus())) return;
+
+        step.setStatus(StepStatus.IN_PROGRESS);
         List<MoldProgress> moldProgressList = moldProgressRepository.findAllByStepId(step.getId());
         log.info("get list progress list of step {} get result {}", step, moldProgressList);
         List<MoldProgress> listUpdatedProgress = new ArrayList<>();
@@ -199,11 +205,14 @@ public class ProgressComponent {
     }
 
     private void resetMoldGroupProgress(Step step, List<Mold> listMold) {
+        if (StepStatus.INIT.equals(step.getStatus())) return;
+
+        step.setStatus(StepStatus.IN_PROGRESS);
         List<MoldGroupElementProgress> listUpdatedProgress = new ArrayList<>();
 
         listMold.forEach(mold -> {
             log.info("Start delete progress mold {} of step {}", mold, step);
-            moldGroupElementProgressRepository.deleteByStepIdAndMoldId(step.getId(), mold.getId());
+            moldGroupElementProgressRepository.removeByStepIdAndMoldId(step.getId(), mold.getId());
 
             listUpdatedProgress.addAll(ProgressUtil.generateMoldGroupElementProgress(step, mold));
         });
@@ -214,6 +223,9 @@ public class ProgressComponent {
     }
 
     private void resetMoldDeliverProgress(Step step, List<Mold> listMold) {
+        if (StepStatus.INIT.equals(step.getStatus())) return;
+
+        step.setStatus(StepStatus.IN_PROGRESS);
         List<MoldDeliverProgress> progressList = moldDeliverProgressRepository.findAllByStepId(step.getId());
         log.info("get list progress list of step {} get result {}", step, progressList);
         List<MoldDeliverProgress> listUpdatedProgress = new ArrayList<>();
@@ -270,7 +282,7 @@ public class ProgressComponent {
                 .collect(Collectors.toList());
 
         /* reset progress */
-        listStepNeedToReset.parallelStream().forEach(step -> this.resetProgress(step, List.of(mold)));
+        listStepNeedToReset.forEach(step -> this.resetProgress(step, List.of(mold)));
     }
 
     public void resetMoldGroupProgressChangeElement(Mold mold) {
@@ -288,7 +300,7 @@ public class ProgressComponent {
                 .collect(Collectors.toList());
 
         /* reset progress */
-        listStepNeedToReset.parallelStream().forEach(step -> this.resetMoldGroupProgressChangeElement(mold, step));
+        listStepNeedToReset.forEach(step -> this.resetMoldGroupProgressChangeElement(mold, step));
     }
 
     public void resetMoldGroupProgressChangeElement(Mold mold, Step step) {

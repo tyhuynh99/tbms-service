@@ -1,12 +1,14 @@
 package com.shop.tbms.dto.log;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @ToString
 public class IssueLogDTO {
     private String reportBy;

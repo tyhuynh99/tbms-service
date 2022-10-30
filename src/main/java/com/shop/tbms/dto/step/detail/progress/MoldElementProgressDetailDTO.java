@@ -2,7 +2,7 @@ package com.shop.tbms.dto.step.detail.progress;
 
 import lombok.*;
 
-@Data
+@Getter @Setter
 @ToString
 @Builder
 @NoArgsConstructor

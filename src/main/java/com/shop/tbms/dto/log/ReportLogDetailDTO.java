@@ -2,12 +2,15 @@ package com.shop.tbms.dto.log;
 
 import com.shop.tbms.dto.EvidenceDTO;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @ToString
 public class ReportLogDetailDTO {
     private Long id;
