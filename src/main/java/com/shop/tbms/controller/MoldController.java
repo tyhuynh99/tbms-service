@@ -37,4 +37,9 @@ public class MoldController {
     public ResponseEntity<SuccessRespDTO> save(@RequestBody MoldGroupReqDTO moldGroupReqDTO) {
         return ResponseEntity.ok(moldService.saveMoldGroup(moldGroupReqDTO));
     }
+
+    @DeleteMapping("/group")
+    public ResponseEntity<SuccessRespDTO> deleteMoldGroup(@RequestParam("groupId") Long groupId) {
+        return ResponseEntity.ok(moldService.deleteMoldGroup(groupId));
+    }
 }

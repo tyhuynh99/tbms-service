@@ -351,4 +351,19 @@ public class MoldServiceImpl implements MoldService {
 
         return moldGroupDetailMapper.toDTOs(order.getListMoldGroup());
     }
+
+    @Override
+    public SuccessRespDTO deleteMoldGroup(Long groupId) {
+        MoldGroup moldGroup = moldGroupRepository.findById(groupId).orElseThrow();
+
+        MoldGroupDetailDTO detailDTO = moldGroupDetailMapper.toDTO(moldGroup);
+        detailDTO.setMoldList(List.of());
+
+        return saveMoldGroup(
+                MoldGroupReqDTO.builder()
+                        .moldGroup(detailDTO)
+                        .orderId(moldGroup.getPurchaseOrder().getId())
+                        .build()
+        );
+    }
 }

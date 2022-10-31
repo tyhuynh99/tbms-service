@@ -11,4 +11,5 @@ public interface MoldService {
     List<MoldElementTemplateDTO> getListElementTemplate();
     SuccessRespDTO saveMoldGroup(MoldGroupReqDTO reqDTO);
     List<MoldGroupDetailDTO> getListElementOfOrder(long orderId);
+    SuccessRespDTO deleteMoldGroup(Long groupId);
 }
