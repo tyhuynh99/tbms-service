@@ -17,6 +17,7 @@ public class NotificationDTO {
     private String content;
     private NotificationType type;
     private boolean isRead;
+    private long orderId;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdDate;
     private String createdDateDisplay;
