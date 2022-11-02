@@ -6,6 +6,7 @@ import com.shop.tbms.entity.Position_;
 import com.shop.tbms.enumerate.Role;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.JoinType;
 import java.util.List;
 
 public class AccountSpecification {
@@ -41,7 +42,7 @@ public class AccountSpecification {
         specification = specification.and(
                 (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(Account_.ACTIVE), Boolean.TRUE)
         ).and(
-                (root, query, criteriaBuilder) -> root.get(Account_.POSITION + "." + Position_.CODE).in(positionCodeList));
+                (root, query, criteriaBuilder) -> root.join(Account_.POSITION, JoinType.INNER).get(Position_.CODE).in(positionCodeList));
 
         return specification;
     }
