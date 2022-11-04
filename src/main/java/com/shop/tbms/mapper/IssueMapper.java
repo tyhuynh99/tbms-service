@@ -1,6 +1,6 @@
 package com.shop.tbms.mapper;
 
-import com.shop.tbms.dto.log.IssueLogDTO;
+import com.shop.tbms.dto.log.ReportLogDetailDTO;
 import com.shop.tbms.dto.step.report_issue.ReportIssueStepReqDTO;
 import com.shop.tbms.entity.Account;
 import com.shop.tbms.entity.Issue;
@@ -15,7 +15,6 @@ import org.mapstruct.Named;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
@@ -25,9 +24,9 @@ public interface IssueMapper {
     @Mapping(target = "reportBy", source = "createdBy", qualifiedByName = "getReportBy")
     @Mapping(target = "reportAt", source = "updatedDate")
     @Mapping(target = "listMold", source = "issue", qualifiedByName = "getListMold")
-    IssueLogDTO toLogDTO(Issue issue, @Context AccountRepository accountRepository);
+    ReportLogDetailDTO toLogDTO(Issue issue, @Context AccountRepository accountRepository);
 
-    List<IssueLogDTO> toLogDTOs(List<Issue> issues, @Context AccountRepository accountRepository);
+    List<ReportLogDetailDTO> toLogDTOs(List<Issue> issues, @Context AccountRepository accountRepository);
 
     @Named("getListMold")
     default String getListMold(Issue issue) {

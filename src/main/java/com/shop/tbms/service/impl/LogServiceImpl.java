@@ -1,7 +1,6 @@
 package com.shop.tbms.service.impl;
 
 import com.shop.tbms.component.ProgressComponent;
-import com.shop.tbms.dto.log.IssueLogDTO;
 import com.shop.tbms.dto.log.ReportLogDetailDTO;
 import com.shop.tbms.dto.log.ReportLogRespDTO;
 import com.shop.tbms.dto.log.ReportProgressCompleteDTO;
@@ -54,7 +53,8 @@ public class LogServiceImpl implements LogService {
             List<ReportLogDetailDTO> detailDTOS = reportLogMapper.toDTOs(
                     reportLogList.stream()
                             .sorted(Comparator.comparing(AbstractAuditingEntity::getCreatedDate))
-                            .collect(Collectors.toList())
+                            .collect(Collectors.toList()),
+                    accountRepository
             );
             List<ReportProgressCompleteDTO> completeDTOS = progressComponent.getListCompleteReport(step)
                     .stream()
@@ -71,7 +71,7 @@ public class LogServiceImpl implements LogService {
     }
 
     @Override
-    public List<IssueLogDTO> getIssueLog(long stepId) {
+    public List<ReportLogDetailDTO> getIssueLog(long stepId) {
         List<Issue> issues = issueRepository.findByStepId(stepId);
 
         if (!CollectionUtils.isEmpty(issues)) {

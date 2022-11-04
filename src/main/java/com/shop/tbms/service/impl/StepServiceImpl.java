@@ -252,7 +252,6 @@ public class StepServiceImpl implements StepService {
                 log.info("Step {} is complete for all progress", currentStep);
                 log.info("Step is end. Start set value for end order");
 
-                // TODO: delete evidence
                 currentOrder.setStatus(OrderStatus.COMPLETED);
             }
 

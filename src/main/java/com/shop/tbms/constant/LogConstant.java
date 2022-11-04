@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Getter
 @Setter
-@PropertySource("classpath:log-constant.properties")
+@PropertySource(value = "classpath:log-constant.properties", encoding = "UTF-8")
 public class LogConstant {
     @Value("${checklist.checked}")
     private String checklistChecked;

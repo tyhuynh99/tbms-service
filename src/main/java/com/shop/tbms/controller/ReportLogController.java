@@ -1,7 +1,7 @@
 package com.shop.tbms.controller;
 
 import com.shop.tbms.dto.ListWrapperDTO;
-import com.shop.tbms.dto.log.IssueLogDTO;
+import com.shop.tbms.dto.log.ReportLogDetailDTO;
 import com.shop.tbms.dto.log.ReportLogRespDTO;
 import com.shop.tbms.service.LogService;
 import com.shop.tbms.util.ResponseUtil;
@@ -24,7 +24,7 @@ public class ReportLogController {
     }
 
     @GetMapping("/issue")
-    public ResponseEntity<ListWrapperDTO<IssueLogDTO>> getIssue(@RequestParam("stepId") long stepId) {
+    public ResponseEntity<ListWrapperDTO<ReportLogDetailDTO>> getIssue(@RequestParam("stepId") long stepId) {
         return ResponseEntity.ok(ResponseUtil.wrapListToResp(logService.getIssueLog(stepId)));
     }
 }
