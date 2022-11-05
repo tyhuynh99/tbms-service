@@ -36,7 +36,7 @@ public class StepUtil {
         if (CollectionUtils.isEmpty(listStepSequenceAfter)) return null;
 
         listStepSequenceAfter.sort(Comparator.comparing(o -> o.getStepBefore().getSequenceNo()));
-        return listStepSequenceAfter.get(0).getStepAfter();
+        return listStepSequenceAfter.get(0).getStepBefore();
     }
 
     public static Step getNextMainStep(List<StepSequence> listStepSequenceBefore, Mold mold) {

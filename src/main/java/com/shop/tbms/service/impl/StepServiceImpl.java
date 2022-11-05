@@ -112,28 +112,28 @@ public class StepServiceImpl implements StepService {
         boolean notStartStep = Boolean.FALSE.equals(step.getIsStart());
 
         /* Map progress dto */
+        Step preStep = StepUtil.getPreMainStep(step.getListStepAfter());
+        Step nextStep = StepUtil.getNextMainStep(step.getListStepBefore());
         switch (step.getReportType()) {
             case BY_MOLD:
                 dto.setListMoldProgress(moldProgressMapper.toDTOs(step.getListMoldProgress()));
                 if (notStartStep) {
                     dto.setListMoldProgress(
-                            progressComponent.setCanCheckForMoldProgress(
-                                    StepUtil.getPreMainStep(step.getListStepBefore()),
-                                    dto.getListMoldProgress()
-                            )
+                            progressComponent.setReportAvailabilityForMoldProgress(
+                                    preStep,
+                                    nextStep,
+                                    dto.getListMoldProgress())
                     );
                 }
                 break;
             case BY_MOLD_SEND_RECEIVE:
                 dto.setListMoldDeliverProgress(moldDeliverProgressMapper.toDTOs(step.getListMoldDeliverProgress()));
-                if (notStartStep) {
-                    dto.setListMoldDeliverProgress(
-                            progressComponent.setCanCheckForDeliveryProgress(
-                                    StepUtil.getPreMainStep(step.getListStepBefore()),
-                                    dto.getListMoldDeliverProgress()
-                            )
-                    );
-                }
+                dto.setListMoldDeliverProgress(
+                        progressComponent.setReportAvailabilityForDeliveryProgress(
+                                preStep,
+                                nextStep,
+                                dto.getListMoldDeliverProgress())
+                );
                 break;
             case BY_MOLD_ELEMENT:
                 List<MoldElementProgressDTO> moldElementProgressDTOList = step.getProcedure().getPurchaseOrder()
@@ -156,14 +156,13 @@ public class StepServiceImpl implements StepService {
 
                 dto.setListMoldElementProgress(moldElementProgressDTOList);
 
-                if (notStartStep) {
-                    dto.setListMoldElementProgress(
-                            progressComponent.setCanCheckForMoldElementProgress(
-                                    StepUtil.getPreMainStep(step.getListStepBefore()),
-                                    dto.getListMoldElementProgress()
-                            )
-                    );
-                }
+                dto.setListMoldElementProgress(
+                        progressComponent.setReportAvailabilityForMoldElementProgress(
+                                preStep,
+                                nextStep,
+                                dto.getListMoldElementProgress()
+                        )
+                );
                 break;
             default:
         }

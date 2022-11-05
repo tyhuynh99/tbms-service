@@ -61,22 +61,45 @@ public class ProgressComponent {
         log.info("End generate progress for step {}", step);
     }
 
-    public List<MoldProgressDTO> setCanCheckForMoldProgress(Step preStep, List<MoldProgressDTO> moldProgressDTOList) {
+    public List<MoldProgressDTO> setReportAvailabilityForMoldProgress(Step preStep, Step nextStep, List<MoldProgressDTO> moldProgressDTOList) {
         return moldProgressDTOList.stream().map(moldProgressDTO -> {
-            boolean canCheck = canCheckCompleteBySize(preStep, moldProgressDTO.getMoldSize());
+            boolean canCheck = true;
+            if (Objects.nonNull(preStep)) {
+                canCheck = canCheckCompleteBySize(preStep, moldProgressDTO.getMoldSize());
+            }
             log.info("Set value canCheck of {} is {}", moldProgressDTO, canCheck);
             moldProgressDTO.setCanCheck(canCheck);
+
+            boolean canUncheck = true;
+            if (Objects.nonNull(nextStep)) {
+                canUncheck = canUnCheckCompleteBySize(nextStep, moldProgressDTO.getMoldSize());
+            }
+            log.info("Set value canUncheck of {} is {}", moldProgressDTO, canUncheck);
+            moldProgressDTO.setCanUncheck(canUncheck);
 
             return moldProgressDTO;
         }).collect(Collectors.toList());
     }
 
-    public List<MoldElementProgressDTO> setCanCheckForMoldElementProgress(Step preStep, List<MoldElementProgressDTO> moldElementProgressDTOList) {
+    public List<MoldElementProgressDTO> setReportAvailabilityForMoldElementProgress(Step preStep, Step nextStep, List<MoldElementProgressDTO> moldElementProgressDTOList) {
         return moldElementProgressDTOList.stream().map(moldElementProgressDTO -> {
-            boolean canCheck = canCheckCompleteBySize(preStep, moldElementProgressDTO.getMoldSize());
+            boolean canCheck = true;
+            if (Objects.nonNull(preStep)) {
+                canCheck = canCheckCompleteBySize(preStep, moldElementProgressDTO.getMoldSize());
+            }
+            final boolean canCheckFinal = canCheck;
             log.info("Set value canCheck of {} is {}", moldElementProgressDTO, canCheck);
+
+            boolean canUncheck = true;
+            if (Objects.nonNull(nextStep)) {
+                canUncheck = canUnCheckCompleteBySize(nextStep, moldElementProgressDTO.getMoldSize());
+            }
+            final boolean canUncheckFinal = canCheck;
+            log.info("Set value canUncheck of {} is {}", moldElementProgressDTO, canUncheck);
+
             List<MoldElementProgressDetailDTO> moldElementProgressDetailDTOList = moldElementProgressDTO.getListElement().stream().map(moldElementProgressDetailDTO -> {
-                moldElementProgressDetailDTO.setCanCheck(canCheck);
+                moldElementProgressDetailDTO.setCanCheck(canCheckFinal);
+                moldElementProgressDetailDTO.setCanUncheck(canUncheckFinal);
                 return moldElementProgressDetailDTO;
             }).collect(Collectors.toList());
 
@@ -86,11 +109,21 @@ public class ProgressComponent {
         }).collect(Collectors.toList());
     }
 
-    public List<MoldDeliverProgressDTO> setCanCheckForDeliveryProgress(Step preStep, List<MoldDeliverProgressDTO> moldDeliverProgressDTOList) {
+    public List<MoldDeliverProgressDTO> setReportAvailabilityForDeliveryProgress(Step preStep, Step nextStep, List<MoldDeliverProgressDTO> moldDeliverProgressDTOList) {
         return moldDeliverProgressDTOList.stream().map(moldDeliverProgressDTO -> {
-            boolean canCheck = canCheckCompleteBySize(preStep, moldDeliverProgressDTO.getMoldSize());
+            boolean canCheck = true;
+            if (Objects.nonNull(preStep)) {
+                canCheck = canCheckCompleteBySize(preStep, moldDeliverProgressDTO.getMoldSize());
+            }
             log.info("Set value canCheck of {} is {}", moldDeliverProgressDTO, canCheck);
             moldDeliverProgressDTO.setCanCheck(canCheck);
+
+            boolean canUncheck = true;
+            if (Objects.nonNull(nextStep)) {
+                canUncheck = canUnCheckCompleteBySize(nextStep, moldDeliverProgressDTO.getMoldSize());
+            }
+            log.info("Set value canUncheck of {} is {}", moldDeliverProgressDTO, canUncheck);
+            moldDeliverProgressDTO.setCanCheck(canUncheck);
 
             return moldDeliverProgressDTO;
         }).collect(Collectors.toList());
@@ -101,10 +134,8 @@ public class ProgressComponent {
             case BY_MOLD:
                 log.info("Check complete of mold size {} with preStep mold progress {}", moldSize, preStep.getListMoldProgress());
                 return preStep.getListMoldProgress().stream()
-                        .allMatch(moldProgress ->
-                                moldSize.equals(moldProgress.getMold().getSize())
-                                    && Boolean.TRUE.equals(moldProgress.getIsCompleted())
-                        );
+                        .filter(moldProgress -> moldSize.equals(moldProgress.getMold().getSize()))
+                        .allMatch(moldProgress -> Boolean.TRUE.equals(moldProgress.getIsCompleted()));
             case BY_MOLD_ELEMENT:
                 log.info("Check complete of mold size {} with preStep mold element progress {}", moldSize, preStep.getListMoldGroupElementProgresses());
                 return preStep.getListMoldGroupElementProgresses().stream()
@@ -125,20 +156,18 @@ public class ProgressComponent {
     public boolean canUnCheckCompleteBySize(Step nextStep, String moldSize) {
         switch (nextStep.getReportType()) {
             case BY_MOLD:
-                log.info("Check complete of mold size {} with preStep mold progress {}", moldSize, nextStep.getListMoldProgress());
+                log.info("Check complete of mold size {} with nextStep mold progress {}", moldSize, nextStep.getListMoldProgress());
                 return nextStep.getListMoldProgress().stream()
-                        .allMatch(moldProgress ->
-                                moldSize.equals(moldProgress.getMold().getSize())
-                                        && Boolean.FALSE.equals(moldProgress.getIsCompleted())
-                        );
+                        .filter(moldProgress -> moldSize.equals(moldProgress.getMold().getSize()))
+                        .allMatch(moldProgress -> Boolean.FALSE.equals(moldProgress.getIsCompleted()));
             case BY_MOLD_ELEMENT:
-                log.info("Check complete of mold size {} with preStep mold element progress {}", moldSize, nextStep.getListMoldGroupElementProgresses());
+                log.info("Check complete of mold size {} with nextStep mold element progress {}", moldSize, nextStep.getListMoldGroupElementProgresses());
                 return nextStep.getListMoldGroupElementProgresses().stream()
                         .filter(moldGroupElementProgress ->
                                 moldSize.equals(moldGroupElementProgress.getMold().getSize()))
-                        .anyMatch(Predicate.not(MoldGroupElementProgress::getIsCompleted));
+                        .allMatch(Predicate.not(MoldGroupElementProgress::getIsCompleted));
             case BY_MOLD_SEND_RECEIVE:
-                log.info("Check complete of mold size {} with preStep mold deliver progress {}", moldSize, nextStep.getListMoldDeliverProgress());
+                log.info("Check complete of mold size {} with nextStep mold deliver progress {}", moldSize, nextStep.getListMoldDeliverProgress());
                 return nextStep.getListMoldDeliverProgress().stream()
                         .filter(moldDeliverProgress ->
                                 moldSize.equals(moldDeliverProgress.getMold().getSize()))

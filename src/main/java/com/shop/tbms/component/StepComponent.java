@@ -150,7 +150,7 @@ public class StepComponent {
 
                             /* validate not complete in next-step */
                             if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
-                                Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepAfter(), moldProgress.getMold()));
+                                Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepBefore(), moldProgress.getMold()));
                                 boolean canCheckComplete = progressComponent.canUnCheckCompleteBySize(
                                         nextStep,
                                         moldProgress.getMold().getSize()
@@ -170,7 +170,7 @@ public class StepComponent {
 
                             /* validate complete in pre-step */
                             if (Boolean.FALSE.equals(currentStep.getIsStart())) {
-                                Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepBefore(), moldProgress.getMold()));
+                                Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepAfter(), moldProgress.getMold()));
                                 boolean canCheckComplete = progressComponent.canCheckCompleteBySize(
                                         preStep,
                                         moldProgress.getMold().getSize()

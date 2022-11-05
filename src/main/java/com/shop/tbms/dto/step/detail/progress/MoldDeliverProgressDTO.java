@@ -17,4 +17,5 @@ public class MoldDeliverProgressDTO {
     private String moldSize;
     private String moldSizeWithType;
     private boolean canCheck;
+    private boolean canUncheck;
 }
