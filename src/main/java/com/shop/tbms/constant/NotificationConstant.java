@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-@PropertySource("classpath:noti-constant.properties")
+@PropertySource(value = "classpath:noti-constant.properties", encoding = "utf-8")
 public class NotificationConstant {
     @Value("${order.nearly_due.title}")
     private String orderNearlyDueTitle;
