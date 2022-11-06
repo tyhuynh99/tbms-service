@@ -85,7 +85,7 @@ public class StepUtil {
         listStepSequenceAfter.sort(Comparator.comparing(o -> o.getStepBefore().getSequenceNo()));
 
         for (int i = 0; i < listStepSequenceAfter.size(); i++) {
-            Step chkStep = listStepSequenceAfter.get(i).getStepAfter();
+            Step chkStep = listStepSequenceAfter.get(i).getStepBefore();
             switch (chkStep.getReportType()) {
                 case BY_MOLD:
                     if (Objects.nonNull(chkStep.getListMoldProgress())) {
