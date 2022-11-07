@@ -75,6 +75,9 @@ public class Step extends AbstractAuditingEntity {
     @Column(name = "note", length = 1000)
     private String note;
 
+    @Column(name = "factory_name", length = 50)
+    private String factoryName;
+
     @ManyToOne
     @JoinColumn(name = "procedure_id", nullable = false)
     @ToString.Exclude

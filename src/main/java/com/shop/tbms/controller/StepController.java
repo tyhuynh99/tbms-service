@@ -3,8 +3,8 @@ package com.shop.tbms.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shop.tbms.annotation.ValidRole;
-import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.dto.SuccessRespDTO;
+import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.dto.step.ResetMoldStepReqDTO;
 import com.shop.tbms.dto.step.detail.StepDTO;
 import com.shop.tbms.dto.step.report.ReportEvidenceReqDTO;
@@ -49,6 +49,14 @@ public class StepController {
         ReportStepReqDTO reportStepReqDTO = objectMapper.readValue(reportStepReqDTOJson, ReportStepReqDTO.class);
 
         return processReportStep(reportStepReqDTO, listFile);
+    }
+
+    @PostMapping(value = "/test", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SuccessRespDTO> test(@RequestPart("data") String data) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        SuccessRespDTO dto = objectMapper.readValue(data, SuccessRespDTO.class);
+
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping(value = "/report_without_file")

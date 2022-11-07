@@ -34,6 +34,7 @@ public class StepDTO {
     private LocalDateTime deliveredDate;
     private LocalDateTime receivedDate;
     private String note;
+    private String factoryName;
     private Boolean isPaid;
 
     private List<ChecklistDTO> checklist;

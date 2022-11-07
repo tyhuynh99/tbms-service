@@ -1,5 +1,7 @@
 package com.shop.tbms.dto.step.report;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
@@ -13,11 +15,14 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ReportStepReqDTO {
     @NotNull
     private Long stepId;
 
     private String note;
+
+    private String factoryName;
 
     private LocalDateTime deliveredDate;
 

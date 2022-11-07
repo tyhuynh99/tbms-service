@@ -112,6 +112,7 @@ public class StepComponent {
         if (StepType.THIRD_PARTY.equals(currentStep.getType())) {
             currentStep.setDeliveredDate(req.getDeliveredDate());
             currentStep.setReceivedDate(req.getReceivedDate());
+            currentStep.setFactoryName(req.getFactoryName());
         }
 
         if (Boolean.TRUE.equals(currentStep.getIsEnd())) {

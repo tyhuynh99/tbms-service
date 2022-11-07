@@ -140,7 +140,8 @@ public class StepServiceImpl implements StepService {
                         .getListMold().stream()
                         .map(mold ->
                                 MoldElementProgressDTO.builder()
-                                        .moldSize(mold.getSize() + "#" + mold.getMoldGroup().getType().name())
+                                        .moldSize(mold.getSize())
+                                        .moldSizeWithType(Objects.nonNull(mold.getMoldGroup()) ? (mold.getSize() + "#" + mold.getMoldGroup().getType().name()) : mold.getSize())
                                         .percentCompleted(
                                                 MoldElementUtil.calPercentComplete(
                                                         step.getListMoldGroupElementProgresses(), mold)
