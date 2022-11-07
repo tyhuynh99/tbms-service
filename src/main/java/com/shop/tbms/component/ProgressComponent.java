@@ -123,7 +123,7 @@ public class ProgressComponent {
                 canUncheck = canUnCheckCompleteBySize(nextStep, moldDeliverProgressDTO.getMoldSize());
             }
             log.info("Set value canUncheck of {} is {}", moldDeliverProgressDTO, canUncheck);
-            moldDeliverProgressDTO.setCanCheck(canUncheck);
+            moldDeliverProgressDTO.setCanUncheck(canUncheck);
 
             return moldDeliverProgressDTO;
         }).collect(Collectors.toList());
