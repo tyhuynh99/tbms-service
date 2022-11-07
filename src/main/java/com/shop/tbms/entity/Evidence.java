@@ -34,12 +34,12 @@ public class Evidence extends AbstractAuditingEntity {
     @ToString.Exclude
     private Step step;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "create_at_report_log_id", nullable = false)
     @ToString.Exclude
     private ReportLog createAtReportLog;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "delete_at_report_log_id")
     @ToString.Exclude
     private ReportLog deleteAtReportLog;

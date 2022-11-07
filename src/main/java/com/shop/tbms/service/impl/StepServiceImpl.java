@@ -181,6 +181,7 @@ public class StepServiceImpl implements StepService {
         List<MoldGroupElementProgress> currentMoldElementProgress = currentStep.getListMoldGroupElementProgresses();
         List<Checklist> currentChecklist = currentStep.getListChecklist();
         ReportLog reportLog = new ReportLog();
+        reportLog.setStep(currentStep);
         List<String> logDetail = new ArrayList<>();
 
         /* validate */
@@ -217,15 +218,15 @@ public class StepServiceImpl implements StepService {
         stepComponent.updateChecklist(currentChecklist, reportStepReqDTO.getChecklist(), logDetail);
         checklistRepository.saveAll(currentChecklist);
 
-        log.info("Start update evidences");
-        stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence(), reportLog);
-
         log.info("Start update step info");
         stepComponent.updateStep(currentStep, reportStepReqDTO);
         stepComponent.updateStepStatus(currentStep, currentMoldProgress);
 
         log.info("Save step new info");
         stepRepository.save(currentStep);
+
+        log.info("Start update evidences");
+        stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence(), reportLog);
 
         /* set status next step */
         log.info("Start change status for next step");

@@ -377,6 +377,7 @@ public class StepComponent {
                     log.error("Upload file {} has exception {}", multipartFile.getOriginalFilename(), e);
                     throw new RuntimeException(e);
                 }
+
                 return new Evidence(
                         null,
                         null,
