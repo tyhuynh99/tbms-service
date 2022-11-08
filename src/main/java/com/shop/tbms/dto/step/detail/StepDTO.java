@@ -1,5 +1,6 @@
 package com.shop.tbms.dto.step.detail;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.shop.tbms.dto.ChecklistDTO;
 import com.shop.tbms.dto.EvidenceDTO;
 import com.shop.tbms.dto.step.detail.progress.MoldDeliverProgressDTO;
@@ -29,9 +30,16 @@ public class StepDTO {
     private Boolean requiredEvidence;
     private Boolean isStart;
     private Boolean isEnd;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expectedCompleteDate;
+
     private StepStatus status;
+
+    @JsonFormat(pattern = "HH:mm yyyy-MM-dd")
     private LocalDateTime deliveredDate;
+
+    @JsonFormat(pattern = "HH:mm yyyy-MM-dd")
     private LocalDateTime receivedDate;
     private String note;
     private String factoryName;

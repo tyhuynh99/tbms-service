@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,6 +18,7 @@ public interface MoldDeliverProgressMapper {
     @Mapping(target = "moldSize", source = "mold.size")
     @Mapping(target = "moldSizeWithType", source = "entity", qualifiedByName = "getMoldSizeWithType")
     @Mapping(target = "canCheck", constant = "true")
+    @Mapping(target = "actionDate", source = "entity", qualifiedByName = "getActionDate")
     MoldDeliverProgressDTO toDTO(MoldDeliverProgress entity);
 
     List<MoldDeliverProgressDTO> toDTOs(List<MoldDeliverProgress> entities);
@@ -32,5 +34,10 @@ public interface MoldDeliverProgressMapper {
             return entity.getMold().getSize();
         }
         return StringUtils.EMPTY;
+    }
+
+    @Named("getActionDate")
+    default LocalDateTime getActionDate(MoldDeliverProgress entity) {
+        return (Boolean.TRUE.equals(entity.getIsCompleted()) ? entity.getUpdatedDate() : null);
     }
 }
