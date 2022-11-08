@@ -26,6 +26,16 @@ spring:
     properties:
       hibernate:
         show_sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+logging:
+  level:
+    root: debug
+    org.spring.framework: info
+    com.shop.tbms: debug
 
 # firebase
 firebase:
@@ -60,6 +70,16 @@ spring:
     hibernate:
       ddl-auto: update
     generate-ddl: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+logging:
+  level:
+    root: debug
+    org.spring.framework: info
+    com.shop.tbms: debug
 
 # firebase
 firebase:
