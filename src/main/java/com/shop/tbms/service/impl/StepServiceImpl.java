@@ -109,22 +109,18 @@ public class StepServiceImpl implements StepService {
         Step step = stepRepository.findById(stepId).orElseThrow(EntityNotFoundException::new);
         StepDTO dto = stepMapper.toDTO(step);
 
-        boolean notStartStep = Boolean.FALSE.equals(step.getIsStart());
-
         /* Map progress dto */
         Step preStep = StepUtil.getPreMainStep(step.getListStepAfter());
         Step nextStep = StepUtil.getNextMainStep(step.getListStepBefore());
         switch (step.getReportType()) {
             case BY_MOLD:
                 dto.setListMoldProgress(moldProgressMapper.toDTOs(step.getListMoldProgress()));
-                if (notStartStep) {
-                    dto.setListMoldProgress(
-                            progressComponent.setReportAvailabilityForMoldProgress(
-                                    preStep,
-                                    nextStep,
-                                    dto.getListMoldProgress())
-                    );
-                }
+                dto.setListMoldProgress(
+                        progressComponent.setReportAvailabilityForMoldProgress(
+                                preStep,
+                                nextStep,
+                                dto.getListMoldProgress())
+                );
                 break;
             case BY_MOLD_SEND_RECEIVE:
                 dto.setListMoldDeliverProgress(moldDeliverProgressMapper.toDTOs(step.getListMoldDeliverProgress()));
