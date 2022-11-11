@@ -34,6 +34,9 @@ public class StepDTO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expectedCompleteDate;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate expectedPaidDate;
+
     private StepStatus status;
 
     @JsonFormat(pattern = "HH:mm yyyy-MM-dd")

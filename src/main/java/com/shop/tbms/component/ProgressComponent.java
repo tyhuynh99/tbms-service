@@ -181,8 +181,9 @@ public class ProgressComponent {
         log.info("Begin reset progress mold {} of step {}", listMold, step);
 
         /* set status to IN PROGRESS */
-        if (StepStatus.INIT.equals(step.getStatus())) return;
-        if (!StepStatus.IN_PROGRESS.equals(step.getStatus())) step.setStatus(StepStatus.IN_PROGRESS);
+        if (!StepStatus.IN_PROGRESS.equals(step.getStatus())) {
+            step.setStatus(StepStatus.INIT.equals(step.getStatus()) ? StepStatus.INIT : StepStatus.IN_PROGRESS);
+        }
 
         switch (step.getReportType()) {
             case BY_MOLD:
