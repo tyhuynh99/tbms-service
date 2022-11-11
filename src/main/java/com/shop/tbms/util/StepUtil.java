@@ -141,8 +141,7 @@ public class StepUtil {
                 .filter(moldProgress -> Boolean.TRUE.equals(moldProgress.getIsCompleted()))
                 .count();
         long totalMold = listMoldProgress.size();
-
-        return Math.floorDiv(completedMold, totalMold);
+        return (long) (((double) completedMold / totalMold) * 100);
     }
 
     public static long calPercentByMoldGroupElement(Step step) {
