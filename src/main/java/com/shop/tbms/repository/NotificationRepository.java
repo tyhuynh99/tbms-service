@@ -12,5 +12,6 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<TbmsNotification, Long>, JpaSpecificationExecutor<TbmsNotification> {
     Page<TbmsNotification> findByReceiverUsername(String receiverUser, Pageable pageable);
+    boolean existsByReceiverUsernameAndIsRead(String receiverUser, Boolean isRead);
     List<TbmsNotification> findByIdInAndReceiverUsername(List<Long> ids, String receiverUsername);
 }

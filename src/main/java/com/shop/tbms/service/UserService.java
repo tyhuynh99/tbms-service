@@ -1,7 +1,7 @@
 package com.shop.tbms.service;
 
-import com.shop.tbms.config.security.TbmsUserDetails;
+import com.shop.tbms.dto.ProfileDTO;
 
 public interface UserService {
-    TbmsUserDetails getCurrentUserProfile();
+    ProfileDTO getCurrentUserProfile();
 }

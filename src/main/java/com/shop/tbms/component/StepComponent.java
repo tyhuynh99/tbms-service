@@ -1,6 +1,8 @@
 package com.shop.tbms.component;
 
 import com.shop.tbms.config.exception.BusinessException;
+import com.shop.tbms.config.exception.ForbiddenException;
+import com.shop.tbms.config.security.TbmsUserDetails;
 import com.shop.tbms.constant.LogConstant;
 import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.FileDTO;
@@ -11,10 +13,12 @@ import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.order.OrderStatus;
 import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.enumerate.step.StepType;
+import com.shop.tbms.repository.AccountRepository;
 import com.shop.tbms.repository.EvidenceRepository;
 import com.shop.tbms.repository.MoldProgressRepository;
 import com.shop.tbms.repository.PurchaseOrderRepository;
 import com.shop.tbms.service.FileService;
+import com.shop.tbms.util.AuthenticationUtil;
 import com.shop.tbms.util.EvidenceUtil;
 import com.shop.tbms.util.ReportLogUtil;
 import com.shop.tbms.util.StepUtil;
@@ -42,6 +46,8 @@ public class StepComponent {
     private PurchaseOrderRepository purchaseOrderRepository;
     @Autowired
     private EvidenceRepository evidenceRepository;
+    @Autowired
+    private AccountRepository accountRepository;
 
     @Autowired
     private StepConstant stepConstant;
@@ -94,6 +100,19 @@ public class StepComponent {
     }
 
     public void canReportProgress(Step currentStep) {
+        /* check position of user */
+        TbmsUserDetails currentUser = AuthenticationUtil.getUserDetails();
+        Account account = accountRepository.findById(currentUser.getUserId()).orElseThrow();
+        if (Objects.nonNull(account.getPosition())) {
+            currentUser.setPosition(account.getPosition().getName());
+        }
+
+        if (!currentStep.getCode().equalsIgnoreCase(currentUser.getPosition())) {
+            throw new ForbiddenException(
+                    "User is in position " + currentUser.getPosition()
+                            + ". Cannot report for step " + currentStep.getCode());
+        }
+
         /* check step status */
         if (StepStatus.COMPLETED.equals(currentStep.getStatus())) {
             throw new BusinessException(

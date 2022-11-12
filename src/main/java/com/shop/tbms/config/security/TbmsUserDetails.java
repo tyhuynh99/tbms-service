@@ -1,5 +1,6 @@
 package com.shop.tbms.config.security;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.shop.tbms.dto.UserAssignedStepDTO;
 import com.shop.tbms.enumerate.Role;
 import lombok.*;
@@ -21,6 +22,7 @@ public class TbmsUserDetails {
     private Role role;
     private Boolean active;
     private String position;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime updatedDate;
 
     @Override
