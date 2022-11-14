@@ -149,7 +149,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public SuccessRespDTO testNoti(FBNotificationRequestDTO requestDTO) throws Exception {
         sendPnsToTopic(requestDTO);
-        notificationRepository.save(NotificationUtil.genEntityNotification(requestDTO, null, NotificationType.OTHER));
+        notificationRepository.save(NotificationUtil.genEntityNotification(requestDTO, NotificationType.OTHER));
 
         return null;
     }

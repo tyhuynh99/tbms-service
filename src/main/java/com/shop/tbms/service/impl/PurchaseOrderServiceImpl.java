@@ -5,6 +5,7 @@ import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.constant.NotificationConstant;
 import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
+import com.shop.tbms.dto.noti.FBNotificationRequestDTO;
 import com.shop.tbms.dto.order.*;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteRespDTO;
@@ -268,7 +269,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
         log.info("Start send noti of overdue order to {} ", listReceiver.stream().map(Account::getUsername).collect(Collectors.toList()));
 
-        List<TbmsNotification> notificationList = listReceiver.stream()
+        List<FBNotificationRequestDTO> listFbNoti = listReceiver.stream()
                 .map(receiver ->
                         listLateOrder.stream()
                                 .map(order -> NotificationUtil.genNotiOrderOverdue(
@@ -277,15 +278,26 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                         receiver.getUsername()))
                                 .collect(Collectors.toList()))
                 .flatMap(List::stream)
-                .map(requestDTO -> {
-                    try {
-                        notificationService.sendPnsToTopic(requestDTO);
-                    } catch (Exception e) {
-                        log.error("Error while send notification {}", requestDTO);
-                    }
+                .collect(Collectors.toList());
 
-                    return NotificationUtil.genEntityNotification(requestDTO, null, NotificationType.ORDER_OVERDUE);
-                }).collect(Collectors.toList());
+        listFbNoti.forEach(requestDTO -> {
+            try {
+                notificationService.sendPnsToTopic(requestDTO);
+            } catch (Exception e) {
+                log.error("Error while send notification {}", requestDTO);
+            }
+        });
+
+        List<TbmsNotification> notificationList = listFbNoti.stream()
+                .map(requestDTO ->
+                        listLateOrder.stream()
+                                .map(order -> NotificationUtil.genEntityNotification(
+                                        requestDTO,
+                                        order,
+                                        NotificationType.ORDER_OVERDUE))
+                                .collect(Collectors.toList()))
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
 
         log.info("Complete send noti of overdue order");
         purchaseOrderRepository.saveAll(listLateOrder);
@@ -303,7 +315,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
         log.info("Start send noti of nearly due order to {} ", listReceiver.stream().map(Account::getUsername).collect(Collectors.toList()));
 
-        List<TbmsNotification> notificationList = listReceiver.stream()
+        List<FBNotificationRequestDTO> listFbNoti = listReceiver.stream()
                 .map(receiver ->
                         orderNearlyDue.stream()
                                 .map(order -> NotificationUtil.genNotiOrderNearlyDue(
@@ -312,15 +324,26 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                         receiver.getUsername()))
                                 .collect(Collectors.toList()))
                 .flatMap(List::stream)
-                .map(requestDTO -> {
-                    try {
-                        notificationService.sendPnsToTopic(requestDTO);
-                    } catch (Exception e) {
-                        log.error("Error while send notification {}", requestDTO);
-                    }
+                .collect(Collectors.toList());
 
-                    return NotificationUtil.genEntityNotification(requestDTO, null, NotificationType.ORDER_NEARLY_DUE);
-                }).collect(Collectors.toList());
+        listFbNoti.forEach(requestDTO -> {
+            try {
+                notificationService.sendPnsToTopic(requestDTO);
+            } catch (Exception e) {
+                log.error("Error while send notification {}", requestDTO);
+            }
+        });
+
+        List<TbmsNotification> notificationList = listFbNoti.stream()
+                .map(requestDTO ->
+                        orderNearlyDue.stream()
+                                .map(order -> NotificationUtil.genEntityNotification(
+                                        requestDTO,
+                                        order,
+                                        NotificationType.ORDER_NEARLY_DUE))
+                                .collect(Collectors.toList()))
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
 
         log.info("Complete send noti for nearly due order");
         notificationRepository.saveAll(notificationList);
