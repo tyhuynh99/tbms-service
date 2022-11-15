@@ -22,6 +22,7 @@ public class TbmsUserDetails {
     private Role role;
     private Boolean active;
     private String position;
+    private String positionCode;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime updatedDate;
 

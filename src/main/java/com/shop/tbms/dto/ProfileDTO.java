@@ -17,6 +17,7 @@ public class ProfileDTO extends TbmsUserDetails {
                 userDetails.getRole(),
                 userDetails.getActive(),
                 userDetails.getPosition(),
+                userDetails.getPositionCode(),
                 userDetails.getUpdatedDate());
     }
 

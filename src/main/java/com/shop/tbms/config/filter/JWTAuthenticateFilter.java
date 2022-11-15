@@ -49,6 +49,11 @@ public class JWTAuthenticateFilter extends OncePerRequestFilter {
                     throw new ForbiddenException("Account is updated");
                 }
 
+                if (Objects.nonNull(account.getPosition())) {
+                    userDetails.setPositionCode(account.getPosition().getCode());
+                    userDetails.setPosition(account.getPosition().getName());
+                }
+
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, null);
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 

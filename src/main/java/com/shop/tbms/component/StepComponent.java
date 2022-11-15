@@ -107,9 +107,9 @@ public class StepComponent {
             currentUser.setPosition(account.getPosition().getName());
         }
 
-        if (!currentStep.getCode().equalsIgnoreCase(currentUser.getPosition())) {
+        if (!currentStep.getCode().equalsIgnoreCase(currentUser.getPositionCode())) {
             throw new ForbiddenException(
-                    "User is in position " + currentUser.getPosition()
+                    "User is in position " + currentUser.getPositionCode()
                             + ". Cannot report for step " + currentStep.getCode());
         }
 

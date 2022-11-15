@@ -33,6 +33,7 @@ public class UserServiceImpl implements UserService {
             Account account = accountRepository.findById(currentUser.getUserId()).orElseThrow();
             if (Objects.nonNull(account.getPosition())) {
                 currentUser.setPosition(account.getPosition().getName());
+                currentUser.setPositionCode(account.getPosition().getCode());
             }
 
             profileDTO = new ProfileDTO(currentUser);
