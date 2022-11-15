@@ -94,7 +94,7 @@ public class ProgressComponent {
             if (Objects.nonNull(nextStep)) {
                 canUncheck = canUnCheckCompleteBySize(nextStep, moldElementProgressDTO.getMoldSize());
             }
-            final boolean canUncheckFinal = canCheck;
+            final boolean canUncheckFinal = canUncheck;
             log.info("Set value canUncheck of {} is {}", moldElementProgressDTO, canUncheck);
 
             List<MoldElementProgressDetailDTO> moldElementProgressDetailDTOList = moldElementProgressDTO.getListElement().stream().map(moldElementProgressDetailDTO -> {
@@ -199,9 +199,6 @@ public class ProgressComponent {
     }
 
     private void resetMoldProgress(Step step, List<Mold> listMold) {
-        if (StepStatus.INIT.equals(step.getStatus())) return;
-
-        step.setStatus(StepStatus.IN_PROGRESS);
         List<MoldProgress> moldProgressList = moldProgressRepository.findAllByStepId(step.getId());
         log.info("get list progress list of step {} get result {}", step, moldProgressList);
         List<MoldProgress> listUpdatedProgress = new ArrayList<>();
@@ -235,9 +232,6 @@ public class ProgressComponent {
     }
 
     private void resetMoldGroupProgress(Step step, List<Mold> listMold) {
-        if (StepStatus.INIT.equals(step.getStatus())) return;
-
-        step.setStatus(StepStatus.IN_PROGRESS);
         List<MoldGroupElementProgress> listUpdatedProgress = new ArrayList<>();
 
         listMold.forEach(mold -> {
@@ -253,9 +247,6 @@ public class ProgressComponent {
     }
 
     private void resetMoldDeliverProgress(Step step, List<Mold> listMold) {
-        if (StepStatus.INIT.equals(step.getStatus())) return;
-
-        step.setStatus(StepStatus.IN_PROGRESS);
         List<MoldDeliverProgress> progressList = moldDeliverProgressRepository.findAllByStepId(step.getId());
         log.info("get list progress list of step {} get result {}", step, progressList);
         List<MoldDeliverProgress> listUpdatedProgress = new ArrayList<>();
