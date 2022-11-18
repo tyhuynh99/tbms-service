@@ -93,6 +93,7 @@ public class FileServiceImpl implements FileService {
             throw new Exception("File is empty");
         }
         String contentType = multipartFile.getContentType();
+        log.info("File contentType {} ", contentType);
         if (contentType == null || !isSupportedContentType(contentType)) {
             throw new Exception("Only support images and video type");
         }
