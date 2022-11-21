@@ -91,7 +91,8 @@ public class ReportLogUtil {
             if (mapChangeToComplete.containsKey(moldId)) {
                 mapChangeToComplete.get(moldId).add(moldGroupElementProgress);
             } else {
-                List<MoldGroupElementProgress> progressList = Arrays.asList(moldGroupElementProgress);
+                List<MoldGroupElementProgress> progressList = new ArrayList<>();
+                progressList.add(moldGroupElementProgress);
                 mapChangeToComplete.put(moldId, progressList);
             }
         });
@@ -101,7 +102,8 @@ public class ReportLogUtil {
             if (mapChangeToUnComplete.containsKey(moldId)) {
                 mapChangeToUnComplete.get(moldId).add(moldGroupElementProgress);
             } else {
-                List<MoldGroupElementProgress> progressList = Arrays.asList(moldGroupElementProgress);
+                List<MoldGroupElementProgress> progressList = new ArrayList<>();
+                progressList.add(moldGroupElementProgress);
                 mapChangeToUnComplete.put(moldId, progressList);
             }
         });

@@ -216,7 +216,6 @@ public class StepServiceImpl implements StepService {
 
         log.info("Start update step info");
         stepComponent.updateStep(currentStep, reportStepReqDTO);
-        stepComponent.updateStepStatus(currentStep, currentMoldProgress);
 
         log.info("Save step new info");
         stepRepository.save(currentStep);

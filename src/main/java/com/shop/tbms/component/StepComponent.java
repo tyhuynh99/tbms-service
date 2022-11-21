@@ -114,15 +114,15 @@ public class StepComponent {
         }
 
         /* check step status */
-        if (StepStatus.COMPLETED.equals(currentStep.getStatus())) {
-            throw new BusinessException(
-                    String.format(
-                            "Current step {} status is {}. Only status not Completed can be reported.",
-                            currentStep.getCode(),
-                            currentStep.getStatus()
-                    )
-            );
-        }
+//        if (StepStatus.COMPLETED.equals(currentStep.getStatus())) {
+//            throw new BusinessException(
+//                    String.format(
+//                            "Current step %s status is %s. Only status not Completed can be reported.",
+//                            currentStep.getCode(),
+//                            currentStep.getStatus()
+//                    )
+//            );
+//        }
     }
 
     public void updateStep(Step currentStep, ReportStepReqDTO req) {
@@ -231,7 +231,7 @@ public class StepComponent {
 
                     /* validate not complete in next-step */
                     if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
-                        Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepAfter(), moldGroupElementProgress.getMold()));
+                        Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepBefore(), moldGroupElementProgress.getMold()));
                         boolean canCheckComplete = progressComponent.canUnCheckCompleteBySize(
                                 nextStep,
                                 moldGroupElementProgress.getMold().getSize()
@@ -251,7 +251,7 @@ public class StepComponent {
 
                     /* validate complete in pre-step */
                     if (Boolean.FALSE.equals(currentStep.getIsStart())) {
-                        Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepBefore(), moldGroupElementProgress.getMold()));
+                        Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepAfter(), moldGroupElementProgress.getMold()));
                         boolean canCheckComplete = progressComponent.canCheckCompleteBySize(
                                 preStep,
                                 moldGroupElementProgress.getMold().getSize()
@@ -294,7 +294,7 @@ public class StepComponent {
 
                     /* validate not complete in next-step */
                     if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
-                        Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepAfter(), moldDeliverProgress.getMold()));
+                        Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepBefore(), moldDeliverProgress.getMold()));
                         boolean canCheckComplete = progressComponent.canUnCheckCompleteBySize(
                                 nextStep,
                                 moldDeliverProgress.getMold().getSize()
@@ -314,7 +314,7 @@ public class StepComponent {
 
                     /* validate complete in pre-step */
                     if (Boolean.FALSE.equals(currentStep.getIsStart())) {
-                        Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepBefore(), moldDeliverProgress.getMold()));
+                        Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepAfter(), moldDeliverProgress.getMold()));
                         boolean canCheckComplete = progressComponent.canCheckCompleteBySize(
                                 preStep,
                                 moldDeliverProgress.getMold().getSize()

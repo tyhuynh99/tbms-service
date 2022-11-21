@@ -16,7 +16,7 @@ public class PurchaseOrderComponent {
         if (!OrderStatus.IN_PROGRESS.equals(currentOrder.getStatus())) {
             throw new BusinessException(
                     String.format(
-                            "Current order {} status is {}. Only status in progress can be updated.",
+                            "Current order %s status is %s. Only status in progress can be updated.",
                             currentOrder.getCode(),
                             currentOrder.getStatus()
                     )

@@ -18,6 +18,6 @@ public class MoldElementUtil {
                 .count();
         long totalElement = progressListByMold.size();
 
-        return totalElement > 0 ? Math.floorDiv(completedElement, totalElement) : 0L;
+        return totalElement > 0 ? (long) (((double) completedElement / totalElement) * 100) : 0L;
     }
 }
