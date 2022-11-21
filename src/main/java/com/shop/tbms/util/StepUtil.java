@@ -154,7 +154,7 @@ public class StepUtil {
                 .count();
         long totalElement = listMoldGroupElementProgresses.size();
 
-        return Math.floorDiv(completedElement, totalElement);
+        return totalElement > 0 ? (long) (((double) completedElement / totalElement) * 100) : 0L;
     }
 
     public static long calPercentByMoldDeliver(Step step) {
@@ -167,7 +167,7 @@ public class StepUtil {
                 .count();
         long totalMoldDeliver = listMoldDeliverProgress.size();
 
-        return Math.floorDiv(completedMoldDeliver, totalMoldDeliver);
+        return totalMoldDeliver > 0 ? (long) (((double) completedMoldDeliver / totalMoldDeliver) * 100) : 0L;
     }
 
     public static boolean isCompleteAllMold(Step step) {
