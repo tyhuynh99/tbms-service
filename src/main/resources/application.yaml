@@ -52,6 +52,7 @@ server:
     include-stacktrace: never
   servlet:
     context-path: /tbms_service
+  use-forward-headers: true
 
 # spring setting
 spring:
