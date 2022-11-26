@@ -17,7 +17,8 @@ public interface MoldDeliverProgressMapper {
     @Mapping(target = "progressId", source = "id")
     @Mapping(target = "moldSize", source = "mold.size")
     @Mapping(target = "moldSizeWithType", source = "entity", qualifiedByName = "getMoldSizeWithType")
-    @Mapping(target = "canCheck", constant = "true")
+    @Mapping(target = "canCheck", constant = "false")
+    @Mapping(target = "canUncheck", constant = "false")
     @Mapping(target = "actionDate", source = "entity", qualifiedByName = "getActionDate")
     MoldDeliverProgressDTO toDTO(MoldDeliverProgress entity);
 

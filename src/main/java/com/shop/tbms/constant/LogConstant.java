@@ -23,4 +23,10 @@ public class LogConstant {
 
     @Value("${progress.unchecked}")
     private String progressUnchecked;
+
+    @Value("${order.paid}")
+    private String orderPaid;
+
+    @Value("${order.unpaid}")
+    private String orderUnpaid;
 }

@@ -2,6 +2,8 @@ package com.shop.tbms.service.impl;
 
 import com.shop.tbms.component.*;
 import com.shop.tbms.config.exception.BusinessException;
+import com.shop.tbms.config.security.TbmsUserDetails;
+import com.shop.tbms.constant.LogConstant;
 import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.constant.NotificationConstant;
 import com.shop.tbms.dto.mold.MoldDTO;
@@ -31,6 +33,7 @@ import com.shop.tbms.service.NotificationService;
 import com.shop.tbms.service.StepService;
 import com.shop.tbms.specification.AccountSpecification;
 import com.shop.tbms.specification.StepSpecification;
+import com.shop.tbms.util.AuthenticationUtil;
 import com.shop.tbms.util.MoldElementUtil;
 import com.shop.tbms.util.NotificationUtil;
 import com.shop.tbms.util.StepUtil;
@@ -100,6 +103,8 @@ public class StepServiceImpl implements StepService {
 
     @Autowired
     private NotificationConstant notificationConstant;
+    @Autowired
+    private LogConstant logConstant;
 
     @Autowired
     private NotificationService notificationService;
@@ -115,21 +120,25 @@ public class StepServiceImpl implements StepService {
         switch (step.getReportType()) {
             case BY_MOLD:
                 dto.setListMoldProgress(moldProgressMapper.toDTOs(step.getListMoldProgress()));
-                dto.setListMoldProgress(
-                        progressComponent.setReportAvailabilityForMoldProgress(
-                                preStep,
-                                nextStep,
-                                dto.getListMoldProgress())
-                );
+                if (!StepStatus.COMPLETED.equals(step.getStatus())) {
+                    dto.setListMoldProgress(
+                            progressComponent.setReportAvailabilityForMoldProgress(
+                                    preStep,
+                                    nextStep,
+                                    dto.getListMoldProgress())
+                    );
+                }
                 break;
             case BY_MOLD_SEND_RECEIVE:
                 dto.setListMoldDeliverProgress(moldDeliverProgressMapper.toDTOs(step.getListMoldDeliverProgress()));
-                dto.setListMoldDeliverProgress(
-                        progressComponent.setReportAvailabilityForDeliveryProgress(
-                                preStep,
-                                nextStep,
-                                dto.getListMoldDeliverProgress())
-                );
+                if (!StepStatus.COMPLETED.equals(step.getStatus())) {
+                    dto.setListMoldDeliverProgress(
+                            progressComponent.setReportAvailabilityForDeliveryProgress(
+                                    preStep,
+                                    nextStep,
+                                    dto.getListMoldDeliverProgress())
+                    );
+                }
                 break;
             case BY_MOLD_ELEMENT:
                 List<MoldElementProgressDTO> moldElementProgressDTOList = step.getProcedure().getPurchaseOrder()
@@ -153,13 +162,15 @@ public class StepServiceImpl implements StepService {
 
                 dto.setListMoldElementProgress(moldElementProgressDTOList);
 
-                dto.setListMoldElementProgress(
-                        progressComponent.setReportAvailabilityForMoldElementProgress(
-                                preStep,
-                                nextStep,
-                                dto.getListMoldElementProgress()
-                        )
-                );
+                if (!StepStatus.COMPLETED.equals(step.getStatus())) {
+                    dto.setListMoldElementProgress(
+                            progressComponent.setReportAvailabilityForMoldElementProgress(
+                                    preStep,
+                                    nextStep,
+                                    dto.getListMoldElementProgress()
+                            )
+                    );
+                }
                 break;
             default:
         }
@@ -190,68 +201,79 @@ public class StepServiceImpl implements StepService {
         stepComponent.canReportProgress(currentStep);
 
         /* update progress */
-        log.info("Start update progress of step {}", currentStep);
-        switch (currentStep.getReportType()) {
-            case BY_MOLD:
-                log.info("Start update progress of report type = BY_MOLD");
-                stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
-                moldProgressRepository.saveAll(currentMoldProgress);
-                break;
-            case BY_MOLD_ELEMENT:
-                log.info("Start update progress of report type = BY_MOLD_ELEMENT");
-                stepComponent.updateMoldElementProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
-                moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
-                break;
-            case BY_MOLD_SEND_RECEIVE:
-                log.info("Start update progress of report type = BY_MOLD_SEND_RECEIVE");
-                stepComponent.updateMoldDeliverProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
-                moldDeliverProgressRepository.saveAll(currentMoldDeliverProgress);
-                break;
-            default:
-        }
-
-        log.info("Start update check list");
-        stepComponent.updateChecklist(currentChecklist, reportStepReqDTO.getChecklist(), logDetail);
-        checklistRepository.saveAll(currentChecklist);
-
-        log.info("Start update step info");
-        stepComponent.updateStep(currentStep, reportStepReqDTO);
-
-        log.info("Save step new info");
-        stepRepository.save(currentStep);
-
-        log.info("Start update evidences");
-        stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence(), reportLog);
-
-        /* set status next step */
-        log.info("Start change status for next step");
-        Step nextMainStep = StepUtil.getNextMainStep(stepSequenceRepository.findByStepBeforeId(currentStep.getId()));
-        if (!StepStatus.IN_PROGRESS.equals(nextMainStep.getStatus())) {
-            nextMainStep.setStatus(StepStatus.IN_PROGRESS);
-            stepRepository.save(nextMainStep);
-        }
-
-        /* insert log */
-        log.info("Start insert log");
-        reportLogComponent.insertReportLog(currentStep, reportLog, logDetail);
-
-        if (Boolean.TRUE.equals(currentStep.getIsEnd())) {
-            if (Boolean.TRUE.equals(reportStepReqDTO.getIsPaid())) {
-                currentOrder.setPaymentStatus(OrderPaymentStatus.PAID);
-            } else {
-                currentOrder.setPaymentStatus(OrderPaymentStatus.NOT_PAID);
+        TbmsUserDetails curUser = AuthenticationUtil.getUserDetails();
+        if (Role.EMPLOYEE.equals(curUser.getRole())) {
+            log.info("Start update progress of step {}", currentStep);
+            switch (currentStep.getReportType()) {
+                case BY_MOLD:
+                    log.info("Start update progress of report type = BY_MOLD");
+                    stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
+                    moldProgressRepository.saveAll(currentMoldProgress);
+                    break;
+                case BY_MOLD_ELEMENT:
+                    log.info("Start update progress of report type = BY_MOLD_ELEMENT");
+                    stepComponent.updateMoldElementProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
+                    moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
+                    break;
+                case BY_MOLD_SEND_RECEIVE:
+                    log.info("Start update progress of report type = BY_MOLD_SEND_RECEIVE");
+                    stepComponent.updateMoldDeliverProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
+                    moldDeliverProgressRepository.saveAll(currentMoldDeliverProgress);
+                    break;
+                default:
             }
 
-            boolean isCompleteAllMold = StepUtil.isCompleteAllMold(currentStep);
+            log.info("Start update check list");
+            stepComponent.updateChecklist(currentChecklist, reportStepReqDTO.getChecklist(), logDetail);
+            checklistRepository.saveAll(currentChecklist);
 
-            if (isCompleteAllMold) {
-                log.info("Step {} is complete for all progress", currentStep);
-                log.info("Step is end. Start set value for end order");
+            log.info("Start update step info");
+            stepComponent.updateStep(currentStep, reportStepReqDTO);
 
-                currentOrder.setStatus(OrderStatus.COMPLETED);
+            log.info("Save step new info");
+            stepRepository.save(currentStep);
+
+            log.info("Start update evidences");
+            stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence(), reportLog);
+
+            /* set status next step */
+            log.info("Start change status for next step");
+            Step nextMainStep = StepUtil.getNextMainStep(stepSequenceRepository.findByStepBeforeId(currentStep.getId()));
+            if (!StepStatus.IN_PROGRESS.equals(nextMainStep.getStatus())) {
+                nextMainStep.setStatus(StepStatus.IN_PROGRESS);
+                stepRepository.save(nextMainStep);
+            }
+        }
+
+        if (Boolean.TRUE.equals(currentStep.getIsEnd())) {
+            if (List.of(Role.PRESIDENT, Role.SECRETARY, Role.ACCOUNTANT).contains(curUser.getRole())) {
+                if (Boolean.TRUE.equals(reportStepReqDTO.getIsPaid()) && !OrderPaymentStatus.PAID.equals(currentOrder.getPaymentStatus())) {
+                    currentOrder.setPaymentStatus(OrderPaymentStatus.PAID);
+                    logDetail.add(String.format(logConstant.getOrderPaid(), curUser.getFullname()));
+                } else if (Boolean.FALSE.equals(reportStepReqDTO.getIsPaid()) && !OrderPaymentStatus.NOT_PAID.equals(currentOrder.getPaymentStatus())) {
+                    currentOrder.setPaymentStatus(OrderPaymentStatus.NOT_PAID);
+                    logDetail.add(String.format(logConstant.getOrderUnpaid(), curUser.getFullname()));
+                }
+            }
+
+            if (!OrderStatus.COMPLETED.equals(currentOrder.getStatus())) {
+                boolean isCompleteAllMold = StepUtil.isCompleteAllMold(currentStep);
+
+                if (isCompleteAllMold) {
+                    log.info("Step {} is complete for all progress", currentStep);
+                    log.info("Step is end. Start set value for end order");
+
+                    currentOrder.setStatus(OrderStatus.COMPLETED);
+                }
             }
 
             purchaseOrderRepository.save(currentOrder);
+        }
+
+        /* insert log */
+        if (!CollectionUtils.isEmpty(logDetail)) {
+            log.info("Start insert log");
+            reportLogComponent.insertReportLog(currentStep, reportLog, logDetail);
         }
 
         log.info("End report step progress");

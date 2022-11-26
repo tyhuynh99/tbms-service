@@ -102,27 +102,25 @@ public class StepComponent {
     public void canReportProgress(Step currentStep) {
         /* check position of user */
         TbmsUserDetails currentUser = AuthenticationUtil.getUserDetails();
-        Account account = accountRepository.findById(currentUser.getUserId()).orElseThrow();
-        if (Objects.nonNull(account.getPosition())) {
-            currentUser.setPosition(account.getPosition().getName());
-        }
 
-        if (!currentStep.getCode().equalsIgnoreCase(currentUser.getPositionCode())) {
-            throw new ForbiddenException(
-                    "User is in position " + currentUser.getPositionCode()
-                            + ". Cannot report for step " + currentStep.getCode());
-        }
+        switch (currentUser.getRole()) {
+            case ACCOUNTANT:
+            case SECRETARY:
+            case PRESIDENT:
+                break;
+            case EMPLOYEE:
+            default:
+                Account account = accountRepository.findById(currentUser.getUserId()).orElseThrow();
+                if (Objects.nonNull(account.getPosition())) {
+                    currentUser.setPosition(account.getPosition().getName());
+                }
 
-        /* check step status */
-//        if (StepStatus.COMPLETED.equals(currentStep.getStatus())) {
-//            throw new BusinessException(
-//                    String.format(
-//                            "Current step %s status is %s. Only status not Completed can be reported.",
-//                            currentStep.getCode(),
-//                            currentStep.getStatus()
-//                    )
-//            );
-//        }
+                if (!currentStep.getCode().equalsIgnoreCase(currentUser.getPositionCode())) {
+                    throw new ForbiddenException(
+                            "User is in position " + currentUser.getPositionCode()
+                                    + ". Cannot report for step " + currentStep.getCode());
+                }
+        }
     }
 
     public void updateStep(Step currentStep, ReportStepReqDTO req) {

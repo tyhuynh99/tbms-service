@@ -39,7 +39,6 @@ public class StepController {
     }
 
     @PostMapping(value = "/report", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ValidRole(role = {Role.EMPLOYEE})
     public ResponseEntity<SuccessRespDTO> reportStep(
             @RequestPart("data") String reportStepReqDTOJson,
             @RequestPart(value = "listFile", required = false) List<MultipartFile> listFile
@@ -60,7 +59,6 @@ public class StepController {
     }
 
     @PostMapping(value = "/report_without_file")
-    @ValidRole(role = {Role.EMPLOYEE})
     public ResponseEntity reportWithoutFile(@RequestBody ReportStepReqDTO reportStepReqDTO) {
         return processReportStep(reportStepReqDTO, null);
     }
