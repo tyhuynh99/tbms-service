@@ -97,26 +97,32 @@ public class Step extends AbstractAuditingEntity {
     private List<StepSequence> listStepAfter = new ArrayList<>();
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @OrderBy("id asc")
     @ToString.Exclude
     private List<Evidence> listEvidence = new ArrayList<>();
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @OrderBy("id asc")
     @ToString.Exclude
     private List<Issue> listIssue = new ArrayList<>();
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @OrderBy("createdDate asc")
     @ToString.Exclude
     private List<ReportLog> listReportLog = new ArrayList<>();
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @OrderBy("id asc")
     @ToString.Exclude
     private List<MoldProgress> listMoldProgress = new ArrayList<>();
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @OrderBy("id asc")
     @ToString.Exclude
     private List<MoldDeliverProgress> listMoldDeliverProgress = new ArrayList<>();
 
     @OneToMany(mappedBy = "step", cascade = CascadeType.ALL)
+    @OrderBy("id asc")
     @ToString.Exclude
     private List<MoldGroupElementProgress> listMoldGroupElementProgresses = new ArrayList<>();
 }

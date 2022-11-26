@@ -155,6 +155,7 @@ public class StepServiceImpl implements StepService {
                                                         step.getListMoldGroupElementProgresses().stream()
                                                                 .filter(elementProgress ->
                                                                         mold.getId().equals(elementProgress.getMold().getId()))
+                                                                .sorted(Comparator.comparing(MoldGroupElementProgress::getId))
                                                                 .collect(Collectors.toList()))
                                         ).build()
                         )
