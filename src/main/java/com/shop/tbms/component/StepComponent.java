@@ -271,9 +271,7 @@ public class StepComponent {
     }
 
     public void updateMoldDeliverProgress(Step currentStep, List<ReportProgressReqDTO> listReq, List<String> logDetail) {
-        List<MoldDeliverProgress> progressList = currentStep.getListMoldDeliverProgress().stream()
-                .filter(Predicate.not(MoldDeliverProgress::getIsCompleted)).
-                collect(Collectors.toList());
+        List<MoldDeliverProgress> progressList = currentStep.getListMoldDeliverProgress();
         final List<MoldDeliverProgress> listUpdateToComplete = new ArrayList<>();
         final List<MoldDeliverProgress> listUpdateToUnComplete = new ArrayList<>();
 
