@@ -139,11 +139,14 @@ public class ProgressComponent {
                         .allMatch(moldProgress -> Boolean.TRUE.equals(moldProgress.getIsCompleted()));
             case BY_MOLD_ELEMENT:
                 log.info("Check complete of mold size {} with preStep mold element progress {}", moldSize, preStep.getListMoldGroupElementProgresses());
-                if (CollectionUtils.isEmpty(preStep.getListMoldGroupElementProgresses())) return false;
-
-                return preStep.getListMoldGroupElementProgresses().stream()
+                List<MoldGroupElementProgress> elementProgressesBySize = preStep.getListMoldGroupElementProgresses().stream()
                         .filter(moldGroupElementProgress ->
                                 moldSize.equals(moldGroupElementProgress.getMold().getSize()))
+                        .collect(Collectors.toList());
+
+                if (CollectionUtils.isEmpty(elementProgressesBySize)) return false;
+
+                return elementProgressesBySize.stream()
                         .allMatch(MoldGroupElementProgress::getIsCompleted);
             case BY_MOLD_SEND_RECEIVE:
                 log.info("Check complete of mold size {} with preStep mold deliver progress {}", moldSize, preStep.getListMoldDeliverProgress());
