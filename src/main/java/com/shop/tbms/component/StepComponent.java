@@ -99,30 +99,6 @@ public class StepComponent {
         }
     }
 
-    public void canReportProgress(Step currentStep) {
-        /* check position of user */
-        TbmsUserDetails currentUser = AuthenticationUtil.getUserDetails();
-
-        switch (currentUser.getRole()) {
-            case ACCOUNTANT:
-            case SECRETARY:
-            case PRESIDENT:
-                break;
-            case EMPLOYEE:
-            default:
-                Account account = accountRepository.findById(currentUser.getUserId()).orElseThrow();
-                if (Objects.nonNull(account.getPosition())) {
-                    currentUser.setPosition(account.getPosition().getName());
-                }
-
-                if (!currentStep.getCode().equalsIgnoreCase(currentUser.getPositionCode())) {
-                    throw new ForbiddenException(
-                            "User is in position " + currentUser.getPositionCode()
-                                    + ". Cannot report for step " + currentStep.getCode());
-                }
-        }
-    }
-
     public void updateStep(Step currentStep, ReportStepReqDTO req) {
         currentStep.setNote(req.getNote());
 

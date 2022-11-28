@@ -197,10 +197,6 @@ public class StepServiceImpl implements StepService {
         log.info("validate order status of order {}", currentOrder);
         purchaseOrderComponent.canUpdateOrder(currentOrder);
 
-        /* validate step status */
-        log.info("validate step status {}", currentStep);
-        stepComponent.canReportProgress(currentStep);
-
         /* update progress */
         TbmsUserDetails curUser = AuthenticationUtil.getUserDetails();
         if (Role.EMPLOYEE.equals(curUser.getRole())) {
@@ -310,9 +306,6 @@ public class StepServiceImpl implements StepService {
         /* validate order status */
         purchaseOrderComponent.canUpdateOrder(order);
 
-        /* validate step status */
-        stepComponent.canReportProgress(currentStep);
-
         /* validate mold */
         if (CollectionUtils.isEmpty(reportIssueStepReqDTO.getListMoldId())) {
             throw new BusinessException("Required list mold");
@@ -379,9 +372,6 @@ public class StepServiceImpl implements StepService {
         Step resetStep = stepRepository.findById(resetMoldStepReqDTO.getResetToStepId()).orElseThrow();
         /* validate step status */
         purchaseOrderComponent.canUpdateOrder(currentStep.getProcedure().getPurchaseOrder());
-
-        /* validate step status */
-        stepComponent.canReportProgress(currentStep);
 
         /* validate reset step */
         if (!Objects.equals(currentStep.getProcedure(), resetStep.getProcedure())) {

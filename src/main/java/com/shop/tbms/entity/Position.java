@@ -27,8 +27,4 @@ public class Position extends AbstractAuditingEntity {
     @OneToMany(mappedBy = "position")
     @ToString.Exclude
     private List<Account> listAccount = new ArrayList<>();
-
-    @OneToMany(mappedBy = "position")
-    @ToString.Exclude
-    private List<TemplateStep> listTemplateStep = new ArrayList<>();
 }
