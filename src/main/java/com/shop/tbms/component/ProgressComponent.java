@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -138,6 +139,8 @@ public class ProgressComponent {
                         .allMatch(moldProgress -> Boolean.TRUE.equals(moldProgress.getIsCompleted()));
             case BY_MOLD_ELEMENT:
                 log.info("Check complete of mold size {} with preStep mold element progress {}", moldSize, preStep.getListMoldGroupElementProgresses());
+                if (CollectionUtils.isEmpty(preStep.getListMoldGroupElementProgresses())) return false;
+
                 return preStep.getListMoldGroupElementProgresses().stream()
                         .filter(moldGroupElementProgress ->
                                 moldSize.equals(moldGroupElementProgress.getMold().getSize()))
