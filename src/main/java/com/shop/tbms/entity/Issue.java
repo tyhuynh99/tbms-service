@@ -19,7 +19,7 @@ public class Issue extends AbstractAuditingEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "description", length = 1000, nullable = false)
+    @Column(name = "description", length = 1000)
     private String description;
 
     @Column(name = "change_to_step_id")
