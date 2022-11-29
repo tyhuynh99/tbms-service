@@ -199,47 +199,45 @@ public class StepServiceImpl implements StepService {
 
         /* update progress */
         TbmsUserDetails curUser = AuthenticationUtil.getUserDetails();
-        if (Role.EMPLOYEE.equals(curUser.getRole())) {
-            log.info("Start update progress of step {}", currentStep);
-            switch (currentStep.getReportType()) {
-                case BY_MOLD:
-                    log.info("Start update progress of report type = BY_MOLD");
-                    stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
-                    moldProgressRepository.saveAll(currentMoldProgress);
-                    break;
-                case BY_MOLD_ELEMENT:
-                    log.info("Start update progress of report type = BY_MOLD_ELEMENT");
-                    stepComponent.updateMoldElementProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
-                    moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
-                    break;
-                case BY_MOLD_SEND_RECEIVE:
-                    log.info("Start update progress of report type = BY_MOLD_SEND_RECEIVE");
-                    stepComponent.updateMoldDeliverProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
-                    moldDeliverProgressRepository.saveAll(currentMoldDeliverProgress);
-                    break;
-                default:
-            }
+        log.info("Start update progress of step {}", currentStep);
+        switch (currentStep.getReportType()) {
+            case BY_MOLD:
+                log.info("Start update progress of report type = BY_MOLD");
+                stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
+                moldProgressRepository.saveAll(currentMoldProgress);
+                break;
+            case BY_MOLD_ELEMENT:
+                log.info("Start update progress of report type = BY_MOLD_ELEMENT");
+                stepComponent.updateMoldElementProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
+                moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
+                break;
+            case BY_MOLD_SEND_RECEIVE:
+                log.info("Start update progress of report type = BY_MOLD_SEND_RECEIVE");
+                stepComponent.updateMoldDeliverProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
+                moldDeliverProgressRepository.saveAll(currentMoldDeliverProgress);
+                break;
+            default:
+        }
 
-            log.info("Start update check list");
-            stepComponent.updateChecklist(currentChecklist, reportStepReqDTO.getChecklist(), logDetail);
-            checklistRepository.saveAll(currentChecklist);
+        log.info("Start update check list");
+        stepComponent.updateChecklist(currentChecklist, reportStepReqDTO.getChecklist(), logDetail);
+        checklistRepository.saveAll(currentChecklist);
 
-            log.info("Start update step info");
-            stepComponent.updateStep(currentStep, reportStepReqDTO);
+        log.info("Start update step info");
+        stepComponent.updateStep(currentStep, reportStepReqDTO);
 
-            log.info("Save step new info");
-            stepRepository.save(currentStep);
+        log.info("Save step new info");
+        stepRepository.save(currentStep);
 
-            log.info("Start update evidences");
-            stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence(), reportLog);
+        log.info("Start update evidences");
+        stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence(), reportLog);
 
-            /* set status next step */
-            log.info("Start change status for next step");
-            Step nextMainStep = StepUtil.getNextMainStep(stepSequenceRepository.findByStepBeforeId(currentStep.getId()));
-            if (!StepStatus.IN_PROGRESS.equals(nextMainStep.getStatus())) {
-                nextMainStep.setStatus(StepStatus.IN_PROGRESS);
-                stepRepository.save(nextMainStep);
-            }
+        /* set status next step */
+        log.info("Start change status for next step");
+        Step nextMainStep = StepUtil.getNextMainStep(stepSequenceRepository.findByStepBeforeId(currentStep.getId()));
+        if (!StepStatus.IN_PROGRESS.equals(nextMainStep.getStatus())) {
+            nextMainStep.setStatus(StepStatus.IN_PROGRESS);
+            stepRepository.save(nextMainStep);
         }
 
         if (Boolean.TRUE.equals(currentStep.getIsEnd())) {
