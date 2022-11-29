@@ -68,7 +68,12 @@ public class OrderController {
                                     PurchaseOrder_.STATUS,
                                     PurchaseOrder_.PROCEDURE + "." + Procedure_.PRIORITY
                             },
-                            direction = Sort.Direction.ASC)
+                            direction = Sort.Direction.ASC),
+                    @SortDefault(
+                            sort = {
+                                    PurchaseOrder_.CREATED_DATE
+                            },
+                            direction = Sort.Direction.DESC)
             })
             Pageable pageable) {
         return ResponseUtil.buildPageResponse(purchaseOrderService.getListOrder(filterReqDTO, pageable));
