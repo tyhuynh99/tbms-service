@@ -2,6 +2,7 @@ package com.shop.tbms.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.shop.tbms.annotation.ValidRole;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.mold.MoldDTO;
@@ -45,6 +46,7 @@ public class StepController {
     ) throws JsonProcessingException {
         log.info("Covert JSON {} to object", reportStepReqDTOJson);
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         ReportStepReqDTO reportStepReqDTO = objectMapper.readValue(reportStepReqDTOJson, ReportStepReqDTO.class);
 
         return processReportStep(reportStepReqDTO, listFile);
