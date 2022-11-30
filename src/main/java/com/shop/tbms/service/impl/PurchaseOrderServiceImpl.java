@@ -289,14 +289,9 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         });
 
         List<TbmsNotification> notificationList = listFbNoti.stream()
-                .map(requestDTO ->
-                        listLateOrder.stream()
-                                .map(order -> NotificationUtil.genEntityNotification(
-                                        requestDTO,
-                                        order,
-                                        NotificationType.ORDER_OVERDUE))
-                                .collect(Collectors.toList()))
-                .flatMap(List::stream)
+                .map(requestDTO -> NotificationUtil.genEntityNotification(
+                        requestDTO,
+                        NotificationType.ORDER_OVERDUE))
                 .collect(Collectors.toList());
 
         log.info("Complete send noti of overdue order");
@@ -335,14 +330,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         });
 
         List<TbmsNotification> notificationList = listFbNoti.stream()
-                .map(requestDTO ->
-                        orderNearlyDue.stream()
-                                .map(order -> NotificationUtil.genEntityNotification(
-                                        requestDTO,
-                                        order,
-                                        NotificationType.ORDER_NEARLY_DUE))
-                                .collect(Collectors.toList()))
-                .flatMap(List::stream)
+                .map(requestDTO -> NotificationUtil.genEntityNotification(
+                        requestDTO,
+                        NotificationType.ORDER_NEARLY_DUE)
+                )
                 .collect(Collectors.toList());
 
         log.info("Complete send noti for nearly due order");

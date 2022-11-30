@@ -62,18 +62,6 @@ public class NotificationUtil {
         return notification;
     }
 
-    public static TbmsNotification genEntityNotification(FBNotificationRequestDTO fbNotificationRequestDTO, PurchaseOrder order, NotificationType type) {
-        TbmsNotification notification = new TbmsNotification();
-
-        notification.setIsRead(Boolean.FALSE);
-        notification.setReceiverUsername(fbNotificationRequestDTO.getTopic());
-        notification.setContent(fbNotificationRequestDTO.getBody());
-        notification.setType(type);
-        notification.setOrderId(order.getId());
-
-        return notification;
-    }
-
     public static TbmsNotification genEntityNotification(FBNotificationRequestDTO fbNotificationRequestDTO, NotificationType type) {
         TbmsNotification notification = new TbmsNotification();
 
@@ -81,6 +69,7 @@ public class NotificationUtil {
         notification.setReceiverUsername(fbNotificationRequestDTO.getTopic());
         notification.setContent(fbNotificationRequestDTO.getBody());
         notification.setType(type);
+        notification.setOrderId(fbNotificationRequestDTO.getOrderId());
 
         return notification;
     }
