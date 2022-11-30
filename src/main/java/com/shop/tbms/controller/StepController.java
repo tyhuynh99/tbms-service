@@ -80,13 +80,11 @@ public class StepController {
     }
 
     @PostMapping("/report_issue")
-    @ValidRole(role = {Role.EMPLOYEE})
     public ResponseEntity<SuccessRespDTO> reportIssue(@RequestBody @Valid ReportIssueStepReqDTO reportIssueStepReqDTO) {
         return ResponseEntity.ok(stepService.reportIssueStep(reportIssueStepReqDTO));
     }
 
     @PostMapping("/reset")
-    @ValidRole(role = {Role.EMPLOYEE})
     public ResponseEntity<SuccessRespDTO> reset(@RequestBody @Valid ResetMoldStepReqDTO resetMoldStepReqDTO) {
         return ResponseEntity.ok(stepService.resetMold(resetMoldStepReqDTO));
     }
