@@ -235,7 +235,7 @@ public class StepServiceImpl implements StepService {
         /* set status next step */
         log.info("Start change status for next step");
         Step nextMainStep = StepUtil.getNextMainStep(stepSequenceRepository.findByStepBeforeId(currentStep.getId()));
-        if (!StepStatus.IN_PROGRESS.equals(nextMainStep.getStatus())) {
+        if (Objects.nonNull(nextMainStep) && !StepStatus.IN_PROGRESS.equals(nextMainStep.getStatus())) {
             nextMainStep.setStatus(StepStatus.IN_PROGRESS);
             stepRepository.save(nextMainStep);
         }
