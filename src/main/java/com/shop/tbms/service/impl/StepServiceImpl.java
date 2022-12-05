@@ -404,6 +404,7 @@ public class StepServiceImpl implements StepService {
     private void resetMoldProgressToStep(Step currentStep, Long resetToStepId, List<Long> listMoldId) {
         /* loop to get all main previous step of current step until reset step */
         List<Step> listResetStep = new ArrayList<>();
+        listResetStep.add(currentStep);
         Step step = currentStep;
 
         do {
