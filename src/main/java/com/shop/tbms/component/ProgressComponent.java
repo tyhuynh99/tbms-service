@@ -315,17 +315,11 @@ public class ProgressComponent {
 
         listMold.forEach(mold -> {
             log.info("Start change complete mold {} of step {}", mold, step);
-            Optional<MoldDeliverProgress> optinalProgress = progressList.stream()
+            List<MoldDeliverProgress> deliverProgressList = progressList.stream()
                     .filter(moldProgress -> moldProgress.getMold().getId().equals(mold.getId()))
-                    .findFirst();
+                    .collect(Collectors.toList());
 
-            if (optinalProgress.isPresent()) {
-                MoldDeliverProgress progress = optinalProgress.get();
-                log.info("deliver progress is exited {}. Change complete to FALSE", progress);
-                progress.setIsCompleted(Boolean.FALSE);
-
-                listUpdatedProgress.add(progress);
-            } else {
+            if (deliverProgressList.isEmpty()) {
                 log.info("deliver progress is not existed. create new delvier progress.");
                 MoldDeliverProgress sendProgress = new MoldDeliverProgress();
                 sendProgress.setMold(mold);
@@ -342,6 +336,13 @@ public class ProgressComponent {
                 receiveProgress.setIsCompleted(Boolean.FALSE);
 
                 listUpdatedProgress.add(receiveProgress);
+            } else {
+                deliverProgressList.forEach(progress -> {
+                    log.info("deliver progress is exited {}. Change complete to FALSE", progress);
+                    progress.setIsCompleted(Boolean.FALSE);
+
+                    listUpdatedProgress.add(progress);
+                });
             }
         });
 
