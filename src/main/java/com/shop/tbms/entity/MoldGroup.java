@@ -1,9 +1,7 @@
 package com.shop.tbms.entity;
 
 import com.shop.tbms.entity.common.AbstractAuditingEntity;
-import com.shop.tbms.enumerate.mold.MoldPlatingType;
-import com.shop.tbms.enumerate.mold.MoldStructure;
-import com.shop.tbms.enumerate.mold.MoldType;
+import com.shop.tbms.enumerate.mold.*;
 import lombok.*;
 
 import javax.persistence.*;
@@ -48,6 +46,30 @@ public class MoldGroup extends AbstractAuditingEntity {
 
     @Column(name = "num_of_plate", nullable = false)
     private Integer numOfPlate;
+
+    @Column(name = "thinness")
+    private String thinness;
+
+    @Column(name = "khuon_scan_cnc")
+    private String khuonScanCnc;
+
+    @Column(name = "ti_le_rut_nuoc_khuon")
+    private String tiLeRutNuocKhuon;
+
+    @Column(name = "ti_le_rut_nuoc_go")
+    private String tiLeRutNuocGo;
+
+    @Column(name = "tao_hoa_theo_type")
+    private TaoHoaTheoType taoHoaTheoType;
+
+    @Column(name = "ban_le_khuon_type")
+    private BanLeKhuonType banLeKhuonType;
+
+    @Column(name = "chu_tren_loi_type")
+    private ChuTrenLoiType chuTrenLoiType;
+
+    @Column(name = "vat_lieu_khuon_type")
+    private VatLieuKhuonType vatLieuKhuonType;
 
     @OneToMany(mappedBy = "moldGroup", cascade = CascadeType.ALL)
     @ToString.Exclude
