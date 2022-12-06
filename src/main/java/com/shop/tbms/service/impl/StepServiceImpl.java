@@ -354,7 +354,8 @@ public class StepServiceImpl implements StepService {
             if (StepType.FIXING.equals(resetStep.getType())) {
                 progressComponent.resetProgress(resetStep, listReportedMold);
             } else {
-                resetMoldProgressToStep(currentStep, resetStep.getId(), reportIssueStepReqDTO.getListMoldId());
+                Step endStep = StepUtil.getEndStep(currentStep.getProcedure().getPurchaseOrder());
+                resetMoldProgressToStep(endStep, resetStep.getId(), reportIssueStepReqDTO.getListMoldId());
             }
         }
 
@@ -366,46 +367,23 @@ public class StepServiceImpl implements StepService {
     @Override
     public SuccessRespDTO resetMold(ResetMoldStepReqDTO resetMoldStepReqDTO) {
         log.info("Start reset mold to step {}", resetMoldStepReqDTO);
-        Step currentStep = stepRepository.findById(resetMoldStepReqDTO.getCurrentStepId()).orElseThrow();
-        Step resetStep = stepRepository.findById(resetMoldStepReqDTO.getResetToStepId()).orElseThrow();
+        Step resetStep = stepRepository.findById(resetMoldStepReqDTO.getCurrentStepId()).orElseThrow();
         /* validate step status */
-        purchaseOrderComponent.canUpdateOrder(currentStep.getProcedure().getPurchaseOrder());
+        purchaseOrderComponent.canUpdateOrder(resetStep.getProcedure().getPurchaseOrder());
 
-        /* validate reset step */
-        if (!Objects.equals(currentStep.getProcedure(), resetStep.getProcedure())) {
-            log.info("Validate order of step in req {}", resetMoldStepReqDTO);
-            throw new BusinessException(
-                    String.format(
-                            "Reset step %s is not the same order with step %s",
-                            resetMoldStepReqDTO.getResetToStepId(),
-                            resetMoldStepReqDTO.getCurrentStepId())
-            );
-        }
-
-        /* validate sequence */
-        /* this rule include validate not is start step */
-        if (resetStep.getSequenceNo() >= currentStep.getSequenceNo()) {
-            log.info("Validate step order in req {}", resetMoldStepReqDTO);
-            throw new BusinessException(
-                    String.format(
-                            "Reset step %s is after step %s",
-                            resetMoldStepReqDTO.getResetToStepId(),
-                            resetMoldStepReqDTO.getCurrentStepId())
-            );
-        }
-
-        resetMoldProgressToStep(currentStep, resetMoldStepReqDTO.getResetToStepId(), resetMoldStepReqDTO.getListMoldId());
+        Step endStep = StepUtil.getEndStep(resetStep.getProcedure().getPurchaseOrder());
+        resetMoldProgressToStep(endStep, resetStep.getId(), resetMoldStepReqDTO.getListMoldId());
         log.info("End reset mold to step");
         return SuccessRespDTO.builder()
                 .message(MessageConstant.UPDATE_SUCCESS)
                 .build();
     }
 
-    private void resetMoldProgressToStep(Step currentStep, Long resetToStepId, List<Long> listMoldId) {
+    private void resetMoldProgressToStep(Step endStep, Long resetToStepId, List<Long> listMoldId) {
         /* loop to get all main previous step of current step until reset step */
         List<Step> listResetStep = new ArrayList<>();
-        listResetStep.add(currentStep);
-        Step step = currentStep;
+        listResetStep.add(endStep);
+        Step step = endStep;
 
         do {
             List<StepSequence> stepSequenceList = stepSequenceRepository.findByStepAfterId(step.getId());

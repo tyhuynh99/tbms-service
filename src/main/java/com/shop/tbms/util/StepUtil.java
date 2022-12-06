@@ -1,6 +1,7 @@
 package com.shop.tbms.util;
 
 import com.shop.tbms.entity.*;
+import com.shop.tbms.enumerate.step.StepType;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityNotFoundException;
@@ -30,6 +31,13 @@ public class StepUtil {
 
         listStepSequenceBefore.sort(Comparator.comparing(o -> o.getStepAfter().getSequenceNo()));
         return listStepSequenceBefore.get(listStepSequenceBefore.size() - 1).getStepAfter();
+    }
+
+    public static Step getEndStep(PurchaseOrder order) {
+        return order.getProcedure().getListStep().stream()
+                .filter(step -> Boolean.TRUE.equals(step.getIsEnd()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Not found end step of order " + order.getCode()));
     }
 
     public static Step getPreMainStep(List<StepSequence> listStepSequenceAfter) {
