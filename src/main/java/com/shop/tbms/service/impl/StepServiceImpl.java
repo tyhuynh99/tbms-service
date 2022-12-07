@@ -115,8 +115,8 @@ public class StepServiceImpl implements StepService {
         StepDTO dto = stepMapper.toDTO(step);
 
         /* Map progress dto */
-        Step preStep = StepUtil.getPreMainStep(step.getListStepAfter());
-        Step nextStep = StepUtil.getNextMainStep(step.getListStepBefore());
+        List<Step> preStep = StepUtil.getPreStep(step.getListStepAfter());
+        List<Step> nextStep = StepUtil.getNextStep(step.getListStepBefore());
         switch (step.getReportType()) {
             case BY_MOLD:
                 dto.setListMoldProgress(moldProgressMapper.toDTOs(step.getListMoldProgress()));
@@ -352,7 +352,7 @@ public class StepServiceImpl implements StepService {
             Step resetStep = stepRepository.findById(reportIssueStepReqDTO.getChangeToStepId()).orElseThrow();
 
             if (StepType.FIXING.equals(resetStep.getType())) {
-                progressComponent.resetProgress(resetStep, listReportedMold);
+                progressComponent.resetProgress(resetStep, listReportedMold, false);
             } else {
                 Step endStep = StepUtil.getEndStep(currentStep.getProcedure().getPurchaseOrder());
                 resetMoldProgressToStep(endStep, resetStep.getId(), reportIssueStepReqDTO.getListMoldId());
@@ -392,7 +392,7 @@ public class StepServiceImpl implements StepService {
         } while (!Objects.equals(Objects.requireNonNull(step).getId(), resetToStepId));
 
         List<Mold> listMold = moldRepository.findAllById(listMoldId);
-        listResetStep.forEach(stepAction -> progressComponent.resetProgress(stepAction, listMold));
+        listResetStep.forEach(stepAction -> progressComponent.resetProgress(stepAction, listMold, false));
     }
 
     @Override

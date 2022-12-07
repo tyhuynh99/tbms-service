@@ -8,6 +8,7 @@ import javax.persistence.EntityNotFoundException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.shop.tbms.constant.AppConstant.ZERO_LONG;
 
@@ -33,6 +34,13 @@ public class StepUtil {
         return listStepSequenceBefore.get(listStepSequenceBefore.size() - 1).getStepAfter();
     }
 
+    public static List<Step> getNextStep(List<StepSequence> listStepSequenceBefore) {
+        if (CollectionUtils.isEmpty(listStepSequenceBefore)) return null;
+
+        listStepSequenceBefore.sort(Comparator.comparing(o -> o.getStepAfter().getSequenceNo()));
+        return listStepSequenceBefore.stream().map(StepSequence::getStepAfter).collect(Collectors.toList());
+    }
+
     public static Step getEndStep(PurchaseOrder order) {
         return order.getProcedure().getListStep().stream()
                 .filter(step -> Boolean.TRUE.equals(step.getIsEnd()))
@@ -45,6 +53,13 @@ public class StepUtil {
 
         listStepSequenceAfter.sort(Comparator.comparing(o -> o.getStepBefore().getSequenceNo()));
         return listStepSequenceAfter.get(0).getStepBefore();
+    }
+
+    public static List<Step> getPreStep(List<StepSequence> listStepSequenceAfter) {
+        if (CollectionUtils.isEmpty(listStepSequenceAfter)) return null;
+
+        listStepSequenceAfter.sort(Comparator.comparing(o -> o.getStepBefore().getSequenceNo()));
+        return listStepSequenceAfter.stream().map(StepSequence::getStepBefore).collect(Collectors.toList());
     }
 
     public static Step getNextMainStep(List<StepSequence> listStepSequenceBefore, Mold mold) {
