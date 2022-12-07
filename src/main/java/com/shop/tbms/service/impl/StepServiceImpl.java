@@ -369,6 +369,37 @@ public class StepServiceImpl implements StepService {
             Step resetStep = stepRepository.findById(reportIssueStepReqDTO.getChangeToStepId()).orElseThrow();
 
             if (StepType.FIXING.equals(resetStep.getType())) {
+                switch (currentStep.getReportType()) {
+                    case BY_MOLD: {
+                        List<MoldProgress> progressList = currentStep.getListMoldProgress().stream()
+                                .filter(progress -> reportIssueStepReqDTO.getListMoldId().contains(progress.getMold().getId()))
+                                .collect(Collectors.toList());
+
+                        progressList.forEach(progress -> progress.setIsCompleted(Boolean.FALSE));
+                        moldProgressRepository.saveAll(progressList);
+                    }
+                    break;
+                    case BY_MOLD_SEND_RECEIVE: {
+                        List<MoldDeliverProgress> progressList = currentStep.getListMoldDeliverProgress().stream()
+                                .filter(progress -> reportIssueStepReqDTO.getListMoldId().contains(progress.getMold().getId()))
+                                .collect(Collectors.toList());
+
+                        progressList.forEach(progress -> progress.setIsCompleted(Boolean.FALSE));
+                        moldDeliverProgressRepository.saveAll(progressList);
+                    }
+                    break;
+                    case BY_MOLD_ELEMENT: {
+                        List<MoldGroupElementProgress> progressList = currentStep.getListMoldGroupElementProgresses().stream()
+                                .filter(progress -> reportIssueStepReqDTO.getListMoldId().contains(progress.getMold().getId()))
+                                .collect(Collectors.toList());
+
+                        progressList.forEach(progress -> progress.setIsCompleted(Boolean.FALSE));
+                        moldGroupElementProgressRepository.saveAll(progressList);
+                    }
+                    break;
+                    default:
+                }
+
                 progressComponent.resetProgress(resetStep, listReportedMold, false);
             } else {
                 Step endStep = StepUtil.getEndStep(currentStep.getProcedure().getPurchaseOrder());
