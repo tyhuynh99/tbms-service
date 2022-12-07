@@ -6,4 +6,5 @@ public class AppConstant {
     public final static int ZERO = 0;
     public final static int PASSWORD_MIN_LENGTH = 6;
     public final static int PASSWORD_MAX_LENGTH = 20;
+    public final static Long DELETED_ID = -1L;
 }

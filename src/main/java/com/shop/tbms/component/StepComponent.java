@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.shop.tbms.constant.AppConstant.DELETED_ID;
 import static com.shop.tbms.constant.AppConstant.ZERO;
 
 @Component
@@ -144,14 +145,18 @@ public class StepComponent {
 
                             /* validate not complete in next-step */
                             if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
-                                Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepBefore(), moldProgress.getMold()));
-                                boolean canCheckComplete = progressComponent.canUnCheckCompleteBySize(
-                                        nextStep,
-                                        moldProgress.getMold().getSize()
-                                );
+                                boolean canUncheckComplete = true;
 
-                                if (!canCheckComplete) {
-                                    log.error("Mold {} is complete in next step {}", moldProgress.getMold(), nextStep);
+                                List<Step> nextSteps = StepUtil.getNextStep(currentStep.getListStepBefore());
+                                for (Step nextStep : nextSteps) {
+                                    canUncheckComplete &= progressComponent.canUnCheckCompleteBySize(
+                                            nextStep,
+                                            moldProgress.getMold().getSize()
+                                    );
+                                }
+
+                                if (!canUncheckComplete) {
+                                    log.error("Mold {} is complete in next step {}", moldProgress.getMold(), nextSteps);
                                     throw new BusinessException("Mold " + moldProgress.getMold().getSize() + " is complete in next step");
                                 }
                             }
@@ -164,14 +169,18 @@ public class StepComponent {
 
                             /* validate complete in pre-step */
                             if (Boolean.FALSE.equals(currentStep.getIsStart())) {
-                                Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepAfter(), moldProgress.getMold()));
-                                boolean canCheckComplete = progressComponent.canCheckCompleteBySize(
-                                        preStep,
-                                        moldProgress.getMold().getSize()
-                                );
+                                boolean canCheckComplete = true;
+
+                                List<Step> preSteps = StepUtil.getNextStep(currentStep.getListStepBefore());
+                                for (Step preStep : preSteps) {
+                                    canCheckComplete &= progressComponent.canCheckCompleteBySize(
+                                            preStep,
+                                            moldProgress.getMold().getSize()
+                                    );
+                                }
 
                                 if (!canCheckComplete) {
-                                    log.error("Mold {} is not complete in prestep {}", moldProgress.getMold(), preStep);
+                                    log.error("Mold {} is not complete in prestep {}", moldProgress.getMold(), preSteps);
                                     throw new BusinessException("Mold " + moldProgress.getMold().getSize() + " is not complete in prestep");
                                 }
                             }
@@ -183,6 +192,10 @@ public class StepComponent {
                 });
 
         logDetail.addAll(ReportLogUtil.genLogForMoldProgress(listUpdateToComplete, listUpdateToUnComplete, logConstant));
+        if (StepType.FIXING.equals(currentStep.getType())) {
+            /* step SUA KHUON, when update complete, remove progress */
+            listUpdateToComplete.forEach(moldProgress -> moldProgress.setId(DELETED_ID));
+        }
     }
 
     public void updateMoldElementProgress(Step currentStep, List<ReportProgressReqDTO> listReq, List<String> logDetail) {
@@ -205,14 +218,18 @@ public class StepComponent {
 
                     /* validate not complete in next-step */
                     if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
-                        Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepBefore(), moldGroupElementProgress.getMold()));
-                        boolean canCheckComplete = progressComponent.canUnCheckCompleteBySize(
-                                nextStep,
-                                moldGroupElementProgress.getMold().getSize()
-                        );
+                        boolean canUncheckComplete = true;
 
-                        if (!canCheckComplete) {
-                            log.error("Mold {} is complete in next step {}", moldGroupElementProgress.getMold(), nextStep);
+                        List<Step> nextSteps = StepUtil.getNextStep(currentStep.getListStepBefore());
+                        for (Step nextStep : nextSteps) {
+                            canUncheckComplete &= progressComponent.canUnCheckCompleteBySize(
+                                    nextStep,
+                                    moldGroupElementProgress.getMold().getSize()
+                            );
+                        }
+
+                        if (!canUncheckComplete) {
+                            log.error("Mold {} is complete in next step {}", moldGroupElementProgress.getMold(), nextSteps);
                             throw new BusinessException("Mold " + moldGroupElementProgress.getMold().getSize() + " is complete in next step");
                         }
                     }
@@ -225,14 +242,18 @@ public class StepComponent {
 
                     /* validate complete in pre-step */
                     if (Boolean.FALSE.equals(currentStep.getIsStart())) {
-                        Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepAfter(), moldGroupElementProgress.getMold()));
-                        boolean canCheckComplete = progressComponent.canCheckCompleteBySize(
-                                preStep,
-                                moldGroupElementProgress.getMold().getSize()
-                        );
+                        boolean canCheckComplete = true;
+
+                        List<Step> preSteps = StepUtil.getNextStep(currentStep.getListStepBefore());
+                        for (Step preStep : preSteps) {
+                            canCheckComplete &= progressComponent.canCheckCompleteBySize(
+                                    preStep,
+                                    moldGroupElementProgress.getMold().getSize()
+                            );
+                        }
 
                         if (!canCheckComplete) {
-                            log.error("Mold {} is not complete in prestep {}", moldGroupElementProgress.getMold(), preStep);
+                            log.error("Mold {} is not complete in prestep {}", moldGroupElementProgress.getMold(), preSteps);
                             throw new BusinessException("Mold " + moldGroupElementProgress.getMold().getSize() + " is not complete in prestep");
                         }
                     }
@@ -244,6 +265,10 @@ public class StepComponent {
         });
 
         logDetail.addAll(ReportLogUtil.genLogForMoldElementProgress(listUpdateToComplete, listUpdateToUnComplete, logConstant));
+        if (StepType.FIXING.equals(currentStep.getType())) {
+            /* step SUA KHUON, when update complete, remove progress */
+            listUpdateToComplete.forEach(moldProgress -> moldProgress.setId(DELETED_ID));
+        }
     }
 
     public void updateMoldDeliverProgress(Step currentStep, List<ReportProgressReqDTO> listReq, List<String> logDetail) {
@@ -266,14 +291,18 @@ public class StepComponent {
 
                     /* validate not complete in next-step */
                     if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
-                        Step nextStep = Objects.requireNonNull(StepUtil.getNextMainStep(currentStep.getListStepBefore(), moldDeliverProgress.getMold()));
-                        boolean canCheckComplete = progressComponent.canUnCheckCompleteBySize(
-                                nextStep,
-                                moldDeliverProgress.getMold().getSize()
-                        );
+                        boolean canUncheckComplete = true;
 
-                        if (!canCheckComplete) {
-                            log.error("Mold {} is complete in next step {}", moldDeliverProgress.getMold(), nextStep);
+                        List<Step> nextSteps = StepUtil.getNextStep(currentStep.getListStepBefore());
+                        for (Step nextStep : nextSteps) {
+                            canUncheckComplete &= progressComponent.canUnCheckCompleteBySize(
+                                    nextStep,
+                                    moldDeliverProgress.getMold().getSize()
+                            );
+                        }
+
+                        if (!canUncheckComplete) {
+                            log.error("Mold {} is complete in next step {}", moldDeliverProgress.getMold(), nextSteps);
                             throw new BusinessException("Mold " + moldDeliverProgress.getMold().getSize() + " is complete in next step");
                         }
                     }
@@ -286,14 +315,18 @@ public class StepComponent {
 
                     /* validate complete in pre-step */
                     if (Boolean.FALSE.equals(currentStep.getIsStart())) {
-                        Step preStep = Objects.requireNonNull(StepUtil.getPreMainStep(currentStep.getListStepAfter(), moldDeliverProgress.getMold()));
-                        boolean canCheckComplete = progressComponent.canCheckCompleteBySize(
-                                preStep,
-                                moldDeliverProgress.getMold().getSize()
-                        );
+                        boolean canCheckComplete = true;
+
+                        List<Step> preSteps = StepUtil.getNextStep(currentStep.getListStepBefore());
+                        for (Step preStep : preSteps) {
+                            canCheckComplete &= progressComponent.canCheckCompleteBySize(
+                                    preStep,
+                                    moldDeliverProgress.getMold().getSize()
+                            );
+                        }
 
                         if (!canCheckComplete) {
-                            log.error("Mold {} is not complete in prestep {}", moldDeliverProgress.getMold(), preStep);
+                            log.error("Mold {} is not complete in prestep {}", moldDeliverProgress.getMold(), preSteps);
                             throw new BusinessException("Mold " + moldDeliverProgress.getMold().getSize() + " is not complete in prestep");
                         }
                     }
@@ -304,6 +337,10 @@ public class StepComponent {
             }
         });
         logDetail.addAll(ReportLogUtil.genLogForMoldDeliverProgress(listUpdateToComplete, listUpdateToUnComplete, logConstant));
+        if (StepType.FIXING.equals(currentStep.getType())) {
+            /* step SUA KHUON, when update complete, remove progress */
+            listUpdateToComplete.forEach(moldProgress -> moldProgress.setId(DELETED_ID));
+        }
     }
 
     public void updateChecklist(List<Checklist> currentChecklist, List<ReportChecklistReqDTO> listReq, List<String> logDetail) {

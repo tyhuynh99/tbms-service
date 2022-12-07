@@ -206,6 +206,11 @@ public class ProgressComponent {
     }
 
     public boolean canCheckCompleteBySize(Step preStep, String moldSize) {
+        if (StepType.FIXING.equals(preStep.getType())) {
+            /* Allow to check in step SUA KHUON */
+            return true;
+        }
+
         switch (preStep.getReportType()) {
             case BY_MOLD:
                 log.info("Check complete of mold size {} with preStep mold progress {}", moldSize, preStep.getListMoldProgress());
@@ -260,6 +265,11 @@ public class ProgressComponent {
     }
 
     public boolean canUnCheckCompleteBySize(Step nextStep, String moldSize) {
+        if (StepType.FIXING.equals(nextStep.getType())) {
+            /* Allow to check in step SUA KHUON */
+            return true;
+        }
+
         switch (nextStep.getReportType()) {
             case BY_MOLD:
                 log.info("Check complete of mold size {} with nextStep mold progress {}", moldSize, nextStep.getListMoldProgress());

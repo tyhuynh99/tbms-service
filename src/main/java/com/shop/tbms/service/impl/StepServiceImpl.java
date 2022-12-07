@@ -48,6 +48,8 @@ import javax.persistence.EntityNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.shop.tbms.constant.AppConstant.DELETED_ID;
+
 @Service
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 @Slf4j
@@ -205,16 +207,31 @@ public class StepServiceImpl implements StepService {
                 log.info("Start update progress of report type = BY_MOLD");
                 stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
                 moldProgressRepository.saveAll(currentMoldProgress);
+                moldProgressRepository.deleteAll(
+                        currentMoldProgress.stream()
+                                .filter(moldProgress -> DELETED_ID.equals(moldProgress.getId()))
+                                .collect(Collectors.toList())
+                );
                 break;
             case BY_MOLD_ELEMENT:
                 log.info("Start update progress of report type = BY_MOLD_ELEMENT");
                 stepComponent.updateMoldElementProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
                 moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
+                moldGroupElementProgressRepository.deleteAll(
+                        currentMoldElementProgress.stream()
+                                .filter(moldProgress -> DELETED_ID.equals(moldProgress.getId()))
+                                .collect(Collectors.toList())
+                );
                 break;
             case BY_MOLD_SEND_RECEIVE:
                 log.info("Start update progress of report type = BY_MOLD_SEND_RECEIVE");
                 stepComponent.updateMoldDeliverProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
                 moldDeliverProgressRepository.saveAll(currentMoldDeliverProgress);
+                moldDeliverProgressRepository.deleteAll(
+                        currentMoldDeliverProgress.stream()
+                                .filter(moldProgress -> DELETED_ID.equals(moldProgress.getId()))
+                                .collect(Collectors.toList())
+                );
                 break;
             default:
         }
