@@ -35,7 +35,7 @@ public class StepUtil {
     }
 
     public static List<Step> getNextStep(List<StepSequence> listStepSequenceBefore) {
-        if (CollectionUtils.isEmpty(listStepSequenceBefore)) return null;
+        if (CollectionUtils.isEmpty(listStepSequenceBefore)) return List.of();
 
         listStepSequenceBefore.sort(Comparator.comparing(o -> o.getStepAfter().getSequenceNo()));
         return listStepSequenceBefore.stream().map(StepSequence::getStepAfter).collect(Collectors.toList());
@@ -56,7 +56,7 @@ public class StepUtil {
     }
 
     public static List<Step> getPreStep(List<StepSequence> listStepSequenceAfter) {
-        if (CollectionUtils.isEmpty(listStepSequenceAfter)) return null;
+        if (CollectionUtils.isEmpty(listStepSequenceAfter)) return List.of();
 
         listStepSequenceAfter.sort(Comparator.comparing(o -> o.getStepBefore().getSequenceNo()));
         return listStepSequenceAfter.stream().map(StepSequence::getStepBefore).collect(Collectors.toList());
