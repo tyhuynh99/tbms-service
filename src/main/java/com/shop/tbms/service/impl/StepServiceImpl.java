@@ -127,7 +127,8 @@ public class StepServiceImpl implements StepService {
                             progressComponent.setReportAvailabilityForMoldProgress(
                                     preStep,
                                     nextStep,
-                                    dto.getListMoldProgress())
+                                    dto.getListMoldProgress(),
+                                    step)
                     );
                 }
                 break;
@@ -138,7 +139,8 @@ public class StepServiceImpl implements StepService {
                             progressComponent.setReportAvailabilityForDeliveryProgress(
                                     preStep,
                                     nextStep,
-                                    dto.getListMoldDeliverProgress())
+                                    dto.getListMoldDeliverProgress(),
+                                    step)
                     );
                 }
                 break;
@@ -170,7 +172,8 @@ public class StepServiceImpl implements StepService {
                             progressComponent.setReportAvailabilityForMoldElementProgress(
                                     preStep,
                                     nextStep,
-                                    dto.getListMoldElementProgress()
+                                    dto.getListMoldElementProgress(),
+                                    step
                             )
                     );
                 }

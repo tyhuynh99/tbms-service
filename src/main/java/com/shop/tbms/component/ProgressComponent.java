@@ -85,22 +85,26 @@ public class ProgressComponent {
 //        }).collect(Collectors.toList());
 //    }
 
-    public List<MoldProgressDTO> setReportAvailabilityForMoldProgress(List<Step> preStepList, List<Step> nextStepList, List<MoldProgressDTO> moldProgressDTOList) {
+    public List<MoldProgressDTO> setReportAvailabilityForMoldProgress(List<Step> preStepList, List<Step> nextStepList, List<MoldProgressDTO> moldProgressDTOList, Step currentStep) {
         return moldProgressDTOList.stream().map(moldProgressDTO -> {
             boolean canCheck = true;
-            for (Step preStep : preStepList) {
-                log.info("Start check can check complete of size {} in step {}", moldProgressDTO.getMoldSize(), preStep);
-                canCheck &= canCheckCompleteBySize(preStep, moldProgressDTO.getMoldSize());
-                log.info("Value canCheck of {} is {}", moldProgressDTO, canCheck);
+            if (!StepType.FIXING.equals(currentStep.getType())) {
+                for (Step preStep : preStepList) {
+                    log.info("Start check can check complete of size {} in step {}", moldProgressDTO.getMoldSize(), preStep);
+                    canCheck &= canCheckCompleteBySize(preStep, moldProgressDTO.getMoldSize());
+                    log.info("Value canCheck of {} is {}", moldProgressDTO, canCheck);
+                }
             }
             log.info("Set value canCheck of {} is {}", moldProgressDTO, canCheck);
             moldProgressDTO.setCanCheck(canCheck);
 
             boolean canUncheck = true;
-            for (Step nextStep : nextStepList) {
-                log.info("Start check can uncheck complete of size {} in step {}", moldProgressDTO.getMoldSize(), nextStep);
-                canUncheck &= canUnCheckCompleteBySize(nextStep, moldProgressDTO.getMoldSize());
-                log.info("Value canUnCheck of {} is {}", moldProgressDTO, canUncheck);
+            if (!StepType.FIXING.equals(currentStep.getType())) {
+                for (Step nextStep : nextStepList) {
+                    log.info("Start check can uncheck complete of size {} in step {}", moldProgressDTO.getMoldSize(), nextStep);
+                    canUncheck &= canUnCheckCompleteBySize(nextStep, moldProgressDTO.getMoldSize());
+                    log.info("Value canUnCheck of {} is {}", moldProgressDTO, canUncheck);
+                }
             }
             log.info("Set value canUncheck of {} is {}", moldProgressDTO, canUncheck);
             moldProgressDTO.setCanUncheck(canUncheck);
@@ -137,19 +141,22 @@ public class ProgressComponent {
 //        }).collect(Collectors.toList());
 //    }
 
-    public List<MoldElementProgressDTO> setReportAvailabilityForMoldElementProgress(List<Step> preStepList, List<Step> nextStepList, List<MoldElementProgressDTO> moldElementProgressDTOList) {
+    public List<MoldElementProgressDTO> setReportAvailabilityForMoldElementProgress(List<Step> preStepList, List<Step> nextStepList, List<MoldElementProgressDTO> moldElementProgressDTOList, Step currentStep) {
         return moldElementProgressDTOList.stream().map(moldElementProgressDTO -> {
             boolean canCheck = true;
-
-            for (Step preStep : preStepList) {
-                canCheck &= canCheckCompleteBySize(preStep, moldElementProgressDTO.getMoldSize());
+            if (!StepType.FIXING.equals(currentStep.getType())) {
+                for (Step preStep : preStepList) {
+                    canCheck &= canCheckCompleteBySize(preStep, moldElementProgressDTO.getMoldSize());
+                }
             }
             final boolean canCheckFinal = canCheck;
             log.info("Set value canCheck of {} is {}", moldElementProgressDTO, canCheck);
 
             boolean canUncheck = true;
-            for (Step nextStep : nextStepList) {
-                canUncheck &= canUnCheckCompleteBySize(nextStep, moldElementProgressDTO.getMoldSize());
+            if (!StepType.FIXING.equals(currentStep.getType())) {
+                for (Step nextStep : nextStepList) {
+                    canUncheck &= canUnCheckCompleteBySize(nextStep, moldElementProgressDTO.getMoldSize());
+                }
             }
             final boolean canUncheckFinal = canUncheck;
             log.info("Set value canUncheck of {} is {}", moldElementProgressDTO, canUncheck);
@@ -186,18 +193,22 @@ public class ProgressComponent {
 //        }).collect(Collectors.toList());
 //    }
 
-    public List<MoldDeliverProgressDTO> setReportAvailabilityForDeliveryProgress(List<Step> preStepList, List<Step> nextStepList, List<MoldDeliverProgressDTO> moldDeliverProgressDTOList) {
+    public List<MoldDeliverProgressDTO> setReportAvailabilityForDeliveryProgress(List<Step> preStepList, List<Step> nextStepList, List<MoldDeliverProgressDTO> moldDeliverProgressDTOList, Step currentStep) {
         return moldDeliverProgressDTOList.stream().map(moldDeliverProgressDTO -> {
             boolean canCheck = true;
-            for (Step preStep : preStepList) {
-                canCheck &= canCheckCompleteBySize(preStep, moldDeliverProgressDTO.getMoldSize());
+            if (!StepType.FIXING.equals(currentStep.getType())) {
+                for (Step preStep : preStepList) {
+                    canCheck &= canCheckCompleteBySize(preStep, moldDeliverProgressDTO.getMoldSize());
+                }
             }
             log.info("Set value canCheck of {} is {}", moldDeliverProgressDTO, canCheck);
             moldDeliverProgressDTO.setCanCheck(canCheck);
 
             boolean canUncheck = true;
-            for (Step nextStep : nextStepList) {
-                canUncheck &= canUnCheckCompleteBySize(nextStep, moldDeliverProgressDTO.getMoldSize());
+            if (!StepType.FIXING.equals(currentStep.getType())) {
+                for (Step nextStep : nextStepList) {
+                    canUncheck &= canUnCheckCompleteBySize(nextStep, moldDeliverProgressDTO.getMoldSize());
+                }
             }
             log.info("Set value canUncheck of {} is {}", moldDeliverProgressDTO, canUncheck);
             moldDeliverProgressDTO.setCanUncheck(canUncheck);
@@ -207,11 +218,6 @@ public class ProgressComponent {
     }
 
     public boolean canCheckCompleteBySize(Step preStep, String moldSize) {
-        if (StepType.FIXING.equals(preStep.getType())) {
-            /* Allow to check in step SUA KHUON */
-            return true;
-        }
-
         switch (preStep.getReportType()) {
             case BY_MOLD:
                 log.info("Check complete of mold size {} with preStep mold progress {}", moldSize, preStep.getListMoldProgress());
@@ -266,11 +272,6 @@ public class ProgressComponent {
     }
 
     public boolean canUnCheckCompleteBySize(Step nextStep, String moldSize) {
-        if (StepType.FIXING.equals(nextStep.getType())) {
-            /* Allow to check in step SUA KHUON */
-            return true;
-        }
-
         switch (nextStep.getReportType()) {
             case BY_MOLD:
                 log.info("Check complete of mold size {} with nextStep mold progress {}", moldSize, nextStep.getListMoldProgress());
@@ -578,7 +579,8 @@ public class ProgressComponent {
             if (mapProgressByMold.containsKey(mold)) {
                 mapProgressByMold.get(mold).add(moldDeliverProgresses);
             } else {
-                List<MoldDeliverProgress> progressListByMold = Arrays.asList(moldDeliverProgresses);
+                List<MoldDeliverProgress> progressListByMold = new ArrayList<>();
+                progressListByMold.add(moldDeliverProgresses);
                 mapProgressByMold.put(mold, progressListByMold);
             }
         });
@@ -621,7 +623,8 @@ public class ProgressComponent {
             if (mapProgressByMold.containsKey(mold)) {
                 mapProgressByMold.get(mold).add(progress);
             } else {
-                List<MoldGroupElementProgress> progressListByMold = Arrays.asList(progress);
+                List<MoldGroupElementProgress> progressListByMold = new ArrayList<>();
+                progressListByMold.add(progress);
                 mapProgressByMold.put(mold, progressListByMold);
             }
         });
