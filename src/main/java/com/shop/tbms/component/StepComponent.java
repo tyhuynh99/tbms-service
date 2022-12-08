@@ -171,7 +171,7 @@ public class StepComponent {
                             if (Boolean.FALSE.equals(currentStep.getIsStart())) {
                                 boolean canCheckComplete = true;
 
-                                List<Step> preSteps = StepUtil.getNextStep(currentStep.getListStepBefore());
+                                List<Step> preSteps = StepUtil.getPreStep(currentStep.getListStepAfter());
                                 for (Step preStep : preSteps) {
                                     canCheckComplete &= progressComponent.canCheckCompleteBySize(
                                             preStep,
@@ -244,7 +244,7 @@ public class StepComponent {
                     if (Boolean.FALSE.equals(currentStep.getIsStart())) {
                         boolean canCheckComplete = true;
 
-                        List<Step> preSteps = StepUtil.getNextStep(currentStep.getListStepBefore());
+                        List<Step> preSteps = StepUtil.getPreStep(currentStep.getListStepAfter());
                         for (Step preStep : preSteps) {
                             canCheckComplete &= progressComponent.canCheckCompleteBySize(
                                     preStep,
@@ -317,7 +317,7 @@ public class StepComponent {
                     if (Boolean.FALSE.equals(currentStep.getIsStart())) {
                         boolean canCheckComplete = true;
 
-                        List<Step> preSteps = StepUtil.getNextStep(currentStep.getListStepBefore());
+                        List<Step> preSteps = StepUtil.getPreStep(currentStep.getListStepAfter());
                         for (Step preStep : preSteps) {
                             canCheckComplete &= progressComponent.canCheckCompleteBySize(
                                     preStep,
