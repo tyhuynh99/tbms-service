@@ -37,6 +37,7 @@ public class StepUtil {
     public static List<Step> getNextStepToChkProgress(List<StepSequence> listStepSequenceBefore) {
         if (CollectionUtils.isEmpty(listStepSequenceBefore)) return List.of();
 
+        Step currentStep = listStepSequenceBefore.get(0).getStepBefore();
         listStepSequenceBefore.sort(Comparator.comparing(o -> o.getStepAfter().getSequenceNo()));
 
         boolean hasFixingStep = listStepSequenceBefore.stream()
@@ -44,7 +45,9 @@ public class StepUtil {
                 .anyMatch(step -> StepType.FIXING.equals(step.getType()));
 
         if (hasFixingStep) {
-            return listStepSequenceBefore.stream().map(StepSequence::getStepAfter).collect(Collectors.toList());
+            return listStepSequenceBefore.stream().map(StepSequence::getStepAfter)
+                    .filter(step -> step.getSequenceNo() > currentStep.getSequenceNo())
+                    .collect(Collectors.toList());
         }
 
         return List.of(getNextMainStep(listStepSequenceBefore));
