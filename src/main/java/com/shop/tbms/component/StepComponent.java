@@ -140,7 +140,7 @@ public class StepComponent {
                             log.info("Update progress {} to incomplete", moldProgress);
 
                             /* validate not complete in next-step */
-                            if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
+                            if (Boolean.FALSE.equals(currentStep.getIsEnd()) && !StepType.FIXING.equals(currentStep.getType())) {
                                 boolean canUncheckComplete = true;
 
                                 List<Step> nextSteps = StepUtil.getNextStepToChkProgress(currentStep.getListStepBefore());
@@ -164,7 +164,7 @@ public class StepComponent {
                             log.info("Update progress {} to complete", moldProgress);
 
                             /* validate complete in pre-step */
-                            if (Boolean.FALSE.equals(currentStep.getIsStart())) {
+                            if (Boolean.FALSE.equals(currentStep.getIsStart()) && !StepType.FIXING.equals(currentStep.getType())) {
                                 boolean canCheckComplete = true;
 
                                 List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
@@ -179,6 +179,7 @@ public class StepComponent {
                                     log.error("Mold {} is not complete in prestep {}", moldProgress.getMold(), preSteps);
                                     throw new BusinessException("Mold " + moldProgress.getMold().getSize() + " is not complete in prestep");
                                 }
+
                             }
 
                             listUpdateToComplete.add(moldProgress);
@@ -213,7 +214,7 @@ public class StepComponent {
                     log.info("Update progress {} to incomplete", moldGroupElementProgress);
 
                     /* validate not complete in next-step */
-                    if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
+                    if (Boolean.FALSE.equals(currentStep.getIsEnd()) && !StepType.FIXING.equals(currentStep.getType())) {
                         boolean canUncheckComplete = true;
 
                         List<Step> nextSteps = StepUtil.getNextStepToChkProgress(currentStep.getListStepBefore());
@@ -237,7 +238,7 @@ public class StepComponent {
                     log.info("Update progress {} to complete", moldGroupElementProgress);
 
                     /* validate complete in pre-step */
-                    if (Boolean.FALSE.equals(currentStep.getIsStart())) {
+                    if (Boolean.FALSE.equals(currentStep.getIsStart()) && !StepType.FIXING.equals(currentStep.getType())) {
                         boolean canCheckComplete = true;
 
                         List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
@@ -286,7 +287,7 @@ public class StepComponent {
                     log.info("Update progress {} to incomplete", moldDeliverProgress);
 
                     /* validate not complete in next-step */
-                    if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
+                    if (Boolean.FALSE.equals(currentStep.getIsEnd()) && !StepType.FIXING.equals(currentStep.getType())) {
                         boolean canUncheckComplete = true;
 
                         List<Step> nextSteps = StepUtil.getNextStepToChkProgress(currentStep.getListStepBefore());
@@ -310,7 +311,7 @@ public class StepComponent {
                     log.info("Update progress {} to complete", moldDeliverProgress);
 
                     /* validate complete in pre-step */
-                    if (Boolean.FALSE.equals(currentStep.getIsStart())) {
+                    if (Boolean.FALSE.equals(currentStep.getIsStart()) && !StepType.FIXING.equals(currentStep.getType())) {
                         boolean canCheckComplete = true;
 
                         List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
