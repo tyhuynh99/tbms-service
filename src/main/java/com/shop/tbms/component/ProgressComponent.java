@@ -281,7 +281,7 @@ public class ProgressComponent {
                 if (CollectionUtils.isEmpty(progressList)) {
                     if (Boolean.TRUE.equals(nextStep.getHasCondition())) {
                         log.info("Step hasCondition, and not found progress of mold size {}. Need to check nextStep", moldSize);
-                        Step nextOfNextStep = StepUtil.getNextMainStep(nextStep.getListStepAfter());
+                        Step nextOfNextStep = StepUtil.getNextMainStep(nextStep.getListStepBefore());
                         return canUnCheckCompleteBySize(nextOfNextStep, moldSize);
                     }
                 }
@@ -297,7 +297,7 @@ public class ProgressComponent {
                 if (CollectionUtils.isEmpty(elementProgressList)) {
                     if (Boolean.TRUE.equals(nextStep.getHasCondition())) {
                         log.info("Step hasCondition, and not found progress of mold size {}. Need to check nextStep", moldSize);
-                        Step nextOfNextStep = StepUtil.getNextMainStep(nextStep.getListStepAfter());
+                        Step nextOfNextStep = StepUtil.getNextMainStep(nextStep.getListStepBefore());
                         return canUnCheckCompleteBySize(nextOfNextStep, moldSize);
                     }
                 }
@@ -313,7 +313,7 @@ public class ProgressComponent {
                 if (CollectionUtils.isEmpty(deliverProgressList)) {
                     if (Boolean.TRUE.equals(nextStep.getHasCondition())) {
                         log.info("Step hasCondition, and not found progress of mold size {}. Need to check nextStep", moldSize);
-                        Step nextOfNextStep = StepUtil.getNextMainStep(nextStep.getListStepAfter());
+                        Step nextOfNextStep = StepUtil.getNextMainStep(nextStep.getListStepBefore());
                         return canUnCheckCompleteBySize(nextOfNextStep, moldSize);
                     }
                 }
