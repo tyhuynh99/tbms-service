@@ -191,7 +191,7 @@ public class StepComponent {
         logDetail.addAll(ReportLogUtil.genLogForMoldProgress(listUpdateToComplete, listUpdateToUnComplete, logConstant));
         if (StepType.FIXING.equals(currentStep.getType())) {
             /* step SUA KHUON, when update complete, remove progress */
-            listUpdateToComplete.forEach(moldProgress -> moldProgress.setId(DELETED_ID));
+            listUpdateToComplete.forEach(moldProgress -> moldProgress.setIsCompleted(null));
         }
     }
 
@@ -262,10 +262,6 @@ public class StepComponent {
         });
 
         logDetail.addAll(ReportLogUtil.genLogForMoldElementProgress(listUpdateToComplete, listUpdateToUnComplete, logConstant));
-        if (StepType.FIXING.equals(currentStep.getType())) {
-            /* step SUA KHUON, when update complete, remove progress */
-            listUpdateToComplete.forEach(moldProgress -> moldProgress.setId(DELETED_ID));
-        }
     }
 
     public void updateMoldDeliverProgress(Step currentStep, List<ReportProgressReqDTO> listReq, List<String> logDetail) {
@@ -334,10 +330,6 @@ public class StepComponent {
             }
         });
         logDetail.addAll(ReportLogUtil.genLogForMoldDeliverProgress(listUpdateToComplete, listUpdateToUnComplete, logConstant));
-        if (StepType.FIXING.equals(currentStep.getType())) {
-            /* step SUA KHUON, when update complete, remove progress */
-            listUpdateToComplete.forEach(moldProgress -> moldProgress.setId(DELETED_ID));
-        }
     }
 
     public void updateChecklist(List<Checklist> currentChecklist, List<ReportChecklistReqDTO> listReq, List<String> logDetail) {

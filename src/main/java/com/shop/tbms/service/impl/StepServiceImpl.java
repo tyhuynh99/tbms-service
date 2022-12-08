@@ -209,32 +209,33 @@ public class StepServiceImpl implements StepService {
             case BY_MOLD:
                 log.info("Start update progress of report type = BY_MOLD");
                 stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
-                moldProgressRepository.saveAll(currentMoldProgress);
-                moldProgressRepository.deleteAll(
-                        currentMoldProgress.stream()
-                                .filter(moldProgress -> DELETED_ID.equals(moldProgress.getId()))
-                                .collect(Collectors.toList())
-                );
+
+                List<MoldProgress> listDeleteProgress = currentMoldProgress.stream()
+                        .filter(moldProgress -> Objects.isNull(moldProgress.getIsCompleted()))
+                        .collect(Collectors.toList());
+
+                /* handle for step SUA KHUON */
+                if (CollectionUtils.isEmpty(listDeleteProgress)) {
+                    moldProgressRepository.saveAll(currentMoldProgress
+                            .stream()
+                            .filter(moldProgress -> Objects.nonNull(moldProgress.getIsCompleted()))
+                            .collect(Collectors.toList())
+                    );
+                } else {
+                    currentStep.getListMoldProgress().removeAll(listDeleteProgress);
+                    moldProgressRepository.deleteAll(listDeleteProgress);
+                    moldProgressRepository.flush();
+                }
                 break;
             case BY_MOLD_ELEMENT:
                 log.info("Start update progress of report type = BY_MOLD_ELEMENT");
                 stepComponent.updateMoldElementProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
                 moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
-                moldGroupElementProgressRepository.deleteAll(
-                        currentMoldElementProgress.stream()
-                                .filter(moldProgress -> DELETED_ID.equals(moldProgress.getId()))
-                                .collect(Collectors.toList())
-                );
                 break;
             case BY_MOLD_SEND_RECEIVE:
                 log.info("Start update progress of report type = BY_MOLD_SEND_RECEIVE");
                 stepComponent.updateMoldDeliverProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
                 moldDeliverProgressRepository.saveAll(currentMoldDeliverProgress);
-                moldDeliverProgressRepository.deleteAll(
-                        currentMoldDeliverProgress.stream()
-                                .filter(moldProgress -> DELETED_ID.equals(moldProgress.getId()))
-                                .collect(Collectors.toList())
-                );
                 break;
             default:
         }
