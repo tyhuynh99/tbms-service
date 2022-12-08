@@ -1,8 +1,6 @@
 package com.shop.tbms.component;
 
 import com.shop.tbms.config.exception.BusinessException;
-import com.shop.tbms.config.exception.ForbiddenException;
-import com.shop.tbms.config.security.TbmsUserDetails;
 import com.shop.tbms.constant.LogConstant;
 import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.FileDTO;
@@ -18,7 +16,6 @@ import com.shop.tbms.repository.EvidenceRepository;
 import com.shop.tbms.repository.MoldProgressRepository;
 import com.shop.tbms.repository.PurchaseOrderRepository;
 import com.shop.tbms.service.FileService;
-import com.shop.tbms.util.AuthenticationUtil;
 import com.shop.tbms.util.EvidenceUtil;
 import com.shop.tbms.util.ReportLogUtil;
 import com.shop.tbms.util.StepUtil;
@@ -29,7 +26,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.shop.tbms.constant.AppConstant.DELETED_ID;
@@ -147,7 +143,7 @@ public class StepComponent {
                             if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
                                 boolean canUncheckComplete = true;
 
-                                List<Step> nextSteps = StepUtil.getNextStep(currentStep.getListStepBefore());
+                                List<Step> nextSteps = StepUtil.getNextStepToChkProgress(currentStep.getListStepBefore());
                                 for (Step nextStep : nextSteps) {
                                     canUncheckComplete &= progressComponent.canUnCheckCompleteBySize(
                                             nextStep,
@@ -171,7 +167,7 @@ public class StepComponent {
                             if (Boolean.FALSE.equals(currentStep.getIsStart())) {
                                 boolean canCheckComplete = true;
 
-                                List<Step> preSteps = StepUtil.getPreStep(currentStep.getListStepAfter());
+                                List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
                                 for (Step preStep : preSteps) {
                                     canCheckComplete &= progressComponent.canCheckCompleteBySize(
                                             preStep,
@@ -220,7 +216,7 @@ public class StepComponent {
                     if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
                         boolean canUncheckComplete = true;
 
-                        List<Step> nextSteps = StepUtil.getNextStep(currentStep.getListStepBefore());
+                        List<Step> nextSteps = StepUtil.getNextStepToChkProgress(currentStep.getListStepBefore());
                         for (Step nextStep : nextSteps) {
                             canUncheckComplete &= progressComponent.canUnCheckCompleteBySize(
                                     nextStep,
@@ -244,7 +240,7 @@ public class StepComponent {
                     if (Boolean.FALSE.equals(currentStep.getIsStart())) {
                         boolean canCheckComplete = true;
 
-                        List<Step> preSteps = StepUtil.getPreStep(currentStep.getListStepAfter());
+                        List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
                         for (Step preStep : preSteps) {
                             canCheckComplete &= progressComponent.canCheckCompleteBySize(
                                     preStep,
@@ -293,7 +289,7 @@ public class StepComponent {
                     if (Boolean.FALSE.equals(currentStep.getIsEnd())) {
                         boolean canUncheckComplete = true;
 
-                        List<Step> nextSteps = StepUtil.getNextStep(currentStep.getListStepBefore());
+                        List<Step> nextSteps = StepUtil.getNextStepToChkProgress(currentStep.getListStepBefore());
                         for (Step nextStep : nextSteps) {
                             canUncheckComplete &= progressComponent.canUnCheckCompleteBySize(
                                     nextStep,
@@ -317,7 +313,7 @@ public class StepComponent {
                     if (Boolean.FALSE.equals(currentStep.getIsStart())) {
                         boolean canCheckComplete = true;
 
-                        List<Step> preSteps = StepUtil.getPreStep(currentStep.getListStepAfter());
+                        List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
                         for (Step preStep : preSteps) {
                             canCheckComplete &= progressComponent.canCheckCompleteBySize(
                                     preStep,

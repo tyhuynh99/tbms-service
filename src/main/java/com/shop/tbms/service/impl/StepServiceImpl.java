@@ -117,8 +117,8 @@ public class StepServiceImpl implements StepService {
         StepDTO dto = stepMapper.toDTO(step);
 
         /* Map progress dto */
-        List<Step> preStep = StepUtil.getPreStep(step.getListStepAfter());
-        List<Step> nextStep = StepUtil.getNextStep(step.getListStepBefore());
+        List<Step> preStep = StepUtil.getPreStepToChkProgress(step.getListStepAfter());
+        List<Step> nextStep = StepUtil.getNextStepToChkProgress(step.getListStepBefore());
         switch (step.getReportType()) {
             case BY_MOLD:
                 dto.setListMoldProgress(moldProgressMapper.toDTOs(step.getListMoldProgress()));

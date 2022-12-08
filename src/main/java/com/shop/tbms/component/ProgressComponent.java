@@ -140,6 +140,7 @@ public class ProgressComponent {
     public List<MoldElementProgressDTO> setReportAvailabilityForMoldElementProgress(List<Step> preStepList, List<Step> nextStepList, List<MoldElementProgressDTO> moldElementProgressDTOList) {
         return moldElementProgressDTOList.stream().map(moldElementProgressDTO -> {
             boolean canCheck = true;
+
             for (Step preStep : preStepList) {
                 canCheck &= canCheckCompleteBySize(preStep, moldElementProgressDTO.getMoldSize());
             }

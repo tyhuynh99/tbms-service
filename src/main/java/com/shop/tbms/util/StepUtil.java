@@ -34,11 +34,20 @@ public class StepUtil {
         return listStepSequenceBefore.get(listStepSequenceBefore.size() - 1).getStepAfter();
     }
 
-    public static List<Step> getNextStep(List<StepSequence> listStepSequenceBefore) {
+    public static List<Step> getNextStepToChkProgress(List<StepSequence> listStepSequenceBefore) {
         if (CollectionUtils.isEmpty(listStepSequenceBefore)) return List.of();
 
         listStepSequenceBefore.sort(Comparator.comparing(o -> o.getStepAfter().getSequenceNo()));
-        return listStepSequenceBefore.stream().map(StepSequence::getStepAfter).collect(Collectors.toList());
+
+        boolean hasFixingStep = listStepSequenceBefore.stream()
+                .map(StepSequence::getStepAfter)
+                .anyMatch(step -> StepType.FIXING.equals(step.getType()));
+
+        if (hasFixingStep) {
+            return listStepSequenceBefore.stream().map(StepSequence::getStepAfter).collect(Collectors.toList());
+        }
+
+        return List.of(getNextMainStep(listStepSequenceBefore));
     }
 
     public static Step getEndStep(PurchaseOrder order) {
@@ -55,11 +64,20 @@ public class StepUtil {
         return listStepSequenceAfter.get(0).getStepBefore();
     }
 
-    public static List<Step> getPreStep(List<StepSequence> listStepSequenceAfter) {
+    public static List<Step> getPreStepToChkProgress(List<StepSequence> listStepSequenceAfter) {
         if (CollectionUtils.isEmpty(listStepSequenceAfter)) return List.of();
 
         listStepSequenceAfter.sort(Comparator.comparing(o -> o.getStepBefore().getSequenceNo()));
-        return listStepSequenceAfter.stream().map(StepSequence::getStepBefore).collect(Collectors.toList());
+
+        boolean hasFixingStep = listStepSequenceAfter.stream()
+                .map(StepSequence::getStepBefore)
+                .anyMatch(step -> StepType.FIXING.equals(step.getType()));
+
+        if (hasFixingStep) {
+            return listStepSequenceAfter.stream().map(StepSequence::getStepBefore).collect(Collectors.toList());
+        }
+
+        return List.of(getPreMainStep(listStepSequenceAfter));
     }
 
     public static Step getNextMainStep(List<StepSequence> listStepSequenceBefore, Mold mold) {
