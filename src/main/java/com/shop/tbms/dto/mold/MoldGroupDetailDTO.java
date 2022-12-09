@@ -1,8 +1,6 @@
 package com.shop.tbms.dto.mold;
 
-import com.shop.tbms.enumerate.mold.MoldPlatingType;
-import com.shop.tbms.enumerate.mold.MoldStructure;
-import com.shop.tbms.enumerate.mold.MoldType;
+import com.shop.tbms.enumerate.mold.*;
 import lombok.*;
 
 import javax.validation.constraints.NotEmpty;
@@ -27,6 +25,17 @@ public class MoldGroupDetailDTO {
     private boolean hasBanDien;
     private boolean hasBanLoHoi;
     private int numOfPlate;
+
+    private String thinness;
+    private String khuonScanCnc;
+    private String tiLeRutNuocKhuon;
+    private String tiLeRutNuocGo;
+
+    private TaoHoaTheoType taoHoaTheoType;
+    private BanLeKhuonType banLeKhuonType;
+    private ChuTrenLoiType chuTrenLoiType;
+    private VatLieuKhuonType vatLieuKhuonType;
+
     @NotEmpty
     private List<MoldElementDTO> moldElementList;
     @NotEmpty

@@ -1,12 +1,14 @@
 package com.shop.tbms.util;
 
 import com.shop.tbms.entity.*;
+import com.shop.tbms.enumerate.step.StepType;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.shop.tbms.constant.AppConstant.ZERO_LONG;
 
@@ -32,11 +34,53 @@ public class StepUtil {
         return listStepSequenceBefore.get(listStepSequenceBefore.size() - 1).getStepAfter();
     }
 
+    public static List<Step> getNextStepToChkProgress(List<StepSequence> listStepSequenceBefore) {
+        if (CollectionUtils.isEmpty(listStepSequenceBefore)) return List.of();
+
+        Step currentStep = listStepSequenceBefore.get(0).getStepBefore();
+        listStepSequenceBefore.sort(Comparator.comparing(o -> o.getStepAfter().getSequenceNo()));
+
+        boolean hasFixingStep = listStepSequenceBefore.stream()
+                .map(StepSequence::getStepAfter)
+                .anyMatch(step -> StepType.FIXING.equals(step.getType()));
+
+        if (hasFixingStep) {
+            return listStepSequenceBefore.stream().map(StepSequence::getStepAfter)
+                    .filter(step -> step.getSequenceNo() > currentStep.getSequenceNo())
+                    .collect(Collectors.toList());
+        }
+
+        return List.of(getNextMainStep(listStepSequenceBefore));
+    }
+
+    public static Step getEndStep(PurchaseOrder order) {
+        return order.getProcedure().getListStep().stream()
+                .filter(step -> Boolean.TRUE.equals(step.getIsEnd()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Not found end step of order " + order.getCode()));
+    }
+
     public static Step getPreMainStep(List<StepSequence> listStepSequenceAfter) {
         if (CollectionUtils.isEmpty(listStepSequenceAfter)) return null;
 
         listStepSequenceAfter.sort(Comparator.comparing(o -> o.getStepBefore().getSequenceNo()));
         return listStepSequenceAfter.get(0).getStepBefore();
+    }
+
+    public static List<Step> getPreStepToChkProgress(List<StepSequence> listStepSequenceAfter) {
+        if (CollectionUtils.isEmpty(listStepSequenceAfter)) return List.of();
+
+        listStepSequenceAfter.sort(Comparator.comparing(o -> o.getStepBefore().getSequenceNo()));
+
+        boolean hasFixingStep = listStepSequenceAfter.stream()
+                .map(StepSequence::getStepBefore)
+                .anyMatch(step -> StepType.FIXING.equals(step.getType()));
+
+        if (hasFixingStep) {
+            return listStepSequenceAfter.stream().map(StepSequence::getStepBefore).collect(Collectors.toList());
+        }
+
+        return List.of(getPreMainStep(listStepSequenceAfter));
     }
 
     public static Step getNextMainStep(List<StepSequence> listStepSequenceBefore, Mold mold) {

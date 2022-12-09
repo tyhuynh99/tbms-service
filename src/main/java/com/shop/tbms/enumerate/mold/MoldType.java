@@ -7,7 +7,8 @@ public enum MoldType {
     CM_EVA,
     TPR,
     IP,
-    PU;
+    PU,
+    FOOTBED;
 
     @JsonValue
     public int getValue() {return ordinal();}

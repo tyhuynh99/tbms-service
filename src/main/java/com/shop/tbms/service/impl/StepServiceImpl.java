@@ -48,6 +48,8 @@ import javax.persistence.EntityNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.shop.tbms.constant.AppConstant.DELETED_ID;
+
 @Service
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 @Slf4j
@@ -115,8 +117,8 @@ public class StepServiceImpl implements StepService {
         StepDTO dto = stepMapper.toDTO(step);
 
         /* Map progress dto */
-        Step preStep = StepUtil.getPreMainStep(step.getListStepAfter());
-        Step nextStep = StepUtil.getNextMainStep(step.getListStepBefore());
+        List<Step> preStep = StepUtil.getPreStepToChkProgress(step.getListStepAfter());
+        List<Step> nextStep = StepUtil.getNextStepToChkProgress(step.getListStepBefore());
         switch (step.getReportType()) {
             case BY_MOLD:
                 dto.setListMoldProgress(moldProgressMapper.toDTOs(step.getListMoldProgress()));
@@ -125,7 +127,8 @@ public class StepServiceImpl implements StepService {
                             progressComponent.setReportAvailabilityForMoldProgress(
                                     preStep,
                                     nextStep,
-                                    dto.getListMoldProgress())
+                                    dto.getListMoldProgress(),
+                                    step)
                     );
                 }
                 break;
@@ -136,7 +139,8 @@ public class StepServiceImpl implements StepService {
                             progressComponent.setReportAvailabilityForDeliveryProgress(
                                     preStep,
                                     nextStep,
-                                    dto.getListMoldDeliverProgress())
+                                    dto.getListMoldDeliverProgress(),
+                                    step)
                     );
                 }
                 break;
@@ -168,7 +172,8 @@ public class StepServiceImpl implements StepService {
                             progressComponent.setReportAvailabilityForMoldElementProgress(
                                     preStep,
                                     nextStep,
-                                    dto.getListMoldElementProgress()
+                                    dto.getListMoldElementProgress(),
+                                    step
                             )
                     );
                 }
@@ -204,7 +209,23 @@ public class StepServiceImpl implements StepService {
             case BY_MOLD:
                 log.info("Start update progress of report type = BY_MOLD");
                 stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
-                moldProgressRepository.saveAll(currentMoldProgress);
+
+                List<MoldProgress> listDeleteProgress = currentMoldProgress.stream()
+                        .filter(moldProgress -> Objects.isNull(moldProgress.getIsCompleted()))
+                        .collect(Collectors.toList());
+
+                /* handle for step SUA KHUON */
+                if (CollectionUtils.isEmpty(listDeleteProgress)) {
+                    moldProgressRepository.saveAll(currentMoldProgress
+                            .stream()
+                            .filter(moldProgress -> Objects.nonNull(moldProgress.getIsCompleted()))
+                            .collect(Collectors.toList())
+                    );
+                } else {
+                    currentStep.getListMoldProgress().removeAll(listDeleteProgress);
+                    moldProgressRepository.deleteAll(listDeleteProgress);
+                    moldProgressRepository.flush();
+                }
                 break;
             case BY_MOLD_ELEMENT:
                 log.info("Start update progress of report type = BY_MOLD_ELEMENT");
@@ -235,7 +256,7 @@ public class StepServiceImpl implements StepService {
         /* set status next step */
         log.info("Start change status for next step");
         Step nextMainStep = StepUtil.getNextMainStep(stepSequenceRepository.findByStepBeforeId(currentStep.getId()));
-        if (!StepStatus.IN_PROGRESS.equals(nextMainStep.getStatus())) {
+        if (Objects.nonNull(nextMainStep) && !StepStatus.IN_PROGRESS.equals(nextMainStep.getStatus())) {
             nextMainStep.setStatus(StepStatus.IN_PROGRESS);
             stepRepository.save(nextMainStep);
         }
@@ -352,9 +373,41 @@ public class StepServiceImpl implements StepService {
             Step resetStep = stepRepository.findById(reportIssueStepReqDTO.getChangeToStepId()).orElseThrow();
 
             if (StepType.FIXING.equals(resetStep.getType())) {
-                progressComponent.resetProgress(resetStep, listReportedMold);
+                switch (currentStep.getReportType()) {
+                    case BY_MOLD: {
+                        List<MoldProgress> progressList = currentStep.getListMoldProgress().stream()
+                                .filter(progress -> reportIssueStepReqDTO.getListMoldId().contains(progress.getMold().getId()))
+                                .collect(Collectors.toList());
+
+                        progressList.forEach(progress -> progress.setIsCompleted(Boolean.FALSE));
+                        moldProgressRepository.saveAll(progressList);
+                    }
+                    break;
+                    case BY_MOLD_SEND_RECEIVE: {
+                        List<MoldDeliverProgress> progressList = currentStep.getListMoldDeliverProgress().stream()
+                                .filter(progress -> reportIssueStepReqDTO.getListMoldId().contains(progress.getMold().getId()))
+                                .collect(Collectors.toList());
+
+                        progressList.forEach(progress -> progress.setIsCompleted(Boolean.FALSE));
+                        moldDeliverProgressRepository.saveAll(progressList);
+                    }
+                    break;
+                    case BY_MOLD_ELEMENT: {
+                        List<MoldGroupElementProgress> progressList = currentStep.getListMoldGroupElementProgresses().stream()
+                                .filter(progress -> reportIssueStepReqDTO.getListMoldId().contains(progress.getMold().getId()))
+                                .collect(Collectors.toList());
+
+                        progressList.forEach(progress -> progress.setIsCompleted(Boolean.FALSE));
+                        moldGroupElementProgressRepository.saveAll(progressList);
+                    }
+                    break;
+                    default:
+                }
+
+                progressComponent.resetProgress(resetStep, listReportedMold, false);
             } else {
-                resetMoldProgressToStep(currentStep, resetStep.getId(), reportIssueStepReqDTO.getListMoldId());
+                Step endStep = StepUtil.getEndStep(currentStep.getProcedure().getPurchaseOrder());
+                resetMoldProgressToStep(endStep, resetStep.getId(), reportIssueStepReqDTO.getListMoldId());
             }
         }
 
@@ -366,45 +419,23 @@ public class StepServiceImpl implements StepService {
     @Override
     public SuccessRespDTO resetMold(ResetMoldStepReqDTO resetMoldStepReqDTO) {
         log.info("Start reset mold to step {}", resetMoldStepReqDTO);
-        Step currentStep = stepRepository.findById(resetMoldStepReqDTO.getCurrentStepId()).orElseThrow();
-        Step resetStep = stepRepository.findById(resetMoldStepReqDTO.getResetToStepId()).orElseThrow();
+        Step resetStep = stepRepository.findById(resetMoldStepReqDTO.getCurrentStepId()).orElseThrow();
         /* validate step status */
-        purchaseOrderComponent.canUpdateOrder(currentStep.getProcedure().getPurchaseOrder());
+        purchaseOrderComponent.canUpdateOrder(resetStep.getProcedure().getPurchaseOrder());
 
-        /* validate reset step */
-        if (!Objects.equals(currentStep.getProcedure(), resetStep.getProcedure())) {
-            log.info("Validate order of step in req {}", resetMoldStepReqDTO);
-            throw new BusinessException(
-                    String.format(
-                            "Reset step %s is not the same order with step %s",
-                            resetMoldStepReqDTO.getResetToStepId(),
-                            resetMoldStepReqDTO.getCurrentStepId())
-            );
-        }
-
-        /* validate sequence */
-        /* this rule include validate not is start step */
-        if (resetStep.getSequenceNo() >= currentStep.getSequenceNo()) {
-            log.info("Validate step order in req {}", resetMoldStepReqDTO);
-            throw new BusinessException(
-                    String.format(
-                            "Reset step %s is after step %s",
-                            resetMoldStepReqDTO.getResetToStepId(),
-                            resetMoldStepReqDTO.getCurrentStepId())
-            );
-        }
-
-        resetMoldProgressToStep(currentStep, resetMoldStepReqDTO.getResetToStepId(), resetMoldStepReqDTO.getListMoldId());
+        Step endStep = StepUtil.getEndStep(resetStep.getProcedure().getPurchaseOrder());
+        resetMoldProgressToStep(endStep, resetStep.getId(), resetMoldStepReqDTO.getListMoldId());
         log.info("End reset mold to step");
         return SuccessRespDTO.builder()
                 .message(MessageConstant.UPDATE_SUCCESS)
                 .build();
     }
 
-    private void resetMoldProgressToStep(Step currentStep, Long resetToStepId, List<Long> listMoldId) {
+    private void resetMoldProgressToStep(Step endStep, Long resetToStepId, List<Long> listMoldId) {
         /* loop to get all main previous step of current step until reset step */
         List<Step> listResetStep = new ArrayList<>();
-        Step step = currentStep;
+        listResetStep.add(endStep);
+        Step step = endStep;
 
         do {
             List<StepSequence> stepSequenceList = stepSequenceRepository.findByStepAfterId(step.getId());
@@ -413,7 +444,7 @@ public class StepServiceImpl implements StepService {
         } while (!Objects.equals(Objects.requireNonNull(step).getId(), resetToStepId));
 
         List<Mold> listMold = moldRepository.findAllById(listMoldId);
-        listResetStep.forEach(stepAction -> progressComponent.resetProgress(stepAction, listMold));
+        listResetStep.forEach(stepAction -> progressComponent.resetProgress(stepAction, listMold, false));
     }
 
     @Override

@@ -7,11 +7,11 @@ import com.shop.tbms.entity.Step;
 import java.util.Optional;
 
 public class StepConditionUtil {
-    public static boolean canGenProgressWhenCreateOrder(Step step, StepConstant stepConstant) {
+    public static boolean isStepHasConditionProgress(Step step, StepConstant stepConstant) {
         if (Boolean.TRUE.equals(step.getHasCondition()) && stepConstant.getCodePHONG_DIEN().equals(step.getCode())) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     public static Optional<Step> getStepPhongDien(PurchaseOrder order, StepConstant stepConstant) {

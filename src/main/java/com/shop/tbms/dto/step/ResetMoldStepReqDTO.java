@@ -13,9 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ResetMoldStepReqDTO {
     @NotNull
-    private Long resetToStepId;
-
-    @NotNull
     private Long currentStepId;
 
     @NotNull
