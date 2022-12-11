@@ -23,7 +23,7 @@ public class ReportLogUtil {
             result.add(String.format(
                     logConstant.getChecklistChecked(),
                     listChangeToChecked.stream()
-                            .map(Checklist::getContent)
+                            .map(Checklist::getMappedContent)
                             .collect(Collectors.joining(DELIMETER)))
             );
         }
@@ -32,7 +32,7 @@ public class ReportLogUtil {
             result.add(String.format(
                     logConstant.getChecklistUnchecked(),
                     listChangeToUnchecked.stream()
-                            .map(Checklist::getContent)
+                            .map(Checklist::getMappedContent)
                             .collect(Collectors.joining(DELIMETER)))
             );
         }

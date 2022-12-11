@@ -29,6 +29,7 @@ public interface ProcedureFromTemplateMapper {
     
     /* CHECKLIST */
     @Mapping(target = "step", source = "templateStep", qualifiedByName = "getStepForChecklist")
+    @Mapping(target = "isChecked", constant = "false")
     @Mapping(target = "id", ignore = true)
     Checklist fromTemplateChecklist(TemplateChecklist templateChecklist);
 
