@@ -20,5 +20,7 @@ public interface NotificationService {
 
     SuccessRespDTO readNotification(List<Long> listId);
 
+    SuccessRespDTO readNotification();
+
     SuccessRespDTO testNoti(FBNotificationRequestDTO requestDTO) throws Exception;
 }

@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -133,10 +134,19 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public SuccessRespDTO readNotification(List<Long> listId) {
-        List<TbmsNotification> tbmsNotificationList = notificationRepository
-                .findByIdInAndReceiverUsername(
-                        listId,
-                        AuthenticationUtil.getUserDetails().getUsername());
+        List<TbmsNotification> tbmsNotificationList;
+
+        if (Objects.nonNull(listId)) {
+            tbmsNotificationList = notificationRepository
+                    .findByIdInAndReceiverUsername(
+                            listId,
+                            AuthenticationUtil.getUserDetails().getUsername());
+        } else {
+            tbmsNotificationList = notificationRepository
+                    .findByReceiverUsernameAndIsRead(
+                            AuthenticationUtil.getUserDetails().getUsername(),
+                            Boolean.FALSE);
+        }
 
         tbmsNotificationList.forEach(tbmsNotification -> tbmsNotification.setIsRead(Boolean.TRUE));
 
@@ -144,6 +154,11 @@ public class NotificationServiceImpl implements NotificationService {
         return SuccessRespDTO.builder()
                 .message(MessageConstant.UPDATE_SUCCESS)
                 .build();
+    }
+
+    @Override
+    public SuccessRespDTO readNotification() {
+        return readNotification(null);
     }
 
     @Override
