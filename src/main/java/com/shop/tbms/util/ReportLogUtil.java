@@ -165,7 +165,8 @@ public class ReportLogUtil {
             if (mapChangeToComplete.containsKey(moldId)) {
                 mapChangeToComplete.get(moldId).add(moldDeliverProgresses);
             } else {
-                List<MoldDeliverProgress> progressList = Arrays.asList(moldDeliverProgresses);
+                List<MoldDeliverProgress> progressList = new ArrayList<>();
+                progressList.add(moldDeliverProgresses);
                 mapChangeToComplete.put(moldId, progressList);
             }
         });
@@ -175,7 +176,8 @@ public class ReportLogUtil {
             if (mapChangeToUnComplete.containsKey(moldId)) {
                 mapChangeToUnComplete.get(moldId).add(moldDeliverProgresses);
             } else {
-                List<MoldDeliverProgress> progressList = Arrays.asList(moldDeliverProgresses);
+                List<MoldDeliverProgress> progressList = new ArrayList<>();
+                progressList.add(moldDeliverProgresses);
                 mapChangeToUnComplete.put(moldId, progressList);
             }
         });
@@ -189,8 +191,7 @@ public class ReportLogUtil {
                         Mold mold = progressList.stream().findAny().orElseThrow().getMold();
                         return "{ "
                                 + mold.getSize()
-                                + "#"
-                                + mold.getMoldGroup().getType().name()
+                                + (Optional.ofNullable(mold.getMoldGroup()).map(MoldGroup::getType).map(groupType -> "#" + groupType.name()).orElse(StringUtils.EMPTY))
                                 + ": "
                                 + progressList.stream()
                                 .map(elementProgress -> elementProgress.getType().getDisplayName())
@@ -209,8 +210,7 @@ public class ReportLogUtil {
                         Mold mold = progressList.stream().findAny().orElseThrow().getMold();
                         return "{ "
                                 + mold.getSize()
-                                + "#"
-                                + mold.getMoldGroup().getType().name()
+                                + (Optional.ofNullable(mold.getMoldGroup()).map(MoldGroup::getType).map(groupType -> "#" + groupType.name()).orElse(StringUtils.EMPTY))
                                 + ": "
                                 + progressList.stream()
                                 .map(elementProgress -> elementProgress.getType().getDisplayName())
