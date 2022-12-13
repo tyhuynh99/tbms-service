@@ -4,28 +4,31 @@ import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.dto.order.OrderUpdateReqDTO;
 import com.shop.tbms.dto.step.report.ReportProgressReqDTO;
-import com.shop.tbms.entity.Mold;
-import com.shop.tbms.entity.MoldProgress;
-import com.shop.tbms.entity.PurchaseOrder;
-import com.shop.tbms.entity.Step;
+import com.shop.tbms.entity.*;
+import com.shop.tbms.enumerate.mold.MoldDeliverProgressType;
+import com.shop.tbms.enumerate.step.ReportType;
 import com.shop.tbms.enumerate.step.StepStatus;
-import com.shop.tbms.repository.IssueMoldDetailRepository;
-import com.shop.tbms.repository.MoldProgressRepository;
-import com.shop.tbms.repository.MoldRepository;
-import com.shop.tbms.repository.StepRepository;
+import com.shop.tbms.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 @Slf4j
 public class MoldComponent {
     @Autowired
     MoldProgressRepository moldProgressRepository;
+    @Autowired
+    MoldDeliverProgressRepository moldDeliverProgressRepository;
+    @Autowired
+    MoldGroupElementProgressRepository moldGroupElementProgressRepository;
     @Autowired
     IssueMoldDetailRepository issueMoldDetailRepository;
     @Autowired
@@ -44,7 +47,6 @@ public class MoldComponent {
     }
 
     public void updateListMoldInOrder(PurchaseOrder currentOrder, OrderUpdateReqDTO orderUpdateReqDTO) {
-        List<Mold> listCurrentMold = currentOrder.getListMold();
         removeDeletedMold(currentOrder.getListMold(), orderUpdateReqDTO.getListSize());
         addNewMold(currentOrder, orderUpdateReqDTO.getListSize());
     }
@@ -67,9 +69,15 @@ public class MoldComponent {
                 issueMold.setMold(null);
             });
         });
-        
+
         /* delete mold progress */
         moldProgressRepository.deleteByMoldIdIn(deletedMoldId);
+
+        /* delete mold deliver */
+        moldDeliverProgressRepository.deleteByMoldIdIn(deletedMoldId);
+
+        /* delete mold element progress */
+        moldGroupElementProgressRepository.deleteByMoldIdIn(deletedMoldId);
 
         /* delete mold issue */
         issueMoldDetailRepository.deleteByMoldIdIn(deletedMoldId);
@@ -90,25 +98,14 @@ public class MoldComponent {
                 .filter(size -> !listAllCurrentSize.contains(size))
                 .collect(Collectors.toList());
 
-        /* List all step that has progress entity */
-        List<Step> listStepHasProgress = moldProgressRepository
-                .findDistinctByStepProcedurePurchaseOrderId(currentOrder.getId())
-                .stream()
-                .map(MoldProgress::getStep)
-                .distinct()
-                .collect(Collectors.toList());
-
-        /* Change status of step to IN PROGRESS */
-        listStepHasProgress.forEach(step -> step.setStatus(StepStatus.IN_PROGRESS));
-        stepRepository.saveAll(listStepHasProgress);
-
         /* create new Mold entity */
         List<Mold> listNewMold = newMold.stream().map(newSize -> {
             Mold mold = new Mold();
             mold.setSize(newSize);
             mold.setPurchaseOrder(currentOrder);
 
-            List<MoldProgress> listMoldProgress = listStepHasProgress.stream()
+            List<MoldProgress> listMoldProgress = currentOrder.getProcedure().getListStep().stream()
+                    .filter(step -> ReportType.BY_MOLD.equals(step.getReportType()))
                     .map(step -> {
                         MoldProgress moldProgress = new MoldProgress();
                         moldProgress.setMold(mold);
@@ -118,7 +115,28 @@ public class MoldComponent {
                         return moldProgress;
                     }).collect(Collectors.toList());
 
+            List<MoldDeliverProgress> listMoldDeliverProgress = currentOrder.getProcedure().getListStep().stream()
+                    .filter(step -> ReportType.BY_MOLD_SEND_RECEIVE.equals(step.getReportType()))
+                    .map(step -> {
+                        MoldDeliverProgress sendProgress = new MoldDeliverProgress();
+                        sendProgress.setMold(mold);
+                        sendProgress.setStep(step);
+                        sendProgress.setIsCompleted(Boolean.FALSE);
+                        sendProgress.setType(MoldDeliverProgressType.SEND);
+
+                        MoldDeliverProgress receiveProgress = new MoldDeliverProgress();
+                        receiveProgress.setMold(mold);
+                        receiveProgress.setStep(step);
+                        receiveProgress.setIsCompleted(Boolean.FALSE);
+                        receiveProgress.setType(MoldDeliverProgressType.RECEIVE);
+
+                        return List.of(sendProgress, receiveProgress);
+                    }).flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+
+            /* Skip mold group element progress, will generate at step add to mold group */
             mold.setListMoldProgresses(listMoldProgress);
+            mold.setListMoldDeliverProgresses(listMoldDeliverProgress);
 
             return mold;
         }).collect(Collectors.toList());
