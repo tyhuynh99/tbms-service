@@ -14,4 +14,5 @@ public interface NotificationRepository extends JpaRepository<TbmsNotification, 
     Page<TbmsNotification> findByReceiverUsername(String receiverUser, Pageable pageable);
     boolean existsByReceiverUsernameAndIsRead(String receiverUser, Boolean isRead);
     List<TbmsNotification> findByIdInAndReceiverUsername(List<Long> ids, String receiverUsername);
+    List<TbmsNotification> findByReceiverUsernameAndIsRead(String receiverUsername, Boolean isRead);
 }

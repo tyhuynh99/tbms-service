@@ -11,4 +11,6 @@ public interface MoldGroupElementProgressRepository extends JpaRepository<MoldGr
     List<MoldGroupElementProgress> findAllByStepId(Long stepId);
 
     long removeByStepIdAndMoldId(Long stepId, Long moldId);
+
+    long deleteByMoldIdIn(List<Long> listMoldId);
 }

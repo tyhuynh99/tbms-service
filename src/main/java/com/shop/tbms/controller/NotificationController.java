@@ -52,6 +52,11 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.readNotification(listId.getData()));
     }
 
+    @PostMapping("/read_all")
+    public ResponseEntity<SuccessRespDTO> readAllNotification() {
+        return ResponseEntity.ok(notificationService.readNotification());
+    }
+
     @PostMapping("/test")
     public ResponseEntity<SuccessRespDTO> testNoti(@RequestBody FBNotificationRequestDTO notiReq) throws Exception {
         return ResponseEntity.ok(notificationService.testNoti(notiReq));

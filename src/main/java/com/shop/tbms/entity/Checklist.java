@@ -1,6 +1,7 @@
 package com.shop.tbms.entity;
 
 import com.shop.tbms.entity.common.AbstractAuditingEntity;
+import com.shop.tbms.util.ChecklistUtil;
 import lombok.*;
 
 import javax.persistence.*;
@@ -27,4 +28,8 @@ public class Checklist extends AbstractAuditingEntity {
     @JoinColumn(name = "step_id", nullable = false)
     @ToString.Exclude
     private Step step;
+
+    public String getMappedContent() {
+        return ChecklistUtil.genChecklistContent(this);
+    }
 }
