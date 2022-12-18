@@ -31,5 +31,7 @@ public class OrderUpdateReqDTO {
     @NotNull
     private Boolean isUrgent;
 
-    private List<String> listSize;
+    private List<String> listNewMoldSize;
+
+    private List<Long> listCurrentMoldId;
 }

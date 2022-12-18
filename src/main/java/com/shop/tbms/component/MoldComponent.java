@@ -47,13 +47,13 @@ public class MoldComponent {
     }
 
     public void updateListMoldInOrder(PurchaseOrder currentOrder, OrderUpdateReqDTO orderUpdateReqDTO) {
-        removeDeletedMold(currentOrder.getListMold(), orderUpdateReqDTO.getListSize());
-        addNewMold(currentOrder, orderUpdateReqDTO.getListSize());
+        removeDeletedMold(currentOrder.getListMold(), orderUpdateReqDTO.getListCurrentMoldId());
+        addNewMold(currentOrder, orderUpdateReqDTO.getListNewMoldSize());
     }
 
-    private void removeDeletedMold(List<Mold> listCurrentMold, List<String> listUpdatedMold) {
+    private void removeDeletedMold(List<Mold> listCurrentMold, List<Long> listReqMoldId) {
         List<Mold> deletedMold = listCurrentMold.stream()
-                .filter(mold -> !listUpdatedMold.contains(mold.getSize()))
+                .filter(mold -> !listReqMoldId.contains(mold.getId()))
                 .collect(Collectors.toList());
         List<Long> deletedMoldId = deletedMold.stream().map(Mold::getId).collect(Collectors.toList());
 
@@ -89,15 +89,7 @@ public class MoldComponent {
         listCurrentMold.removeAll(deletedMold);
     }
 
-    private void addNewMold(PurchaseOrder currentOrder, List<String> listUpdatedMold) {
-        List<Mold> listCurrentMold = currentOrder.getListMold();
-        List<String> listAllCurrentSize = listCurrentMold.stream()
-                .map(Mold::getSize)
-                .collect(Collectors.toList());
-        List<String> newMold = listUpdatedMold.stream()
-                .filter(size -> !listAllCurrentSize.contains(size))
-                .collect(Collectors.toList());
-
+    private void addNewMold(PurchaseOrder currentOrder, List<String> newMold) {
         /* create new Mold entity */
         List<Mold> listNewMold = newMold.stream().map(newSize -> {
             Mold mold = new Mold();
