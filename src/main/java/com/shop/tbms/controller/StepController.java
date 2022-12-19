@@ -52,13 +52,13 @@ public class StepController {
         return processReportStep(reportStepReqDTO, listFile);
     }
 
-    @PostMapping(value = "/test", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SuccessRespDTO> test(@RequestPart("data") String data) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        SuccessRespDTO dto = objectMapper.readValue(data, SuccessRespDTO.class);
-
-        return ResponseEntity.ok(dto);
-    }
+//    @PostMapping(value = "/test", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<SuccessRespDTO> test(@RequestPart("data") String data) throws JsonProcessingException {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        SuccessRespDTO dto = objectMapper.readValue(data, SuccessRespDTO.class);
+//
+//        return ResponseEntity.ok(dto);
+//    }
 
     @PostMapping(value = "/report_without_file")
     public ResponseEntity reportWithoutFile(@RequestBody ReportStepReqDTO reportStepReqDTO) {

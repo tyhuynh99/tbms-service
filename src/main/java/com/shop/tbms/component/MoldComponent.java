@@ -17,6 +17,8 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,11 +49,16 @@ public class MoldComponent {
     }
 
     public void updateListMoldInOrder(PurchaseOrder currentOrder, OrderUpdateReqDTO orderUpdateReqDTO) {
-        removeDeletedMold(currentOrder.getListMold(), orderUpdateReqDTO.getListCurrentMoldId());
-        addNewMold(currentOrder, orderUpdateReqDTO.getListNewMoldSize());
+        removeDeletedMold(currentOrder.getListMold(), orderUpdateReqDTO.getListMoldSize());
+        addNewMold(currentOrder, orderUpdateReqDTO.getListMoldSize());
     }
 
-    private void removeDeletedMold(List<Mold> listCurrentMold, List<Long> listReqMoldId) {
+    private void removeDeletedMold(List<Mold> listCurrentMold, List<MoldDTO> listReqMold) {
+        List<Long> listReqMoldId = listReqMold.stream()
+                .filter(moldDTO -> Objects.nonNull(moldDTO.getId()))
+                .map(MoldDTO::getId)
+                .collect(Collectors.toList());
+
         List<Mold> deletedMold = listCurrentMold.stream()
                 .filter(mold -> !listReqMoldId.contains(mold.getId()))
                 .collect(Collectors.toList());
@@ -89,9 +96,14 @@ public class MoldComponent {
         listCurrentMold.removeAll(deletedMold);
     }
 
-    private void addNewMold(PurchaseOrder currentOrder, List<String> newMold) {
+    private void addNewMold(PurchaseOrder currentOrder, List<MoldDTO> newMold) {
+        List<String> listNewSize = newMold.stream()
+                .filter(moldDTO -> Objects.isNull(moldDTO.getId()))
+                .map(MoldDTO::getSize)
+                .collect(Collectors.toList());
+
         /* create new Mold entity */
-        List<Mold> listNewMold = newMold.stream().map(newSize -> {
+        List<Mold> listNewMold = listNewSize.stream().map(newSize -> {
             Mold mold = new Mold();
             mold.setSize(newSize);
             mold.setPurchaseOrder(currentOrder);

@@ -85,11 +85,11 @@ public class MoldServiceImpl implements MoldService {
 
     private void createNewMoldGroup(PurchaseOrder order, MoldGroupReqDTO reqDTO) {
         List<Mold> listUpdateMold = order.getListMold().stream()
-                .filter(mold -> reqDTO.getMoldGroup().getMoldList().contains(mold.getSize()))
+                .filter(mold -> reqDTO.getMoldGroup().getMoldIdList().contains(mold.getId()))
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(listUpdateMold)) {
-            throw new BusinessException("Not found any mold size " +  reqDTO.getMoldGroup().getMoldList() + " in order " + order.getCode());
+            throw new BusinessException("Not found any mold id " +  reqDTO.getMoldGroup().getMoldIdList() + " in order " + order.getCode());
         }
 
         MoldGroup moldGroup = new MoldGroup();
@@ -145,7 +145,7 @@ public class MoldServiceImpl implements MoldService {
 
     private void updateMoldGroup(PurchaseOrder order, MoldGroupReqDTO reqDTO) {
         List<Mold> listUpdateMold = order.getListMold().stream()
-                .filter(mold -> reqDTO.getMoldGroup().getMoldList().contains(mold.getSize()))
+                .filter(mold -> reqDTO.getMoldGroup().getMoldIdList().contains(mold.getId()))
                 .collect(Collectors.toList());
 
         MoldGroupDetailDTO moldGroupReq = reqDTO.getMoldGroup();
@@ -357,7 +357,7 @@ public class MoldServiceImpl implements MoldService {
         MoldGroup moldGroup = moldGroupRepository.findById(groupId).orElseThrow();
 
         MoldGroupDetailDTO detailDTO = moldGroupDetailMapper.toDTO(moldGroup);
-        detailDTO.setMoldList(List.of());
+        detailDTO.setMoldIdList(List.of());
 
         return saveMoldGroup(
                 MoldGroupReqDTO.builder()
