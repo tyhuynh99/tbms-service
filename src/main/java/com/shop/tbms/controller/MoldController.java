@@ -3,7 +3,8 @@ package com.shop.tbms.controller;
 import com.shop.tbms.dto.ListWrapperDTO;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.mold.MoldElementTemplateDTO;
-import com.shop.tbms.dto.mold.MoldGroupDetailDTO;
+import com.shop.tbms.dto.mold.MoldGroupDetailReqDTO;
+import com.shop.tbms.dto.mold.MoldGroupDetailResDTO;
 import com.shop.tbms.dto.mold.MoldGroupReqDTO;
 import com.shop.tbms.service.MoldService;
 import com.shop.tbms.util.ResponseUtil;
@@ -27,7 +28,7 @@ public class MoldController {
     }
 
     @GetMapping("/order")
-    public ResponseEntity<ListWrapperDTO<MoldGroupDetailDTO>> getListMoldGroupOfOrder(@RequestParam("orderId") Long orderId) {
+    public ResponseEntity<ListWrapperDTO<MoldGroupDetailResDTO>> getListMoldGroupOfOrder(@RequestParam("orderId") Long orderId) {
         return ResponseEntity.ok(ResponseUtil.wrapListToResp(
                 moldService.getListElementOfOrder(orderId)
         ));

@@ -1,10 +1,8 @@
 package com.shop.tbms.mapper.order;
 
-import com.shop.tbms.dto.mold.MoldDTO;
-import com.shop.tbms.dto.mold.MoldGroupDetailDTO;
+import com.shop.tbms.dto.mold.MoldGroupDetailReqDTO;
 import com.shop.tbms.dto.order.OrderDetailRespDTO;
 import com.shop.tbms.dto.order.OrderStepRespDTO;
-import com.shop.tbms.entity.Mold;
 import com.shop.tbms.entity.MoldGroup;
 import com.shop.tbms.entity.PurchaseOrder;
 import com.shop.tbms.entity.Step;
@@ -15,8 +13,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", uses = {MoldMapper.class})
 public interface PurchaseOrderDetailMapper {
@@ -33,15 +29,15 @@ public interface PurchaseOrderDetailMapper {
     }
 
     /* MOLD ELEMENT */
-    MoldGroupDetailDTO toMoldGroupDetailDTO(MoldGroup moldGroup);
-    List<MoldGroupDetailDTO> toMoldGroupDetailDTO(List<MoldGroup> moldGroupList);
+    MoldGroupDetailReqDTO toMoldGroupDetailDTO(MoldGroup moldGroup);
+    List<MoldGroupDetailReqDTO> toMoldGroupDetailDTO(List<MoldGroup> moldGroupList);
 
     /* STEP */
     OrderStepRespDTO toStepDTO(Step step);
     List<OrderStepRespDTO> toStepDTO(List<Step> step);
 
     @Named("genListMoldGroupDetail")
-    default List<MoldGroupDetailDTO> genListMoldGroupDetail(PurchaseOrder order) {
+    default List<MoldGroupDetailReqDTO> genListMoldGroupDetail(PurchaseOrder order) {
         return toMoldGroupDetailDTO(order.getListMoldGroup());
     }
 

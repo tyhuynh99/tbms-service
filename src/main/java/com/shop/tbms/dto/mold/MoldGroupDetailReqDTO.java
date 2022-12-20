@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MoldGroupDetailDTO {
+public class MoldGroupDetailReqDTO {
     private Long id;
     @NotNull
     private MoldType type;
