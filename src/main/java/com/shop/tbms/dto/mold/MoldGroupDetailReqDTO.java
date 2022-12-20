@@ -40,6 +40,4 @@ public class MoldGroupDetailReqDTO {
     private List<MoldElementDTO> moldElementList;
     @NotEmpty
     private List<Long> moldIdList;
-
-    private List<String> moldList;
 }
