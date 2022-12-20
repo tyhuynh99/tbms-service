@@ -40,4 +40,6 @@ public class MoldGroupDetailResDTO {
     private List<MoldElementDTO> moldElementList;
 
     private List<MoldDTO> moldList;
+
+    private List<Long> moldIdList;
 }
