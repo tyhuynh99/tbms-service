@@ -2,8 +2,6 @@ package com.shop.tbms.dto.mold;
 
 import lombok.*;
 
-import java.util.List;
-
 @Getter @Setter
 @ToString
 @Builder
@@ -11,5 +9,5 @@ import java.util.List;
 @NoArgsConstructor
 public class MoldGroupReqDTO {
     private long orderId;
-    private MoldGroupDetailDTO moldGroup;
+    private MoldGroupDetailReqDTO moldGroup;
 }

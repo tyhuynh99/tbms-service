@@ -5,10 +5,7 @@ import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
-import com.shop.tbms.dto.mold.MoldElementDTO;
-import com.shop.tbms.dto.mold.MoldElementTemplateDTO;
-import com.shop.tbms.dto.mold.MoldGroupDetailDTO;
-import com.shop.tbms.dto.mold.MoldGroupReqDTO;
+import com.shop.tbms.dto.mold.*;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.order.OrderStatus;
 import com.shop.tbms.mapper.mold.MoldElementTemplateMapper;
@@ -20,7 +17,6 @@ import com.shop.tbms.util.StepConditionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -85,11 +81,11 @@ public class MoldServiceImpl implements MoldService {
 
     private void createNewMoldGroup(PurchaseOrder order, MoldGroupReqDTO reqDTO) {
         List<Mold> listUpdateMold = order.getListMold().stream()
-                .filter(mold -> reqDTO.getMoldGroup().getMoldList().contains(mold.getSize()))
+                .filter(mold -> reqDTO.getMoldGroup().getMoldIdList().contains(mold.getId()))
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(listUpdateMold)) {
-            throw new BusinessException("Not found any mold size " +  reqDTO.getMoldGroup().getMoldList() + " in order " + order.getCode());
+            throw new BusinessException("Not found any mold id " +  reqDTO.getMoldGroup().getMoldIdList() + " in order " + order.getCode());
         }
 
         MoldGroup moldGroup = new MoldGroup();
@@ -145,10 +141,10 @@ public class MoldServiceImpl implements MoldService {
 
     private void updateMoldGroup(PurchaseOrder order, MoldGroupReqDTO reqDTO) {
         List<Mold> listUpdateMold = order.getListMold().stream()
-                .filter(mold -> reqDTO.getMoldGroup().getMoldList().contains(mold.getSize()))
+                .filter(mold -> reqDTO.getMoldGroup().getMoldIdList().contains(mold.getId()))
                 .collect(Collectors.toList());
 
-        MoldGroupDetailDTO moldGroupReq = reqDTO.getMoldGroup();
+        MoldGroupDetailReqDTO moldGroupReq = reqDTO.getMoldGroup();
         MoldGroup curMoldGroup = order.getListMoldGroup().stream()
                 .filter(moldGroupInOrder ->
                         reqDTO.getMoldGroup().getId().equals(moldGroupInOrder.getId()))
@@ -184,7 +180,7 @@ public class MoldServiceImpl implements MoldService {
         moldGroupRepository.save(curMoldGroup);
     }
 
-    private boolean updateMoldElement(MoldGroup curMoldGroup, MoldGroupDetailDTO moldGroupReq) {
+    private boolean updateMoldElement(MoldGroup curMoldGroup, MoldGroupDetailReqDTO moldGroupReq) {
         boolean isChangeElement = false;
         List<MoldGroupElement> moldGroupElementList = curMoldGroup.getListMoldGroupElement();
         List<MoldElementDTO> reqElementList = moldGroupReq.getMoldElementList();
@@ -248,7 +244,7 @@ public class MoldServiceImpl implements MoldService {
 
     private void processUpdateMoldGroup(
             MoldGroup curMoldGroup,
-            MoldGroupDetailDTO moldGroupReq,
+            MoldGroupDetailReqDTO moldGroupReq,
             List<Mold> listUpdateMold,
             PurchaseOrder order,
             final boolean isChangeElement,
@@ -346,7 +342,7 @@ public class MoldServiceImpl implements MoldService {
     }
 
     @Override
-    public List<MoldGroupDetailDTO> getListElementOfOrder(long orderId) {
+    public List<MoldGroupDetailResDTO> getListElementOfOrder(long orderId) {
         PurchaseOrder order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
 
         return moldGroupDetailMapper.toDTOs(order.getListMoldGroup());
@@ -356,8 +352,8 @@ public class MoldServiceImpl implements MoldService {
     public SuccessRespDTO deleteMoldGroup(Long groupId) {
         MoldGroup moldGroup = moldGroupRepository.findById(groupId).orElseThrow();
 
-        MoldGroupDetailDTO detailDTO = moldGroupDetailMapper.toDTO(moldGroup);
-        detailDTO.setMoldList(List.of());
+        MoldGroupDetailReqDTO detailDTO = moldGroupDetailMapper.toReqDTO(moldGroup);
+        detailDTO.setMoldIdList(List.of());
 
         return saveMoldGroup(
                 MoldGroupReqDTO.builder()

@@ -1,5 +1,6 @@
 package com.shop.tbms.dto.order;
 
+import com.shop.tbms.dto.mold.MoldDTO;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
@@ -31,5 +32,5 @@ public class OrderUpdateReqDTO {
     @NotNull
     private Boolean isUrgent;
 
-    private List<String> listSize;
+    private List<MoldDTO> listMoldSize;
 }
