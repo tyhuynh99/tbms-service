@@ -89,6 +89,8 @@ public class ProgressUtil {
 
         if (Objects.nonNull(mold.getMoldGroup())) {
             for (MoldGroupElement moldGroupElement : mold.getMoldGroup().getListMoldGroupElement()) {
+                if (Boolean.FALSE.equals(moldGroupElement.getChecked())) continue;
+
                 MoldGroupElementProgress progress = new MoldGroupElementProgress();
                 progress.setMoldGroupElement(moldGroupElement);
                 progress.setMold(mold);
