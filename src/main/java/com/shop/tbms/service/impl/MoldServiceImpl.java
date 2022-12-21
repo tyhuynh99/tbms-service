@@ -173,6 +173,11 @@ public class MoldServiceImpl implements MoldService {
 
         final boolean isChangeMoldGroupType = !moldGroupReq.getType().equals(curMoldGroup.getType());
         final boolean isChangeElement = updateMoldElement(curMoldGroup, moldGroupReq);
+
+        /* update relationship to listUpdateMold */
+        listUpdateMold.forEach(updatedMold -> {
+            updatedMold.setMoldGroup(curMoldGroup);
+        });
         processUpdateMoldGroup(curMoldGroup, moldGroupReq, listUpdateMold, order, isChangeElement, isChangeMoldGroupType);
 
         moldGroupDetailMapper.partialUpdate(curMoldGroup, moldGroupReq);

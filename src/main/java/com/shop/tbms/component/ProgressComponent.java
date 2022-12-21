@@ -502,9 +502,12 @@ public class ProgressComponent {
     }
 
     public void resetMoldGroupProgressChangeElement(Mold mold, Step step) {
-        if (ReportType.BY_MOLD_ELEMENT.equals(step.getReportType()) && StepStatus.IN_PROGRESS.equals(step.getStatus())) {
+        if (ReportType.BY_MOLD_ELEMENT.equals(step.getReportType())) {
             List<MoldGroupElement> elementList = mold.getMoldGroup().getListMoldGroupElement();
-            List<MoldGroupElementProgress> listProgress = moldGroupElementProgressRepository.findAllByStepId(step.getId());
+            List<MoldGroupElementProgress> listProgress = elementList.stream()
+                    .map(MoldGroupElement::getListMoldGroupElementProgress)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
 
             List<MoldGroupElementProgress> deletedProgress = new ArrayList<>();
             List<MoldGroupElementProgress> addedProgress = new ArrayList<>();
@@ -512,13 +515,29 @@ public class ProgressComponent {
             for (MoldGroupElement element : elementList) {
                 Optional<MoldGroupElementProgress> chkProgress = listProgress.stream()
                         .filter(moldGroupElementProgress ->
+                                Objects.nonNull(moldGroupElementProgress)
+                                        &&
+                                Objects.nonNull(moldGroupElementProgress.getMoldGroupElement())
+                                        &&
                                 element.getName().equalsIgnoreCase(
                                         moldGroupElementProgress.getMoldGroupElement().getName()))
                         .findFirst();
 
                 if (chkProgress.isPresent()) {
                     if (Boolean.FALSE.equals(element.getChecked())) {
-                        deletedProgress.add(chkProgress.get());
+                        MoldGroupElementProgress progress = chkProgress.get();
+
+                        progress.getMold().getListMoldGroupElementProgress().remove(progress);
+                        progress.getMoldGroupElement().getListMoldGroupElementProgress().remove(progress);
+                        progress.getStep().getListMoldGroupElementProgresses().remove(progress);
+
+                        progress.setMold(null);
+                        progress.setMoldGroupElement(null);
+                        progress.setStep(null);
+
+                        step.getListMoldGroupElementProgresses().remove(progress);
+
+                        deletedProgress.add(progress);
                     }
                 } else if (Boolean.TRUE.equals(element.getChecked())) {
                     MoldGroupElementProgress progress = new MoldGroupElementProgress();
@@ -534,6 +553,7 @@ public class ProgressComponent {
             listProgress.removeAll(deletedProgress);
             listProgress.addAll(addedProgress);
 
+            moldGroupElementProgressRepository.deleteAll(deletedProgress);
             moldGroupElementProgressRepository.saveAll(listProgress);
         }
     }
