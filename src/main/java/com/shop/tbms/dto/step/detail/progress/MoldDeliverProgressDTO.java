@@ -20,6 +20,7 @@ public class MoldDeliverProgressDTO {
     private LocalDateTime actionDate;
 
     private String moldSize;
+    private Long moldId;
     private String moldSizeWithType;
     private boolean canCheck;
     private boolean canUncheck;

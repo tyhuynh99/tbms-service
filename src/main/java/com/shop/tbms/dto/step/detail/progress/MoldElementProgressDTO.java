@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class MoldElementProgressDTO {
     private String moldSize;
+    private Long moldId;
     private String moldSizeWithType;
     private long percentCompleted;
     private List<MoldElementProgressDetailDTO> listElement;
