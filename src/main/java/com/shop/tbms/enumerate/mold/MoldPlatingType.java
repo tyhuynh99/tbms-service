@@ -7,7 +7,9 @@ import lombok.Getter;
 public enum MoldPlatingType {
     XI_MA_THUONG("Xi mạ thường"),
     XI_MA_MO("Xi mạ mờ"),
-    DANH_BONG("Đánh bóng");
+    DANH_BONG("Đánh bóng"),
+    PHU_NANO("Phủ nano"),
+    SON_KHUON("Sơn khuôn");
 
     MoldPlatingType(String name) {
         this.name = name;

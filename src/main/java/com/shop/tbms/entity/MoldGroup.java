@@ -32,12 +32,6 @@ public class MoldGroup extends AbstractAuditingEntity {
     @Enumerated(value = EnumType.STRING)
     private MoldPlatingType platingType;
 
-    @Column(name = "has_son", nullable = false)
-    private Boolean hasSon;
-
-    @Column(name = "has_phu_nano", nullable = false)
-    private Boolean hasPhuNano;
-
     @Column(name = "has_ban_dien", nullable = false)
     private Boolean hasBanDien;
 
