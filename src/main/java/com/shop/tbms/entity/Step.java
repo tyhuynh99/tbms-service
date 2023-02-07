@@ -52,6 +52,11 @@ public class Step extends AbstractAuditingEntity {
     private Boolean isEnd;
 
     @Column(name = "has_condition")
+    /*
+     * If hasCondition = true
+     * Mold won't be generated after create order
+     * Mold will be generated after mold group detail created and gen base on detail info of mold group
+     * */
     private Boolean hasCondition;
 
     @Column(name = "expected_complete_date")

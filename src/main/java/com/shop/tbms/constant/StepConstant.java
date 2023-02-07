@@ -17,6 +17,9 @@ public class StepConstant {
     public Map<String, String> getListStepNeedUpdateMoldElement() {
         return Map.of(code3D_KHUON, description3D_KHUON);
     }
+    public List<String> getListStepNotForFreeFormType() {
+        return List.of(code3D_GO, codeCAM_GO, codeCNC_GO_IN, codeGO_TIA_TOT, codeDUC, codeSCAN, codeRAP_KHUON);
+    }
 
     @Value("${step.code.2D}")
     private String code2D;

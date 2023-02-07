@@ -361,7 +361,7 @@ public class ProgressComponent {
             if (isChangeMoldGroup &&
                     (StepConditionUtil.isStepHasConditionProgress(step, stepConstant) || StepType.FIXING.equals(step.getType()))
             ) {
-                /* if Step is Phong Dien or Sua Khuon, delete progress */
+                /* if Step is has condition or fixing step, delete progress */
                 if (optionalMoldProgress.isPresent()) {
                     MoldProgress moldProgress = optionalMoldProgress.get();
                     log.info("mold progress is exited {}. Delete progress", moldProgress);
@@ -375,15 +375,16 @@ public class ProgressComponent {
                     moldProgress.setIsCompleted(Boolean.FALSE);
 
                     listUpdatedProgress.add(moldProgress);
-                } else {
-                    log.info("mold progress is not existed. create new mold progress.");
-                    MoldProgress moldProgress = new MoldProgress();
-                    moldProgress.setMold(mold);
-                    moldProgress.setStep(step);
-                    moldProgress.setIsCompleted(Boolean.FALSE);
-
-                    listUpdatedProgress.add(moldProgress);
                 }
+//                } else {
+//                    log.info("mold progress is not existed. create new mold progress.");
+//                    MoldProgress moldProgress = new MoldProgress();
+//                    moldProgress.setMold(mold);
+//                    moldProgress.setStep(step);
+//                    moldProgress.setIsCompleted(Boolean.FALSE);
+//
+//                    listUpdatedProgress.add(moldProgress);
+//                }
             }
         });
 
@@ -402,7 +403,7 @@ public class ProgressComponent {
             log.info("Start delete progress mold {} of step {}", mold, step);
             moldGroupElementProgressRepository.removeByStepIdAndMoldId(step.getId(), mold.getId());
 
-            listUpdatedProgress.addAll(ProgressUtil.generateMoldGroupElementProgress(step, mold));
+            listUpdatedProgress.addAll(ProgressUtil.generateMoldGroupElementProgress(step, mold, stepConstant));
         });
 
         log.info("Updated progress {}", listUpdatedProgress);
@@ -425,35 +426,42 @@ public class ProgressComponent {
             if (isChangeMoldGroup &&
                     (StepConditionUtil.isStepHasConditionProgress(step, stepConstant) || StepType.FIXING.equals(step.getType()))
             ) {
-                /* if Step is Phong Dien or Sua Khuon, delete progress */
+                /* if Step is has condition or fixing step, delete progress */
                 listDeletedProgress.addAll(deliverProgressList);
             } else {
                 /* else set progress complete to false */
-                if (deliverProgressList.isEmpty()) {
-                    log.info("deliver progress is not existed. create new delvier progress.");
-                    MoldDeliverProgress sendProgress = new MoldDeliverProgress();
-                    sendProgress.setMold(mold);
-                    sendProgress.setStep(step);
-                    sendProgress.setType(MoldDeliverProgressType.SEND);
-                    sendProgress.setIsCompleted(Boolean.FALSE);
+//                if (deliverProgressList.isEmpty()) {
+//                    log.info("deliver progress is not existed. create new delvier progress.");
+//                    MoldDeliverProgress sendProgress = new MoldDeliverProgress();
+//                    sendProgress.setMold(mold);
+//                    sendProgress.setStep(step);
+//                    sendProgress.setType(MoldDeliverProgressType.SEND);
+//                    sendProgress.setIsCompleted(Boolean.FALSE);
+//
+//                    listUpdatedProgress.add(sendProgress);
+//
+//                    MoldDeliverProgress receiveProgress = new MoldDeliverProgress();
+//                    receiveProgress.setMold(mold);
+//                    receiveProgress.setStep(step);
+//                    receiveProgress.setType(MoldDeliverProgressType.RECEIVE);
+//                    receiveProgress.setIsCompleted(Boolean.FALSE);
+//
+//                    listUpdatedProgress.add(receiveProgress);
+//                } else {
+//                    deliverProgressList.forEach(progress -> {
+//                        log.info("deliver progress is exited {}. Change complete to FALSE", progress);
+//                        progress.setIsCompleted(Boolean.FALSE);
+//
+//                        listUpdatedProgress.add(progress);
+//                    });
+//                }
 
-                    listUpdatedProgress.add(sendProgress);
-
-                    MoldDeliverProgress receiveProgress = new MoldDeliverProgress();
-                    receiveProgress.setMold(mold);
-                    receiveProgress.setStep(step);
-                    receiveProgress.setType(MoldDeliverProgressType.RECEIVE);
-                    receiveProgress.setIsCompleted(Boolean.FALSE);
-
-                    listUpdatedProgress.add(receiveProgress);
-                } else {
-                    deliverProgressList.forEach(progress -> {
+                deliverProgressList.forEach(progress -> {
                         log.info("deliver progress is exited {}. Change complete to FALSE", progress);
                         progress.setIsCompleted(Boolean.FALSE);
 
                         listUpdatedProgress.add(progress);
                     });
-                }
             }
         });
 

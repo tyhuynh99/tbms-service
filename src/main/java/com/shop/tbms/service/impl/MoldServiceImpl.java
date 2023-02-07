@@ -1,6 +1,7 @@
 package com.shop.tbms.service.impl;
 
 import com.shop.tbms.component.ProgressComponent;
+import com.shop.tbms.component.ProgressMoldGroupComponent;
 import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.constant.StepConstant;
@@ -47,6 +48,8 @@ public class MoldServiceImpl implements MoldService {
 
     @Autowired
     private ProgressComponent progressComponent;
+    @Autowired
+    private ProgressMoldGroupComponent progressMoldGroupComponent;
 
     @Autowired
     private StepConstant stepConstant;
@@ -116,27 +119,10 @@ public class MoldServiceImpl implements MoldService {
 
         moldGroup.setListMoldGroupElement(moldGroupElementList);
 
-        if (reqDTO.getMoldGroup().isHasBanDien()) {
-            /* Check to has Ban Dien */
-            /* Generate progress for step Phong Dien */
-            log.info("Check hasBanDien, create progress for mold {} at step PHONG DIEN", listUpdateMold);
-            Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
-            log.info("Step PHONG DIEN {}", phongDienStep);
-
-            List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForConditionStep(
-                    phongDienStep,
-                    listUpdateMold);
-
-            phongDienStep.setListMoldProgress(moldProgressListForConditionStep);
-
-            log.info("Insert progress {}", moldProgressListForConditionStep);
-            moldProgressRepository.saveAll(moldProgressListForConditionStep);
-        }
-
         moldGroupRepository.save(moldGroup);
 
         /* generate progress for step in progress */
-        listUpdateMold.forEach(progressComponent::resetMoldGroupProgressChangeType);
+        progressMoldGroupComponent.generateProgressForCreateGroup(reqDTO, order, listUpdateMold);
     }
 
     private void updateMoldGroup(PurchaseOrder order, MoldGroupReqDTO reqDTO) {
@@ -271,7 +257,7 @@ public class MoldServiceImpl implements MoldService {
                     Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
                     log.info("Step PHONG DIEN {}", phongDienStep);
 
-                    List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForConditionStep(
+                    List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForMoldGroup(
                             phongDienStep,
                             List.of(mold));
 
@@ -305,7 +291,7 @@ public class MoldServiceImpl implements MoldService {
                     Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
                     log.info("Step PHONG DIEN {}", phongDienStep);
 
-                    List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForConditionStep(
+                    List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForMoldGroup(
                             phongDienStep,
                             List.of(mold));
 
