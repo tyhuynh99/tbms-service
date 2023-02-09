@@ -1,5 +1,6 @@
 package com.shop.tbms.constant;
 
+import com.shop.tbms.enumerate.mold.MoldType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
@@ -155,5 +156,15 @@ public class StepConstant {
 
     public String getStepToResetToStepWhenChangeMoldDetail() {
         return this.getCodeCAM_GO();
+    }
+
+    public String getStepToResetToStepWhenChangeMoldDetail(MoldType curMoldType, MoldType reqMoldType) {
+        if ((MoldType.FREEFORM.equals(curMoldType) && !MoldType.FREEFORM.equals(reqMoldType))
+                || (!MoldType.FREEFORM.equals(curMoldType) && MoldType.FREEFORM.equals(reqMoldType))
+                || MoldType.FREEFORM.equals(curMoldType))
+        {
+            return getCode3D_GO();
+        }
+        return this.getStepToResetToStepWhenChangeMoldDetail();
     }
 }

@@ -48,8 +48,6 @@ import javax.persistence.EntityNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.shop.tbms.constant.AppConstant.DELETED_ID;
-
 @Service
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 @Slf4j
@@ -405,7 +403,7 @@ public class StepServiceImpl implements StepService {
                     default:
                 }
 
-                progressComponent.resetProgress(resetStep, listReportedMold, false);
+                progressComponent.resetProgress(resetStep, listReportedMold);
             } else {
                 Step endStep = StepUtil.getEndStep(currentStep.getProcedure().getPurchaseOrder());
                 resetMoldProgressToStep(endStep, resetStep.getId(), reportIssueStepReqDTO.getListMoldId());
@@ -445,7 +443,7 @@ public class StepServiceImpl implements StepService {
         } while (!Objects.equals(Objects.requireNonNull(step).getId(), resetToStepId));
 
         List<Mold> listMold = moldRepository.findAllById(listMoldId);
-        listResetStep.forEach(stepAction -> progressComponent.resetProgress(stepAction, listMold, false));
+        listResetStep.forEach(stepAction -> progressComponent.resetProgress(stepAction, listMold));
     }
 
     @Override

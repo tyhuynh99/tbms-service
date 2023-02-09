@@ -153,7 +153,9 @@ public class MoldServiceImpl implements MoldService {
             mold.setMoldGroup(null);
             /* change mold group */
             /* reset progress to step CAM_GO */
-            progressComponent.resetMoldGroupProgressChangeType(mold);
+            progressMoldGroupComponent.resetMoldGroupProgressChangeType(mold, moldGroupReq);
+
+            // TODO: check type FREEFORM
         });
         curMoldGroup.setListMold(listUpdateMold);
 
@@ -247,25 +249,7 @@ public class MoldServiceImpl implements MoldService {
 
                 /* generate progress */
                 /* reset progress also can generate new progress */
-                progressComponent.resetMoldGroupProgressChangeType(mold);
-
-                /* check phong dien */
-                if (moldGroupReq.isHasBanDien()) {
-                    /* Check to has Ban Dien */
-                    /* Generate progress for step Phong Dien */
-                    log.info("Check hasBanDien, create progress for mold {} at step PHONG DIEN", mold);
-                    Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
-                    log.info("Step PHONG DIEN {}", phongDienStep);
-
-                    List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForMoldGroup(
-                            phongDienStep,
-                            List.of(mold));
-
-                    phongDienStep.setListMoldProgress(moldProgressListForConditionStep);
-
-                    log.info("Insert progress {}", moldProgressListForConditionStep);
-                    moldProgressRepository.saveAll(moldProgressListForConditionStep);
-                }
+                progressMoldGroupComponent.resetMoldGroupProgressChangeType(mold, moldGroupReq);
             } else if (!moldGroupReq.getId().equals(mold.getMoldGroup().getId())) {
                 /* When update, mold must not in any group */
                 throw new BusinessException(
@@ -274,46 +258,45 @@ public class MoldServiceImpl implements MoldService {
                 );
             } else {
                 /* not change mold group */
-
                 if (isChangeMoldGroupType) {
-                    /* reset progress to step CAM_GO */
-                    progressComponent.resetMoldGroupProgressChangeType(mold);
+                    /* reset progress to step CAM_GO or 3D_GO (if type = FREEFORM) */
+                    progressMoldGroupComponent.resetMoldGroupProgressChangeType(mold, moldGroupReq);
                 } else if (isChangeElement) {
                     /* reset progress of element */
                     progressComponent.resetMoldGroupProgressChangeElement(mold);
-                }
 
-                /* check option Ban Dien */
-                if (Boolean.FALSE.equals(curMoldGroup.getHasBanDien()) && moldGroupReq.isHasBanDien()) {
-                    /* Check to has Ban Dien */
-                    /* Generate progress for step Phong Dien */
-                    log.info("Check hasBanDien, create progress for mold {} at step PHONG DIEN", mold);
-                    Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
-                    log.info("Step PHONG DIEN {}", phongDienStep);
+                    /* check option Ban Dien */
+                    if (Boolean.FALSE.equals(curMoldGroup.getHasBanDien()) && moldGroupReq.isHasBanDien()) {
+                        /* Check to has Ban Dien */
+                        /* Generate progress for step Phong Dien */
+                        log.info("Check hasBanDien, create progress for mold {} at step PHONG DIEN", mold);
+                        Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
+                        log.info("Step PHONG DIEN {}", phongDienStep);
 
-                    List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForMoldGroup(
-                            phongDienStep,
-                            List.of(mold));
+                        List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForMoldGroup(
+                                phongDienStep,
+                                List.of(mold));
 
-                    phongDienStep.setListMoldProgress(moldProgressListForConditionStep);
+                        phongDienStep.setListMoldProgress(moldProgressListForConditionStep);
 
-                    log.info("Insert progress {}", moldProgressListForConditionStep);
-                    moldProgressRepository.saveAll(moldProgressListForConditionStep);
-                } else if (Boolean.TRUE.equals(curMoldGroup.getHasBanDien()) && !moldGroupReq.isHasBanDien()) {
-                    /* Uncheck to has Ban Dien */
-                    /* Delete progress for step Phong Dien */
-                    log.info("Uncheck hasBanDien, delete progress for mold {} at step PHONG DIEN", mold);
-                    Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
-                    log.info("Step PHONG DIEN {}", phongDienStep);
+                        log.info("Insert progress {}", moldProgressListForConditionStep);
+                        moldProgressRepository.saveAll(moldProgressListForConditionStep);
+                    } else if (Boolean.TRUE.equals(curMoldGroup.getHasBanDien()) && !moldGroupReq.isHasBanDien()) {
+                        /* Uncheck to has Ban Dien */
+                        /* Delete progress for step Phong Dien */
+                        log.info("Uncheck hasBanDien, delete progress for mold {} at step PHONG DIEN", mold);
+                        Step phongDienStep = StepConditionUtil.getStepPhongDien(order, stepConstant).orElseThrow();
+                        log.info("Step PHONG DIEN {}", phongDienStep);
 
-                    List<MoldProgress> listProgressNeedRemoved = phongDienStep.getListMoldProgress().stream()
-                            .filter(moldProgress ->
-                                    mold.getSize().equalsIgnoreCase(moldProgress.getMold().getSize()))
-                            .collect(Collectors.toList());
-                    phongDienStep.getListMoldProgress().removeAll(listProgressNeedRemoved);
+                        List<MoldProgress> listProgressNeedRemoved = phongDienStep.getListMoldProgress().stream()
+                                .filter(moldProgress ->
+                                        mold.getSize().equalsIgnoreCase(moldProgress.getMold().getSize()))
+                                .collect(Collectors.toList());
+                        phongDienStep.getListMoldProgress().removeAll(listProgressNeedRemoved);
 
-                    log.info("Delete progress {}", listProgressNeedRemoved);
-                    moldProgressRepository.deleteAll(listProgressNeedRemoved);
+                        log.info("Delete progress {}", listProgressNeedRemoved);
+                        moldProgressRepository.deleteAll(listProgressNeedRemoved);
+                    }
                 }
             }
         }
