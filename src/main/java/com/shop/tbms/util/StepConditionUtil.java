@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class StepConditionUtil {
-    public static boolean isStepHasConditionProgress(Step step, StepConstant stepConstant) {
+    public static boolean isStepHasConditionProgress(Step step) {
         if (Boolean.TRUE.equals(step.getHasCondition())) {
             return true;
         }

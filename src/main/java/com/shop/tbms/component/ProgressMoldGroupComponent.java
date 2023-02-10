@@ -15,6 +15,7 @@ import com.shop.tbms.util.ProgressUtil;
 import com.shop.tbms.util.StepConditionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Component
 public class ProgressMoldGroupComponent {
     @Autowired
     private StepConstant stepConstant;
@@ -44,49 +46,49 @@ public class ProgressMoldGroupComponent {
         boolean isFreeFormType = MoldType.FREEFORM.equals(reqDTO.getMoldGroup().getType());
 
         for (Step step : order.getProcedure().getListStep()) {
-            if (stepConstant.getCodePHONG_DIEN().equalsIgnoreCase(step.getCode())) {
-                /* gen step Phong dien */
-                if (reqDTO.getMoldGroup().isHasBanDien() || isFreeFormType) {
-                    List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForMoldGroup(
-                            step,
-                            listUpdateMold);
-
-                    step.setListMoldProgress(moldProgressListForConditionStep);
-
-                    listUpdatedMoldProgress.addAll(moldProgressListForConditionStep);
-                }
-            }
-
-            if ((!isFreeFormType || (!stepConstant.getListStepNotForFreeFormType().contains(step.getCode()))) && !StepType.FIXING.equals(step.getType())) {
-                switch (step.getReportType()) {
-                    case BY_MOLD:
-                        List<MoldProgress> moldProgressListForMoldGroup = ProgressUtil.generateMoldProcessForMoldGroup(
+            if (StepType.FIXING.equals(step.getType()) || StepConditionUtil.isStepHasConditionProgress(step)) {
+                if (stepConstant.getCodePHONG_DIEN().equalsIgnoreCase(step.getCode())) {
+                    /* gen step Phong dien */
+                    if (reqDTO.getMoldGroup().isHasBanDien() || isFreeFormType) {
+                        List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForMoldGroup(
                                 step,
                                 listUpdateMold);
 
-                        step.setListMoldProgress(moldProgressListForMoldGroup);
+                        step.setListMoldProgress(moldProgressListForConditionStep);
 
-                        listUpdatedMoldProgress.addAll(moldProgressListForMoldGroup);
-                        break;
-                    case BY_MOLD_SEND_RECEIVE:
-                        List<MoldDeliverProgress> moldDeliverProgressListForMoldGroup = ProgressUtil.generateMoldDeliverProcessForMoldGroup(
-                                step,
-                                listUpdateMold);
+                        listUpdatedMoldProgress.addAll(moldProgressListForConditionStep);
+                    }
+                } else if ((!isFreeFormType || (!stepConstant.getListStepNotForFreeFormType().contains(step.getCode()))) && !StepType.FIXING.equals(step.getType())) {
+                    switch (step.getReportType()) {
+                        case BY_MOLD:
+                            List<MoldProgress> moldProgressListForMoldGroup = ProgressUtil.generateMoldProcessForMoldGroup(
+                                    step,
+                                    listUpdateMold);
 
-                        step.setListMoldDeliverProgress(moldDeliverProgressListForMoldGroup);
+                            step.setListMoldProgress(moldProgressListForMoldGroup);
 
-                        listUpdatedMoldDeliverProgress.addAll(moldDeliverProgressListForMoldGroup);
-                        break;
-                    case BY_MOLD_ELEMENT:
-                        List<MoldGroupElementProgress> moldGroupElementProgressList = ProgressUtil.generateMoldGroupElementProgress(
-                                step,
-                                listUpdateMold);
+                            listUpdatedMoldProgress.addAll(moldProgressListForMoldGroup);
+                            break;
+                        case BY_MOLD_SEND_RECEIVE:
+                            List<MoldDeliverProgress> moldDeliverProgressListForMoldGroup = ProgressUtil.generateMoldDeliverProcessForMoldGroup(
+                                    step,
+                                    listUpdateMold);
 
-                        step.setListMoldGroupElementProgresses(moldGroupElementProgressList);
+                            step.setListMoldDeliverProgress(moldDeliverProgressListForMoldGroup);
 
-                        listUpdatedMoldElementProgress.addAll(moldGroupElementProgressList);
-                        break;
-                    default:
+                            listUpdatedMoldDeliverProgress.addAll(moldDeliverProgressListForMoldGroup);
+                            break;
+                        case BY_MOLD_ELEMENT:
+                            List<MoldGroupElementProgress> moldGroupElementProgressList = ProgressUtil.generateMoldGroupElementProgress(
+                                    step,
+                                    listUpdateMold);
+
+                            step.setListMoldGroupElementProgresses(moldGroupElementProgressList);
+
+                            listUpdatedMoldElementProgress.addAll(moldGroupElementProgressList);
+                            break;
+                        default:
+                    }
                 }
             }
         }
@@ -157,28 +159,53 @@ public class ProgressMoldGroupComponent {
                     log.info("mold progress is exited {}. Delete progress", moldProgress);
                     listDeletedProgress.add(moldProgress);
                 }
-            } else if (StepConditionUtil.isStepHasConditionProgress(step, stepConstant)) {
+            } else if (StepConditionUtil.isStepHasConditionProgress(step)) {
                 boolean isReqTypeFreeForm = MoldType.FREEFORM.equals(detailReqDTO.getType());
                 boolean isCurTypeFreeForm = Objects.nonNull(mold.getMoldGroup()) && MoldType.FREEFORM.equals(mold.getMoldGroup().getType());
 
                 if (isReqTypeFreeForm && !isCurTypeFreeForm) {
                     /* update from other type to type FREEFORM */
-                    /* delete progress */
-                    if (optionalMoldProgress.isPresent()) {
-                        MoldProgress moldProgress = optionalMoldProgress.get();
-                        log.info("mold progress is exited {}. Delete progress", moldProgress);
-                        listDeletedProgress.add(moldProgress);
+                    if (stepConstant.getCodePHONG_DIEN().equalsIgnoreCase(step.getCode())) {
+                        if (optionalMoldProgress.isPresent()) {
+                            optionalMoldProgress.get().setIsCompleted(Boolean.FALSE);
+                        } else {
+                            List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForMoldGroup(
+                                    step,
+                                    List.of(mold));
+                            step.setListMoldProgress(moldProgressListForConditionStep);
+
+                            listUpdatedProgress.addAll(moldProgressListForConditionStep);
+                        }
+                    } else {
+                        /* delete progress */
+                        if (optionalMoldProgress.isPresent()) {
+                            MoldProgress moldProgress = optionalMoldProgress.get();
+                            log.info("mold progress is exited {}. Delete progress", moldProgress);
+                            listDeletedProgress.add(moldProgress);
+                        }
                     }
                 } else if (!isReqTypeFreeForm && isCurTypeFreeForm) {
                     /* update from type FREEFORM to other TYPE */
-                    /* add new progress */
-                    List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForMoldGroup(
-                            step,
-                            List.of(mold));
+                    if (stepConstant.getCodePHONG_DIEN().equalsIgnoreCase(step.getCode())) {
+                        /* delete progress */
+                        if (optionalMoldProgress.isPresent()) {
+                            MoldProgress moldProgress = optionalMoldProgress.get();
+                            log.info("mold progress is exited {}. Delete progress", moldProgress);
+                            listDeletedProgress.add(moldProgress);
+                        }
+                    } else {
+                        /* add new progress */
+                        if (optionalMoldProgress.isPresent()) {
+                            optionalMoldProgress.get().setIsCompleted(Boolean.FALSE);
+                        } else {
+                            List<MoldProgress> moldProgressListForConditionStep = ProgressUtil.generateMoldProcessForMoldGroup(
+                                    step,
+                                    List.of(mold));
+                            step.setListMoldProgress(moldProgressListForConditionStep);
 
-                    step.setListMoldProgress(moldProgressListForConditionStep);
-
-                    listUpdatedProgress.addAll(moldProgressListForConditionStep);
+                            listUpdatedProgress.addAll(moldProgressListForConditionStep);
+                        }
+                    }
                 } else {
                     /* check hasBanDien */
                     if (!isReqTypeFreeForm && stepConstant.getCodePHONG_DIEN().equalsIgnoreCase(step.getCode())) {
@@ -259,7 +286,7 @@ public class ProgressMoldGroupComponent {
             log.info("Start delete progress mold {} of step {}", mold, step);
             moldGroupElementProgressRepository.removeByStepIdAndMoldId(step.getId(), mold.getId());
 
-            if (!MoldType.FREEFORM.equals(detailReqDTO.getType()) || !StepConditionUtil.isStepHasConditionProgress(step, stepConstant)) {
+            if (!MoldType.FREEFORM.equals(detailReqDTO.getType()) || !StepConditionUtil.isStepHasConditionProgress(step)) {
                 listUpdatedProgress.addAll(ProgressUtil.generateMoldGroupElementProgress(step, List.of(mold)));
             }
         });
@@ -284,7 +311,7 @@ public class ProgressMoldGroupComponent {
             if (StepType.FIXING.equals(step.getType())) {
                 /* if Step is fixing step, delete progress */
                 listDeletedProgress.addAll(deliverProgressList);
-            } else if (StepConditionUtil.isStepHasConditionProgress(step, stepConstant)) {
+            } else if (StepConditionUtil.isStepHasConditionProgress(step)) {
                 boolean isReqTypeFreeForm = MoldType.FREEFORM.equals(detailReqDTO.getType());
                 boolean isCurTypeFreeForm = Objects.nonNull(mold.getMoldGroup()) && MoldType.FREEFORM.equals(mold.getMoldGroup().getType());
 
@@ -326,5 +353,82 @@ public class ProgressMoldGroupComponent {
         moldDeliverProgressRepository.saveAll(listUpdatedProgress);
         moldDeliverProgressRepository.deleteAll(listDeletedProgress);
         log.info("End reset deliver progress.");
+    }
+
+    public void deleteMoldGroup(MoldGroup moldGroup) {
+        deleteMoldOutOfGroup(moldGroup.getListMold(), moldGroup);
+    }
+
+    public void deleteMoldOutOfGroup(List<Mold> moldList, MoldGroup moldGroup) {
+        PurchaseOrder order = moldGroup.getPurchaseOrder();
+        String resetToStepCode = stepConstant.getStepToResetToStepWhenChangeMoldDetail(moldGroup.getType());
+
+        /* get step need to reset when mold group type changed */
+        Step resetToStep = stepRepository.findFirstByCodeAndProcedureOrderId(resetToStepCode, order.getId()).orElseThrow();
+
+        /* get all step after reset step */
+        List<Step> listStepNeedToReset = order.getProcedure().getListStep().stream()
+                .filter(step ->
+                        step.getSequenceNo().compareTo(resetToStep.getSequenceNo()) >= 0
+                )
+                .collect(Collectors.toList());
+
+        listStepNeedToReset.forEach(step -> deleteMoldGroupChangeProgress(step, moldList));
+    }
+
+    private void deleteMoldGroupChangeProgress(Step step, List<Mold> moldList) {
+        /* set status to IN PROGRESS */
+        if (!StepStatus.IN_PROGRESS.equals(step.getStatus())) {
+            step.setStatus(StepStatus.INIT.equals(step.getStatus()) ? StepStatus.INIT : StepStatus.IN_PROGRESS);
+        }
+
+        boolean isStepHasCondition = StepConditionUtil.isStepHasConditionProgress(step);
+        List<Long> listRmMoldId = moldList.stream()
+                .map(Mold::getId)
+                .collect(Collectors.toList());
+
+        switch (step.getReportType()) {
+            case BY_MOLD: {
+                List<MoldProgress> progressList = moldProgressRepository.findAllByStepId(step.getId())
+                        .stream()
+                        .filter(moldProgress -> listRmMoldId.contains(moldProgress.getMold().getId()))
+                        .collect(Collectors.toList());
+
+                if (!progressList.isEmpty()) {
+                    if (isStepHasCondition) {
+                        moldProgressRepository.deleteAll(progressList);
+                    } else {
+                        progressList.forEach(moldProgress -> moldProgress.setIsCompleted(Boolean.FALSE));
+                        moldProgressRepository.saveAll(progressList);
+                    }
+                }
+                break;
+            }
+            case BY_MOLD_ELEMENT: {
+                List<MoldGroupElementProgress> progressList = moldGroupElementProgressRepository.findAllByStepId(step.getId())
+                        .stream()
+                        .filter(progress -> listRmMoldId.contains(progress.getMold().getId()))
+                        .collect(Collectors.toList());
+
+                moldGroupElementProgressRepository.deleteAll(progressList);
+                break;
+            }
+            case BY_MOLD_SEND_RECEIVE: {
+                List<MoldDeliverProgress> progressList = moldDeliverProgressRepository.findAllByStepId(step.getId())
+                        .stream()
+                        .filter(progress -> listRmMoldId.contains(progress.getMold().getId()))
+                        .collect(Collectors.toList());
+
+                if (!progressList.isEmpty()) {
+                    if (isStepHasCondition) {
+                        moldDeliverProgressRepository.deleteAll(progressList);
+                    } else {
+                        progressList.forEach(progress -> progress.setIsCompleted(Boolean.FALSE));
+                        moldDeliverProgressRepository.saveAll(progressList);
+                    }
+                }
+                break;
+            }
+        }
     }
 }

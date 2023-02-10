@@ -69,7 +69,7 @@ public class MoldGroup extends AbstractAuditingEntity {
     @ToString.Exclude
     private List<MoldGroupElement> listMoldGroupElement = new ArrayList<>();
 
-    @OneToMany(mappedBy = "moldGroup", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "moldGroup")
     @ToString.Exclude
     private List<Mold> listMold = new ArrayList<>();
 

@@ -167,4 +167,11 @@ public class StepConstant {
         }
         return this.getStepToResetToStepWhenChangeMoldDetail();
     }
+
+    public String getStepToResetToStepWhenChangeMoldDetail(MoldType curMoldType) {
+        if (MoldType.FREEFORM.equals(curMoldType)) {
+            return getCode3D_GO();
+        }
+        return this.getStepToResetToStepWhenChangeMoldDetail();
+    }
 }

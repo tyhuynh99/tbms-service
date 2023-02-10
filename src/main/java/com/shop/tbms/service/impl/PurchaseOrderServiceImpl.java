@@ -146,7 +146,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
             /* Generate mold progress */
             if (!StepType.FIXING.equals(step.getType())
                     && !ReportType.BY_MOLD_ELEMENT.equals(step.getReportType())
-                    && !StepConditionUtil.isStepHasConditionProgress(step, stepConstant)) {
+                    && !StepConditionUtil.isStepHasConditionProgress(step)) {
                 progressComponent.generateProgressForStep(step);
             }
         });

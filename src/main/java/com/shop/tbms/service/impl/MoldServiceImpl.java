@@ -149,24 +149,19 @@ public class MoldServiceImpl implements MoldService {
                 .filter(mold -> !listUpdateMold.contains(mold))
                 .collect(Collectors.toList());
 
-        listMoldRmOutGroup.forEach(mold -> {
-            mold.setMoldGroup(null);
-            /* change mold group */
-            /* reset progress to step CAM_GO */
-            progressMoldGroupComponent.resetMoldGroupProgressChangeType(mold, moldGroupReq);
-
-            // TODO: check type FREEFORM
-        });
+        listMoldRmOutGroup.forEach(mold -> mold.setMoldGroup(null));
+        progressMoldGroupComponent.deleteMoldOutOfGroup(listMoldRmOutGroup, curMoldGroup);
         curMoldGroup.setListMold(listUpdateMold);
 
         final boolean isChangeMoldGroupType = !moldGroupReq.getType().equals(curMoldGroup.getType());
         final boolean isChangeElement = updateMoldElement(curMoldGroup, moldGroupReq);
 
+        processUpdateMoldGroup(curMoldGroup, moldGroupReq, listUpdateMold, order, isChangeElement, isChangeMoldGroupType);
+
         /* update relationship to listUpdateMold */
         listUpdateMold.forEach(updatedMold -> {
             updatedMold.setMoldGroup(curMoldGroup);
         });
-        processUpdateMoldGroup(curMoldGroup, moldGroupReq, listUpdateMold, order, isChangeElement, isChangeMoldGroupType);
 
         moldGroupDetailMapper.partialUpdate(curMoldGroup, moldGroupReq);
 
@@ -244,9 +239,6 @@ public class MoldServiceImpl implements MoldService {
             final boolean isChangeMoldGroupType) {
         for (Mold mold : listUpdateMold) {
             if (Objects.isNull(mold.getMoldGroup())) {
-                /* add mold group */
-                mold.setMoldGroup(curMoldGroup);
-
                 /* generate progress */
                 /* reset progress also can generate new progress */
                 progressMoldGroupComponent.resetMoldGroupProgressChangeType(mold, moldGroupReq);
@@ -326,14 +318,11 @@ public class MoldServiceImpl implements MoldService {
     public SuccessRespDTO deleteMoldGroup(Long groupId) {
         MoldGroup moldGroup = moldGroupRepository.findById(groupId).orElseThrow();
 
-        MoldGroupDetailReqDTO detailDTO = moldGroupDetailMapper.toReqDTO(moldGroup);
-        detailDTO.setMoldIdList(List.of());
+        progressMoldGroupComponent.deleteMoldGroup(moldGroup);
 
-        return saveMoldGroup(
-                MoldGroupReqDTO.builder()
-                        .moldGroup(detailDTO)
-                        .orderId(moldGroup.getPurchaseOrder().getId())
-                        .build()
-        );
+        moldGroup.getListMold().forEach(mold -> mold.setMoldGroup(null));
+        moldGroupRepository.delete(moldGroup);
+
+        return SuccessRespDTO.builder().message(MessageConstant.DELETE_SUCCESS).build();
     }
 }
