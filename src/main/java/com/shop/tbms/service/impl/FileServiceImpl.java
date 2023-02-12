@@ -7,6 +7,7 @@ import com.google.cloud.storage.Bucket;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.StorageClient;
+import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.dto.FileDTO;
 import com.shop.tbms.service.FileService;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,19 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.shop.tbms.constant.CommonConstant.IMAGE_CONTENT_TYPE;
+import static com.shop.tbms.constant.CommonConstant.PDF_CONTENT_TYPE;
+import static com.shop.tbms.constant.CommonConstant.PDF_FOLDER_NAME;
+import static com.shop.tbms.constant.MessageConstant.NOT_FORMAT_PDF;
 
 @Slf4j
 @Service
@@ -52,10 +63,7 @@ public class FileServiceImpl implements FileService {
             throw new Exception(e);
         }
 
-        FirebaseOptions options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .setStorageBucket(bucketName)
-                .build();
+        FirebaseOptions options = FirebaseOptions.builder().setCredentials(GoogleCredentials.fromStream(serviceAccount)).setStorageBucket(bucketName).build();
         if (FirebaseApp.getApps().isEmpty()) {
             FirebaseApp.initializeApp(options);
         } else {
@@ -82,15 +90,26 @@ public class FileServiceImpl implements FileService {
         String viewUrl = String.format(previewUrl, filename);
 
         log.info("Upload file {} success with url {}", compressedFile.getOriginalFilename(), viewUrl);
-        return FileDTO.builder()
-                .filename(filename)
-                .url(viewUrl)
-                .build();
+        return FileDTO.builder().filename(filename).url(viewUrl).build();
     }
 
     @Override
-    public FileDTO uploadPDF(MultipartFile[] multipartFile) throws Exception {
-        return null;
+    public List<FileDTO> uploadPDF(long orderId, MultipartFile[] multipartFile) throws Exception {
+        List<MultipartFile> files = Arrays.asList(multipartFile);
+        validatePDF(files);
+        List<FileDTO> result = new ArrayList<>();
+        files.forEach(x -> {
+            try {
+                String fileName = x.getOriginalFilename();
+                String viewUrl = uploadToServer(x, fileName, orderId);
+                FileDTO fileDTO = FileDTO.builder().filename(fileName).url(viewUrl).build();
+                result.add(fileDTO);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return result;
     }
 
     public void validate(MultipartFile multipartFile) throws Exception {
@@ -156,5 +175,48 @@ public class FileServiceImpl implements FileService {
 
     private String generateFilename(MultipartFile file) {
         return file.getOriginalFilename();
+    }
+
+    private void validatePDF(List<MultipartFile> files) throws Exception {
+        List<String> errFilename = new ArrayList<>();
+
+        files.forEach(x -> {
+            if (!PDF_CONTENT_TYPE.contains(x.getContentType())) {
+                String filename = x.getOriginalFilename();
+                errFilename.add(filename);
+            }
+        });
+
+        if (!errFilename.isEmpty()) {
+            String msg = String.join(", ", errFilename);
+            msg = msg.concat(NOT_FORMAT_PDF);
+            throw new BusinessException(msg);
+        }
+    }
+
+    private String uploadToServer(MultipartFile file, String filename, long orderId) throws IOException {
+        //Upload to Firebase Storage
+
+        String destination = PDF_FOLDER_NAME.concat(orderId + "/".concat(filename));
+        byte[] bytes = file.getBytes();
+        String contentType = file.getContentType();
+
+        Blob existedFile = bucket.get(destination);
+        int count = 0;
+        String tempDestination = "";
+        while (existedFile != null) {
+            count++;
+            tempDestination = destination.concat(String.format("(%d)", count));
+            existedFile = bucket.get(tempDestination);
+        }
+
+        if (!tempDestination.isEmpty()) {
+            destination = tempDestination;
+        }
+
+        Blob result = bucket.create(destination, bytes, contentType);
+        result.createAcl(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
+
+        return String.format(previewUrl, destination);
     }
 }

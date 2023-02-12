@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -48,11 +48,8 @@ public class FileController {
     }
 
     @PostMapping(value = "/pdf", consumes = {MediaType.APPLICATION_PDF_VALUE, "multipart/form-data"})
-    public ResponseEntity uploadPDF(@RequestParam("orderId") long orderId, @RequestPart("files") MultipartFile[] file) {
-        log.info(file.length + "");
-        Arrays.stream(file).forEach(x -> {
-            log.info(x.getContentType());
-        });
-        return ResponseEntity.ok("ok");
+    public ResponseEntity<List<FileDTO>> uploadPDF(@RequestParam("orderId") long orderId, @RequestPart("files") MultipartFile[] files) throws Exception {
+        List<FileDTO> result = fileService.uploadPDF(orderId, files);
+        return ResponseEntity.ok(result);
     }
 }

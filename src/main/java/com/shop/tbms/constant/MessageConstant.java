@@ -11,4 +11,6 @@ public class MessageConstant {
     public static final String PASSWORD_NOT_LONG = "Password must be longer than " + PASSWORD_MIN_LENGTH + " characters.";
     public static final String INVALID_CREATE_ACC_FOR_ROLE = "Cannot create account for this role.";
     public static final String NOT_FOUND_POSITION = "Not found position.";
+
+    public static final String NOT_FORMAT_PDF = " không phải định dạng PDF.";
 }
