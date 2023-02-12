@@ -5,4 +5,5 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface FileService {
     FileDTO upload(MultipartFile multipartFile) throws Exception;
+    FileDTO uploadPDF(MultipartFile[] multipartFile) throws Exception;
 }

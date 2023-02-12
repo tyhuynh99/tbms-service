@@ -8,8 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Arrays;
 
 @Slf4j
 @RestController
@@ -39,5 +45,14 @@ public class FileController {
             e.printStackTrace();
         }
         return ResponseEntity.ok(file.getOriginalFilename() + fileDTO.toString());
+    }
+
+    @PostMapping(value = "/pdf", consumes = {MediaType.APPLICATION_PDF_VALUE, "multipart/form-data"})
+    public ResponseEntity uploadPDF(@RequestParam("orderId") long orderId, @RequestPart("files") MultipartFile[] file) {
+        log.info(file.length + "");
+        Arrays.stream(file).forEach(x -> {
+            log.info(x.getContentType());
+        });
+        return ResponseEntity.ok("ok");
     }
 }

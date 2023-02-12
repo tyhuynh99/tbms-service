@@ -88,6 +88,11 @@ public class FileServiceImpl implements FileService {
                 .build();
     }
 
+    @Override
+    public FileDTO uploadPDF(MultipartFile[] multipartFile) throws Exception {
+        return null;
+    }
+
     public void validate(MultipartFile multipartFile) throws Exception {
         if (multipartFile.isEmpty()) {
             throw new Exception("File is empty");
