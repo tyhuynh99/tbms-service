@@ -10,6 +10,7 @@ import com.google.firebase.cloud.StorageClient;
 import com.shop.tbms.config.exception.BusinessException;
 import com.shop.tbms.dto.FileDTO;
 import com.shop.tbms.service.FileService;
+import com.shop.tbms.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mock.web.MockMultipartFile;
@@ -35,7 +36,6 @@ import java.util.List;
 
 import static com.shop.tbms.constant.CommonConstant.IMAGE_CONTENT_TYPE;
 import static com.shop.tbms.constant.CommonConstant.PDF_CONTENT_TYPE;
-import static com.shop.tbms.constant.CommonConstant.PDF_FOLDER_NAME;
 import static com.shop.tbms.constant.MessageConstant.NOT_FORMAT_PDF;
 
 @Slf4j
@@ -101,8 +101,7 @@ public class FileServiceImpl implements FileService {
         files.forEach(x -> {
             try {
                 String fileName = x.getOriginalFilename();
-                String viewUrl = uploadToServer(x, fileName, orderId);
-                FileDTO fileDTO = FileDTO.builder().filename(fileName).url(viewUrl).build();
+                FileDTO fileDTO = uploadToServer(x, fileName, orderId);
                 result.add(fileDTO);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -110,6 +109,11 @@ public class FileServiceImpl implements FileService {
         });
 
         return result;
+    }
+
+    @Override
+    public boolean deleteFile(String filename) {
+        return bucket.get(filename).delete();
     }
 
     public void validate(MultipartFile multipartFile) throws Exception {
@@ -194,29 +198,56 @@ public class FileServiceImpl implements FileService {
         }
     }
 
-    private String uploadToServer(MultipartFile file, String filename, long orderId) throws IOException {
+    private FileDTO uploadToServer(MultipartFile file, String filename, long orderId) throws IOException {
         //Upload to Firebase Storage
 
-        String destination = PDF_FOLDER_NAME.concat(orderId + "/".concat(filename));
+        String destination = FileUtil.generateDestination(orderId, filename);
         byte[] bytes = file.getBytes();
         String contentType = file.getContentType();
 
-        Blob existedFile = bucket.get(destination);
+        List<String> nameConvert = generateFilename(filename, destination);
+        filename = nameConvert.get(0);
+        destination = nameConvert.get(1);
+
+        // Save to firebase
+        Blob result = bucket.create(destination, bytes, contentType);
+        result.createAcl(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
+        // Create view url
+        destination = destination.replaceAll("/", "%2F");
+        String url = String.format(previewUrl, destination);
+        return FileDTO.builder()
+                .filename(filename)
+                .url(url)
+                .build();
+    }
+
+    private List<String> generateFilename(String filename, String destination) {
+        String pdfExt = ".pdf";
         int count = 0;
         String tempDestination = "";
+        String tempName = "";
+
+        Blob existedFile = bucket.get(destination);
         while (existedFile != null) {
             count++;
-            tempDestination = destination.concat(String.format("(%d)", count));
+
+            tempDestination = destination.substring(0, destination.lastIndexOf(pdfExt));
+            tempName = filename.substring(0, filename.lastIndexOf(pdfExt));
+
+            tempDestination = tempDestination.concat(String.format("(%d)", count)).concat(pdfExt);
+            tempName = tempName.concat(String.format("(%d)", count)).concat(pdfExt);
             existedFile = bucket.get(tempDestination);
         }
 
+        List<String> result = new ArrayList<>();
         if (!tempDestination.isEmpty()) {
-            destination = tempDestination;
+            result.add(tempName);
+            result.add(tempDestination);
+        } else {
+            result.add(filename);
+            result.add(destination);
         }
 
-        Blob result = bucket.create(destination, bytes, contentType);
-        result.createAcl(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
-
-        return String.format(previewUrl, destination);
+        return result;
     }
 }

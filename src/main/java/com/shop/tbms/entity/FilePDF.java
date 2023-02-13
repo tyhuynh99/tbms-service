@@ -2,6 +2,7 @@ package com.shop.tbms.entity;
 
 import com.shop.tbms.entity.common.AbstractAuditingEntity;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ import javax.persistence.ManyToOne;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class FilePDF extends AbstractAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +39,7 @@ public class FilePDF extends AbstractAuditingEntity {
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = Boolean.FALSE;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "purchase_order_id", nullable = false)
     @ToString.Exclude
     private PurchaseOrder purchaseOrder;

@@ -8,4 +8,6 @@ import java.util.List;
 public interface FileService {
     FileDTO upload(MultipartFile multipartFile) throws Exception;
     List<FileDTO> uploadPDF(long orderId, MultipartFile[] multipartFile) throws Exception;
+
+    boolean deleteFile(String filename);
 }
