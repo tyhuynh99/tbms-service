@@ -1,6 +1,7 @@
 package com.shop.tbms.service;
 
 import com.shop.tbms.dto.FileDTO;
+import com.shop.tbms.dto.ListWrapperDTO;
 import com.shop.tbms.dto.PDFDto;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.order.OrderCreateReqDTO;
@@ -35,7 +36,7 @@ public interface PurchaseOrderService {
 
     List<FileDTO> uploadPDF(Long orderId, MultipartFile[] files) throws Exception;
 
-    List<PDFDto> getPDF(Long orderId);
+    ListWrapperDTO<PDFDto> getPDF(Long orderId);
 
     SuccessRespDTO deletePDF(Long pdfId);
 }

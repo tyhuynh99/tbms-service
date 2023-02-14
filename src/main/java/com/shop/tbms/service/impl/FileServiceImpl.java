@@ -96,7 +96,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public List<FileDTO> uploadPDF(long orderId, MultipartFile[] multipartFile) throws Exception {
         List<MultipartFile> files = Arrays.asList(multipartFile);
-        validatePDF(files);
+        // validatePDF(files); // not validate file, FE handle
         List<FileDTO> result = new ArrayList<>();
         files.forEach(x -> {
             try {

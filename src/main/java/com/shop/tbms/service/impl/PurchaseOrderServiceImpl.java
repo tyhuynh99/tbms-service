@@ -11,6 +11,7 @@ import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.constant.NotificationConstant;
 import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.FileDTO;
+import com.shop.tbms.dto.ListWrapperDTO;
 import com.shop.tbms.dto.PDFDto;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.noti.FBNotificationRequestDTO;
@@ -395,15 +396,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
     @Override
-    public List<PDFDto> getPDF(Long orderId) {
+    public ListWrapperDTO<PDFDto> getPDF(Long orderId) {
         List<FilePDF> filePDFList = filePDFRepository.findAllByPurchaseOrderId(orderId);
-
-        return filePDFList.stream().map(x -> PDFDto.builder()
+        ListWrapperDTO<PDFDto> result = new ListWrapperDTO();
+        result.setData(filePDFList.stream().map(x -> PDFDto.builder()
                         .id(x.getId())
                         .filename(x.getFilename())
                         .url(x.getUrl())
                         .build())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+        return result;
     }
 
     @Override
