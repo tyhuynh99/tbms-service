@@ -5,6 +5,7 @@ import com.shop.tbms.dto.mold.MoldGroupDetailReqDTO;
 import com.shop.tbms.dto.mold.MoldGroupReqDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.mold.MoldType;
+import com.shop.tbms.enumerate.step.ReportType;
 import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.enumerate.step.StepType;
 import com.shop.tbms.repository.MoldDeliverProgressRepository;
@@ -59,48 +60,38 @@ public class ProgressMoldGroupComponent {
                         listUpdatedMoldProgress.addAll(moldProgressListForConditionStep);
                     }
                 } else if ((!isFreeFormType || (!stepConstant.getListStepNotForFreeFormType().contains(step.getCode()))) && !StepType.FIXING.equals(step.getType())) {
-                    startCreateProgressAfterCreate(
-                            listUpdatedMoldProgress,
-                            listUpdatedMoldDeliverProgress,
-                            listUpdatedMoldElementProgress,
-                            step,
-                            listUpdateMold
-                    );
+                    switch (step.getReportType()) {
+                        case BY_MOLD:
+                            List<MoldProgress> moldProgressListForMoldGroup = ProgressUtil.generateMoldProcessForMoldGroup(
+                                    step,
+                                    listUpdateMold);
+
+                            step.setListMoldProgress(moldProgressListForMoldGroup);
+
+                            listUpdatedMoldProgress.addAll(moldProgressListForMoldGroup);
+                            break;
+                        case BY_MOLD_SEND_RECEIVE:
+                            List<MoldDeliverProgress> moldDeliverProgressListForMoldGroup = ProgressUtil.generateMoldDeliverProcessForMoldGroup(
+                                    step,
+                                    listUpdateMold);
+
+                            step.setListMoldDeliverProgress(moldDeliverProgressListForMoldGroup);
+
+                            listUpdatedMoldDeliverProgress.addAll(moldDeliverProgressListForMoldGroup);
+                            break;
+                        case BY_MOLD_ELEMENT:
+                            List<MoldGroupElementProgress> moldGroupElementProgressList = ProgressUtil.generateMoldGroupElementProgress(
+                                    step,
+                                    listUpdateMold);
+
+                            step.setListMoldGroupElementProgresses(moldGroupElementProgressList);
+
+                            listUpdatedMoldElementProgress.addAll(moldGroupElementProgressList);
+                            break;
+                        default:
+                    }
                 }
-            } else {
-                startCreateProgressAfterCreate(
-                        listUpdatedMoldProgress,
-                        listUpdatedMoldDeliverProgress,
-                        listUpdatedMoldElementProgress,
-                        step,
-                        listUpdateMold
-                );
-            }
-        }
-
-        moldProgressRepository.saveAll(listUpdatedMoldProgress);
-        moldDeliverProgressRepository.saveAll(listUpdatedMoldDeliverProgress);
-        moldGroupElementProgressRepository.saveAll(listUpdatedMoldElementProgress);
-    }
-
-    private void startCreateProgressAfterCreate(
-            List<MoldProgress> listUpdatedMoldProgress,
-            List<MoldDeliverProgress> listUpdatedMoldDeliverProgress,
-            List<MoldGroupElementProgress> listUpdatedMoldElementProgress,
-            Step step,
-            List<Mold> listUpdateMold)
-    {
-        switch (step.getReportType()) {
-            case BY_MOLD:
-                List<MoldProgress> moldProgressListForMoldGroup = ProgressUtil.generateMoldProcessForMoldGroup(
-                        step,
-                        listUpdateMold);
-
-                step.setListMoldProgress(moldProgressListForMoldGroup);
-
-                listUpdatedMoldProgress.addAll(moldProgressListForMoldGroup);
-                break;
-            case BY_MOLD_SEND_RECEIVE:
+            } else if (ReportType.BY_MOLD_ELEMENT.equals(step.getReportType())) {
                 List<MoldDeliverProgress> moldDeliverProgressListForMoldGroup = ProgressUtil.generateMoldDeliverProcessForMoldGroup(
                         step,
                         listUpdateMold);
@@ -108,18 +99,12 @@ public class ProgressMoldGroupComponent {
                 step.setListMoldDeliverProgress(moldDeliverProgressListForMoldGroup);
 
                 listUpdatedMoldDeliverProgress.addAll(moldDeliverProgressListForMoldGroup);
-                break;
-            case BY_MOLD_ELEMENT:
-                List<MoldGroupElementProgress> moldGroupElementProgressList = ProgressUtil.generateMoldGroupElementProgress(
-                        step,
-                        listUpdateMold);
-
-                step.setListMoldGroupElementProgresses(moldGroupElementProgressList);
-
-                listUpdatedMoldElementProgress.addAll(moldGroupElementProgressList);
-                break;
-            default:
+            }
         }
+
+        moldProgressRepository.saveAll(listUpdatedMoldProgress);
+        moldDeliverProgressRepository.saveAll(listUpdatedMoldDeliverProgress);
+        moldGroupElementProgressRepository.saveAll(listUpdatedMoldElementProgress);
     }
 
     public void resetMoldGroupProgressChangeType(Mold mold, MoldGroupDetailReqDTO detailReqDTO) {
