@@ -2,6 +2,7 @@ package com.shop.tbms.controller;
 
 import com.shop.tbms.annotation.ValidRole;
 import com.shop.tbms.dto.FileDTO;
+import com.shop.tbms.dto.ListWrapperDTO;
 import com.shop.tbms.dto.PDFDto;
 import com.shop.tbms.dto.PageResponse;
 import com.shop.tbms.dto.SuccessRespDTO;
@@ -109,8 +110,8 @@ public class OrderController {
     }
 
     @GetMapping(value = "/pdf")
-    public ResponseEntity<List<PDFDto>> getPDF(@RequestParam("orderId") Long orderId) {
-        List<PDFDto> result = purchaseOrderService.getPDF(orderId);
+    public ResponseEntity<ListWrapperDTO<PDFDto>> getPDF(@RequestParam("orderId") Long orderId) {
+        ListWrapperDTO<PDFDto> result = purchaseOrderService.getPDF(orderId);
         return ResponseEntity.ok(result);
     }
 
