@@ -92,13 +92,13 @@ public class ProgressMoldGroupComponent {
                     }
                 }
             } else if (ReportType.BY_MOLD_ELEMENT.equals(step.getReportType())) {
-                List<MoldDeliverProgress> moldDeliverProgressListForMoldGroup = ProgressUtil.generateMoldDeliverProcessForMoldGroup(
+                List<MoldGroupElementProgress> moldGroupElementProgressList = ProgressUtil.generateMoldGroupElementProgress(
                         step,
                         listUpdateMold);
 
-                step.setListMoldDeliverProgress(moldDeliverProgressListForMoldGroup);
+                step.setListMoldGroupElementProgresses(moldGroupElementProgressList);
 
-                listUpdatedMoldDeliverProgress.addAll(moldDeliverProgressListForMoldGroup);
+                listUpdatedMoldElementProgress.addAll(moldGroupElementProgressList);
             }
         }
 
