@@ -16,6 +16,7 @@ import java.util.Objects;
 public interface MoldDeliverProgressMapper {
     @Mapping(target = "progressId", source = "id")
     @Mapping(target = "moldSize", source = "mold.size")
+    @Mapping(target = "moldId", source = "mold.id")
     @Mapping(target = "moldSizeWithType", source = "entity", qualifiedByName = "getMoldSizeWithType")
     @Mapping(target = "canCheck", constant = "false")
     @Mapping(target = "canUncheck", constant = "false")

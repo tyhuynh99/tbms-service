@@ -28,7 +28,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.shop.tbms.constant.AppConstant.DELETED_ID;
 import static com.shop.tbms.constant.AppConstant.ZERO;
 
 @Component
@@ -145,9 +144,9 @@ public class StepComponent {
 
                                 List<Step> nextSteps = StepUtil.getNextStepToChkProgress(currentStep.getListStepBefore());
                                 for (Step nextStep : nextSteps) {
-                                    canUncheckComplete &= progressComponent.canUnCheckCompleteBySize(
+                                    canUncheckComplete &= progressComponent.canUnCheckCompleteByMoldId(
                                             nextStep,
-                                            moldProgress.getMold().getSize()
+                                            moldProgress.getMold().getId()
                                     );
                                 }
 
@@ -169,9 +168,9 @@ public class StepComponent {
 
                                 List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
                                 for (Step preStep : preSteps) {
-                                    canCheckComplete &= progressComponent.canCheckCompleteBySize(
+                                    canCheckComplete &= progressComponent.canCheckCompleteByMoldId(
                                             preStep,
-                                            moldProgress.getMold().getSize()
+                                            moldProgress.getMold().getId()
                                     );
                                 }
 
@@ -219,9 +218,9 @@ public class StepComponent {
 
                         List<Step> nextSteps = StepUtil.getNextStepToChkProgress(currentStep.getListStepBefore());
                         for (Step nextStep : nextSteps) {
-                            canUncheckComplete &= progressComponent.canUnCheckCompleteBySize(
+                            canUncheckComplete &= progressComponent.canUnCheckCompleteByMoldId(
                                     nextStep,
-                                    moldGroupElementProgress.getMold().getSize()
+                                    moldGroupElementProgress.getMold().getId()
                             );
                         }
 
@@ -243,9 +242,9 @@ public class StepComponent {
 
                         List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
                         for (Step preStep : preSteps) {
-                            canCheckComplete &= progressComponent.canCheckCompleteBySize(
+                            canCheckComplete &= progressComponent.canCheckCompleteByMoldId(
                                     preStep,
-                                    moldGroupElementProgress.getMold().getSize()
+                                    moldGroupElementProgress.getMold().getId()
                             );
                         }
 
@@ -288,9 +287,9 @@ public class StepComponent {
 
                         List<Step> nextSteps = StepUtil.getNextStepToChkProgress(currentStep.getListStepBefore());
                         for (Step nextStep : nextSteps) {
-                            canUncheckComplete &= progressComponent.canUnCheckCompleteBySize(
+                            canUncheckComplete &= progressComponent.canUnCheckCompleteByMoldId(
                                     nextStep,
-                                    moldDeliverProgress.getMold().getSize()
+                                    moldDeliverProgress.getMold().getId()
                             );
                         }
 
@@ -312,9 +311,9 @@ public class StepComponent {
 
                         List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
                         for (Step preStep : preSteps) {
-                            canCheckComplete &= progressComponent.canCheckCompleteBySize(
+                            canCheckComplete &= progressComponent.canCheckCompleteByMoldId(
                                     preStep,
-                                    moldDeliverProgress.getMold().getSize()
+                                    moldDeliverProgress.getMold().getId()
                             );
                         }
 

@@ -1,5 +1,6 @@
 package com.shop.tbms.constant;
 
+import com.shop.tbms.enumerate.mold.MoldType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,9 @@ import java.util.Map;
 public class StepConstant {
     public Map<String, String> getListStepNeedUpdateMoldElement() {
         return Map.of(code3D_KHUON, description3D_KHUON);
+    }
+    public List<String> getListStepNotForFreeFormType() {
+        return List.of(code3D_GO, codeCAM_GO, codeCNC_GO_IN, codeGO_TIA_TOT, codeDUC, codeSCAN, codeRAP_KHUON);
     }
 
     @Value("${step.code.2D}")
@@ -152,5 +156,22 @@ public class StepConstant {
 
     public String getStepToResetToStepWhenChangeMoldDetail() {
         return this.getCodeCAM_GO();
+    }
+
+    public String getStepToResetToStepWhenChangeMoldDetail(MoldType curMoldType, MoldType reqMoldType) {
+        if ((MoldType.FREEFORM.equals(curMoldType) && !MoldType.FREEFORM.equals(reqMoldType))
+                || (!MoldType.FREEFORM.equals(curMoldType) && MoldType.FREEFORM.equals(reqMoldType))
+                || MoldType.FREEFORM.equals(curMoldType))
+        {
+            return getCode3D_GO();
+        }
+        return this.getStepToResetToStepWhenChangeMoldDetail();
+    }
+
+    public String getStepToResetToStepWhenChangeMoldDetail(MoldType curMoldType) {
+        if (MoldType.FREEFORM.equals(curMoldType)) {
+            return getCode3D_GO();
+        }
+        return this.getStepToResetToStepWhenChangeMoldDetail();
     }
 }

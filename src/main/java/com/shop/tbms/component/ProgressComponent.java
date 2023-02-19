@@ -8,7 +8,6 @@ import com.shop.tbms.dto.step.detail.progress.MoldElementProgressDetailDTO;
 import com.shop.tbms.dto.step.detail.progress.MoldProgressDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.entity.common.AbstractAuditingEntity;
-import com.shop.tbms.enumerate.mold.MoldDeliverProgressType;
 import com.shop.tbms.enumerate.step.ReportType;
 import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.enumerate.step.StepType;
@@ -65,33 +64,13 @@ public class ProgressComponent {
         log.info("End generate progress for step {}", step);
     }
 
-//    public List<MoldProgressDTO> setReportAvailabilityForMoldProgress(Step preStep, Step nextStep, List<MoldProgressDTO> moldProgressDTOList) {
-//        return moldProgressDTOList.stream().map(moldProgressDTO -> {
-//            boolean canCheck = true;
-//            if (Objects.nonNull(preStep)) {
-//                canCheck = canCheckCompleteBySize(preStep, moldProgressDTO.getMoldSize());
-//            }
-//            log.info("Set value canCheck of {} is {}", moldProgressDTO, canCheck);
-//            moldProgressDTO.setCanCheck(canCheck);
-//
-//            boolean canUncheck = true;
-//            if (Objects.nonNull(nextStep)) {
-//                canUncheck = canUnCheckCompleteBySize(nextStep, moldProgressDTO.getMoldSize());
-//            }
-//            log.info("Set value canUncheck of {} is {}", moldProgressDTO, canUncheck);
-//            moldProgressDTO.setCanUncheck(canUncheck);
-//
-//            return moldProgressDTO;
-//        }).collect(Collectors.toList());
-//    }
-
     public List<MoldProgressDTO> setReportAvailabilityForMoldProgress(List<Step> preStepList, List<Step> nextStepList, List<MoldProgressDTO> moldProgressDTOList, Step currentStep) {
         return moldProgressDTOList.stream().map(moldProgressDTO -> {
             boolean canCheck = true;
             if (!StepType.FIXING.equals(currentStep.getType())) {
                 for (Step preStep : preStepList) {
                     log.info("Start check can check complete of size {} in step {}", moldProgressDTO.getMoldSize(), preStep);
-                    canCheck &= canCheckCompleteBySize(preStep, moldProgressDTO.getMoldSize());
+                    canCheck &= canCheckCompleteByMoldId(preStep, moldProgressDTO.getMoldId());
                     log.info("Value canCheck of {} is {}", moldProgressDTO, canCheck);
                 }
             }
@@ -102,7 +81,7 @@ public class ProgressComponent {
             if (!StepType.FIXING.equals(currentStep.getType())) {
                 for (Step nextStep : nextStepList) {
                     log.info("Start check can uncheck complete of size {} in step {}", moldProgressDTO.getMoldSize(), nextStep);
-                    canUncheck &= canUnCheckCompleteBySize(nextStep, moldProgressDTO.getMoldSize());
+                    canUncheck &= canUnCheckCompleteByMoldId(nextStep, moldProgressDTO.getMoldId());
                     log.info("Value canUnCheck of {} is {}", moldProgressDTO, canUncheck);
                 }
             }
@@ -146,7 +125,7 @@ public class ProgressComponent {
             boolean canCheck = true;
             if (!StepType.FIXING.equals(currentStep.getType())) {
                 for (Step preStep : preStepList) {
-                    canCheck &= canCheckCompleteBySize(preStep, moldElementProgressDTO.getMoldSize());
+                    canCheck &= canCheckCompleteByMoldId(preStep, moldElementProgressDTO.getMoldId());
                 }
             }
             final boolean canCheckFinal = canCheck;
@@ -155,7 +134,7 @@ public class ProgressComponent {
             boolean canUncheck = true;
             if (!StepType.FIXING.equals(currentStep.getType())) {
                 for (Step nextStep : nextStepList) {
-                    canUncheck &= canUnCheckCompleteBySize(nextStep, moldElementProgressDTO.getMoldSize());
+                    canUncheck &= canUnCheckCompleteByMoldId(nextStep, moldElementProgressDTO.getMoldId());
                 }
             }
             final boolean canUncheckFinal = canUncheck;
@@ -198,7 +177,7 @@ public class ProgressComponent {
             boolean canCheck = true;
             if (!StepType.FIXING.equals(currentStep.getType())) {
                 for (Step preStep : preStepList) {
-                    canCheck &= canCheckCompleteBySize(preStep, moldDeliverProgressDTO.getMoldSize());
+                    canCheck &= canCheckCompleteByMoldId(preStep, moldDeliverProgressDTO.getMoldId());
                 }
             }
             log.info("Set value canCheck of {} is {}", moldDeliverProgressDTO, canCheck);
@@ -207,7 +186,7 @@ public class ProgressComponent {
             boolean canUncheck = true;
             if (!StepType.FIXING.equals(currentStep.getType())) {
                 for (Step nextStep : nextStepList) {
-                    canUncheck &= canUnCheckCompleteBySize(nextStep, moldDeliverProgressDTO.getMoldSize());
+                    canUncheck &= canUnCheckCompleteByMoldId(nextStep, moldDeliverProgressDTO.getMoldId());
                 }
             }
             log.info("Set value canUncheck of {} is {}", moldDeliverProgressDTO, canUncheck);
@@ -217,34 +196,34 @@ public class ProgressComponent {
         }).collect(Collectors.toList());
     }
 
-    public boolean canCheckCompleteBySize(Step preStep, String moldSize) {
+    public boolean canCheckCompleteByMoldId(Step preStep, Long moldId) {
         switch (preStep.getReportType()) {
             case BY_MOLD:
-                log.info("Check complete of mold size {} with preStep mold progress {}", moldSize, preStep.getListMoldProgress());
+                log.info("Check complete of mold size {} with preStep mold progress {}", moldId, preStep.getListMoldProgress());
                 List<MoldProgress> progressList = preStep.getListMoldProgress().stream()
-                        .filter(moldProgress -> moldSize.equals(moldProgress.getMold().getSize()))
+                        .filter(moldProgress -> moldId.equals(moldProgress.getMold().getId()))
                         .collect(Collectors.toList());
 
                 if (CollectionUtils.isEmpty(progressList)) {
                     if (Boolean.TRUE.equals(preStep.getHasCondition())) {
-                        log.info("Step hasCondition, and not found progress of mold size {}. Need to check preStep", moldSize);
+                        log.info("Step hasCondition, and not found progress of mold size {}. Need to check preStep", moldId);
                         Step preOfPreStep = StepUtil.getPreMainStep(preStep.getListStepAfter());
-                        return canCheckCompleteBySize(preOfPreStep, moldSize);
+                        return canCheckCompleteByMoldId(preOfPreStep, moldId);
                     }
                 }
                 return progressList.stream().allMatch(moldProgress -> Boolean.TRUE.equals(moldProgress.getIsCompleted()));
             case BY_MOLD_ELEMENT:
-                log.info("Check complete of mold size {} with preStep mold element progress {}", moldSize, preStep.getListMoldGroupElementProgresses());
+                log.info("Check complete of mold size {} with preStep mold element progress {}", moldId, preStep.getListMoldGroupElementProgresses());
                 List<MoldGroupElementProgress> elementProgressesBySize = preStep.getListMoldGroupElementProgresses().stream()
                         .filter(moldGroupElementProgress ->
-                                moldSize.equals(moldGroupElementProgress.getMold().getSize()))
+                                moldId.equals(moldGroupElementProgress.getMold().getId()))
                         .collect(Collectors.toList());
 
                 if (CollectionUtils.isEmpty(elementProgressesBySize)) {
                     if (Boolean.TRUE.equals(preStep.getHasCondition())) {
-                        log.info("Step hasCondition, and not found progress of mold size {}. Need to check preStep", moldSize);
+                        log.info("Step hasCondition, and not found progress of mold size {}. Need to check preStep", moldId);
                         Step preOfPreStep = StepUtil.getPreMainStep(preStep.getListStepAfter());
-                        return canCheckCompleteBySize(preOfPreStep, moldSize);
+                        return canCheckCompleteByMoldId(preOfPreStep, moldId);
                     }
                     return false;
                 }
@@ -252,16 +231,16 @@ public class ProgressComponent {
                 return elementProgressesBySize.stream()
                         .allMatch(MoldGroupElementProgress::getIsCompleted);
             case BY_MOLD_SEND_RECEIVE:
-                log.info("Check complete of mold size {} with preStep mold deliver progress {}", moldSize, preStep.getListMoldDeliverProgress());
+                log.info("Check complete of mold size {} with preStep mold deliver progress {}", moldId, preStep.getListMoldDeliverProgress());
                 List<MoldDeliverProgress> deliverProgressList = preStep.getListMoldDeliverProgress().stream()
-                        .filter(moldProgress -> moldSize.equals(moldProgress.getMold().getSize()))
+                        .filter(moldProgress -> moldId.equals(moldProgress.getMold().getId()))
                         .collect(Collectors.toList());
 
                 if (CollectionUtils.isEmpty(deliverProgressList)) {
                     if (Boolean.TRUE.equals(preStep.getHasCondition())) {
-                        log.info("Step hasCondition, and not found progress of mold size {}. Need to check preStep", moldSize);
+                        log.info("Step hasCondition, and not found progress of mold size {}. Need to check preStep", moldId);
                         Step preOfPreStep = StepUtil.getPreMainStep(preStep.getListStepAfter());
-                        return canCheckCompleteBySize(preOfPreStep, moldSize);
+                        return canCheckCompleteByMoldId(preOfPreStep, moldId);
                     }
                 }
 
@@ -271,51 +250,51 @@ public class ProgressComponent {
         }
     }
 
-    public boolean canUnCheckCompleteBySize(Step nextStep, String moldSize) {
+    public boolean canUnCheckCompleteByMoldId(Step nextStep, Long moldId) {
         switch (nextStep.getReportType()) {
             case BY_MOLD:
-                log.info("Check complete of mold size {} with nextStep mold progress {}", moldSize, nextStep.getListMoldProgress());
+                log.info("Check complete of mold size {} with nextStep mold progress {}", moldId, nextStep.getListMoldProgress());
                 List<MoldProgress> progressList = nextStep.getListMoldProgress().stream()
-                        .filter(moldProgress -> moldSize.equals(moldProgress.getMold().getSize()))
+                        .filter(moldProgress -> moldId.equals(moldProgress.getMold().getId()))
                         .collect(Collectors.toList());
 
                 if (CollectionUtils.isEmpty(progressList)) {
                     if (Boolean.TRUE.equals(nextStep.getHasCondition())) {
-                        log.info("Step hasCondition, and not found progress of mold size {}. Need to check nextStep", moldSize);
+                        log.info("Step hasCondition, and not found progress of mold size {}. Need to check nextStep", moldId);
                         Step nextOfNextStep = StepUtil.getNextMainStep(nextStep.getListStepBefore());
-                        return canUnCheckCompleteBySize(nextOfNextStep, moldSize);
+                        return canUnCheckCompleteByMoldId(nextOfNextStep, moldId);
                     }
                 }
 
                 return progressList.stream().allMatch(moldProgress -> Boolean.FALSE.equals(moldProgress.getIsCompleted()));
             case BY_MOLD_ELEMENT:
-                log.info("Check complete of mold size {} with nextStep mold element progress {}", moldSize, nextStep.getListMoldGroupElementProgresses());
+                log.info("Check complete of mold size {} with nextStep mold element progress {}", moldId, nextStep.getListMoldGroupElementProgresses());
                 List<MoldGroupElementProgress> elementProgressList = nextStep.getListMoldGroupElementProgresses().stream()
                         .filter(moldGroupElementProgress ->
-                                moldSize.equals(moldGroupElementProgress.getMold().getSize()))
+                                moldId.equals(moldGroupElementProgress.getMold().getId()))
                         .collect(Collectors.toList());
 
                 if (CollectionUtils.isEmpty(elementProgressList)) {
                     if (Boolean.TRUE.equals(nextStep.getHasCondition())) {
-                        log.info("Step hasCondition, and not found progress of mold size {}. Need to check nextStep", moldSize);
+                        log.info("Step hasCondition, and not found progress of mold size {}. Need to check nextStep", moldId);
                         Step nextOfNextStep = StepUtil.getNextMainStep(nextStep.getListStepBefore());
-                        return canUnCheckCompleteBySize(nextOfNextStep, moldSize);
+                        return canUnCheckCompleteByMoldId(nextOfNextStep, moldId);
                     }
                 }
 
                 return elementProgressList.stream().allMatch(Predicate.not(MoldGroupElementProgress::getIsCompleted));
             case BY_MOLD_SEND_RECEIVE:
-                log.info("Check complete of mold size {} with nextStep mold deliver progress {}", moldSize, nextStep.getListMoldDeliverProgress());
+                log.info("Check complete of mold size {} with nextStep mold deliver progress {}", moldId, nextStep.getListMoldDeliverProgress());
                 List<MoldDeliverProgress> deliverProgressList = nextStep.getListMoldDeliverProgress().stream()
                         .filter(moldDeliverProgress ->
-                                moldSize.equals(moldDeliverProgress.getMold().getSize()))
+                                moldId.equals(moldDeliverProgress.getMold().getId()))
                         .collect(Collectors.toList());
 
                 if (CollectionUtils.isEmpty(deliverProgressList)) {
                     if (Boolean.TRUE.equals(nextStep.getHasCondition())) {
-                        log.info("Step hasCondition, and not found progress of mold size {}. Need to check nextStep", moldSize);
+                        log.info("Step hasCondition, and not found progress of mold size {}. Need to check nextStep", moldId);
                         Step nextOfNextStep = StepUtil.getNextMainStep(nextStep.getListStepBefore());
-                        return canUnCheckCompleteBySize(nextOfNextStep, moldSize);
+                        return canUnCheckCompleteByMoldId(nextOfNextStep, moldId);
                     }
                 }
 
@@ -325,7 +304,7 @@ public class ProgressComponent {
         }
     }
 
-    public void resetProgress(Step step, List<Mold> listMold, boolean isChangeMoldGroup) {
+    public void resetProgress(Step step, List<Mold> listMold) {
         log.info("Begin reset progress mold {} of step {}", listMold, step);
 
         /* set status to IN PROGRESS */
@@ -335,22 +314,21 @@ public class ProgressComponent {
 
         switch (step.getReportType()) {
             case BY_MOLD:
-                resetMoldProgress(step, listMold, isChangeMoldGroup);
+                resetMoldProgress(step, listMold);
                 break;
             case BY_MOLD_ELEMENT:
                 resetMoldGroupProgress(step, listMold);
                 break;
             case BY_MOLD_SEND_RECEIVE:
-                resetMoldDeliverProgress(step, listMold, isChangeMoldGroup);
+                resetMoldDeliverProgress(step, listMold);
                 break;
         }
     }
 
-    private void resetMoldProgress(Step step, List<Mold> listMold, boolean isChangeMoldGroup) {
+    private void resetMoldProgress(Step step, List<Mold> listMold) {
         List<MoldProgress> moldProgressList = moldProgressRepository.findAllByStepId(step.getId());
         log.info("get list progress list of step {} get result {}", step, moldProgressList);
         List<MoldProgress> listUpdatedProgress = new ArrayList<>();
-        List<MoldProgress> listDeletedProgress = new ArrayList<>();
 
         listMold.forEach(mold -> {
             log.info("Start change complete mold {} of step {}", mold, step);
@@ -358,39 +336,28 @@ public class ProgressComponent {
                     .filter(moldProgress -> moldProgress.getMold().getId().equals(mold.getId()))
                     .findFirst();
 
-            if (isChangeMoldGroup &&
-                    (StepConditionUtil.isStepHasConditionProgress(step, stepConstant) || StepType.FIXING.equals(step.getType()))
-            ) {
-                /* if Step is Phong Dien or Sua Khuon, delete progress */
-                if (optionalMoldProgress.isPresent()) {
-                    MoldProgress moldProgress = optionalMoldProgress.get();
-                    log.info("mold progress is exited {}. Delete progress", moldProgress);
-                    listDeletedProgress.add(moldProgress);
-                }
-            } else {
-                /* else set progress complete to false */
-                if (optionalMoldProgress.isPresent()) {
-                    MoldProgress moldProgress = optionalMoldProgress.get();
-                    log.info("mold progress is exited {}. Change complete to FALSE", moldProgress);
-                    moldProgress.setIsCompleted(Boolean.FALSE);
+            if (optionalMoldProgress.isPresent()) {
+                MoldProgress moldProgress = optionalMoldProgress.get();
+                log.info("mold progress is exited {}. Change complete to FALSE", moldProgress);
+                moldProgress.setIsCompleted(Boolean.FALSE);
 
-                    listUpdatedProgress.add(moldProgress);
-                } else {
-                    log.info("mold progress is not existed. create new mold progress.");
-                    MoldProgress moldProgress = new MoldProgress();
-                    moldProgress.setMold(mold);
-                    moldProgress.setStep(step);
-                    moldProgress.setIsCompleted(Boolean.FALSE);
-
-                    listUpdatedProgress.add(moldProgress);
-                }
+                listUpdatedProgress.add(moldProgress);
             }
+            // TODO: recheck, if it works, remove code
+                /* else set progress complete to false */
+
+//                } else {
+//                    log.info("mold progress is not existed. create new mold progress.");
+//                    MoldProgress moldProgress = new MoldProgress();
+//                    moldProgress.setMold(mold);
+//                    moldProgress.setStep(step);
+//                    moldProgress.setIsCompleted(Boolean.FALSE);
+//
+//                    listUpdatedProgress.add(moldProgress);
+//                }
         });
 
         log.info("Updated progress {}", listUpdatedProgress);
-        log.info("Deleted progress {}", listDeletedProgress);
-
-        moldProgressRepository.deleteAll(listDeletedProgress);
         moldProgressRepository.saveAll(listUpdatedProgress);
         log.info("End reset mold progress.");
     }
@@ -402,7 +369,7 @@ public class ProgressComponent {
             log.info("Start delete progress mold {} of step {}", mold, step);
             moldGroupElementProgressRepository.removeByStepIdAndMoldId(step.getId(), mold.getId());
 
-            listUpdatedProgress.addAll(ProgressUtil.generateMoldGroupElementProgress(step, mold));
+            listUpdatedProgress.addAll(ProgressUtil.generateMoldGroupElementProgress(step, List.of(mold)));
         });
 
         log.info("Updated progress {}", listUpdatedProgress);
@@ -410,7 +377,7 @@ public class ProgressComponent {
         log.info("End reset mold progress.");
     }
 
-    private void resetMoldDeliverProgress(Step step, List<Mold> listMold, boolean isChangeMoldGroup) {
+    private void resetMoldDeliverProgress(Step step, List<Mold> listMold) {
         List<MoldDeliverProgress> progressList = moldDeliverProgressRepository.findAllByStepId(step.getId());
         log.info("get list progress list of step {} get result {}", step, progressList);
         List<MoldDeliverProgress> listUpdatedProgress = new ArrayList<>();
@@ -422,39 +389,39 @@ public class ProgressComponent {
                     .filter(moldProgress -> moldProgress.getMold().getId().equals(mold.getId()))
                     .collect(Collectors.toList());
 
-            if (isChangeMoldGroup &&
-                    (StepConditionUtil.isStepHasConditionProgress(step, stepConstant) || StepType.FIXING.equals(step.getType()))
-            ) {
-                /* if Step is Phong Dien or Sua Khuon, delete progress */
-                listDeletedProgress.addAll(deliverProgressList);
-            } else {
-                /* else set progress complete to false */
-                if (deliverProgressList.isEmpty()) {
-                    log.info("deliver progress is not existed. create new delvier progress.");
-                    MoldDeliverProgress sendProgress = new MoldDeliverProgress();
-                    sendProgress.setMold(mold);
-                    sendProgress.setStep(step);
-                    sendProgress.setType(MoldDeliverProgressType.SEND);
-                    sendProgress.setIsCompleted(Boolean.FALSE);
+            deliverProgressList.forEach(progress -> {
+                log.info("deliver progress is exited {}. Change complete to FALSE", progress);
+                progress.setIsCompleted(Boolean.FALSE);
 
-                    listUpdatedProgress.add(sendProgress);
+                listUpdatedProgress.add(progress);
+            });
 
-                    MoldDeliverProgress receiveProgress = new MoldDeliverProgress();
-                    receiveProgress.setMold(mold);
-                    receiveProgress.setStep(step);
-                    receiveProgress.setType(MoldDeliverProgressType.RECEIVE);
-                    receiveProgress.setIsCompleted(Boolean.FALSE);
-
-                    listUpdatedProgress.add(receiveProgress);
-                } else {
-                    deliverProgressList.forEach(progress -> {
-                        log.info("deliver progress is exited {}. Change complete to FALSE", progress);
-                        progress.setIsCompleted(Boolean.FALSE);
-
-                        listUpdatedProgress.add(progress);
-                    });
-                }
-            }
+            // TODO: recheck, if it works, remove code
+//               if (deliverProgressList.isEmpty()) {
+//                    log.info("deliver progress is not existed. create new delvier progress.");
+//                    MoldDeliverProgress sendProgress = new MoldDeliverProgress();
+//                    sendProgress.setMold(mold);
+//                    sendProgress.setStep(step);
+//                    sendProgress.setType(MoldDeliverProgressType.SEND);
+//                    sendProgress.setIsCompleted(Boolean.FALSE);
+//
+//                    listUpdatedProgress.add(sendProgress);
+//
+//                    MoldDeliverProgress receiveProgress = new MoldDeliverProgress();
+//                    receiveProgress.setMold(mold);
+//                    receiveProgress.setStep(step);
+//                    receiveProgress.setType(MoldDeliverProgressType.RECEIVE);
+//                    receiveProgress.setIsCompleted(Boolean.FALSE);
+//
+//                    listUpdatedProgress.add(receiveProgress);
+//                } else {
+//                    deliverProgressList.forEach(progress -> {
+//                        log.info("deliver progress is exited {}. Change complete to FALSE", progress);
+//                        progress.setIsCompleted(Boolean.FALSE);
+//
+//                        listUpdatedProgress.add(progress);
+//                    });
+//                }
         });
 
         log.info("Updated progress {}", listUpdatedProgress);
@@ -463,24 +430,6 @@ public class ProgressComponent {
         moldDeliverProgressRepository.saveAll(listUpdatedProgress);
         moldDeliverProgressRepository.deleteAll(listDeletedProgress);
         log.info("End reset deliver progress.");
-    }
-
-    public void resetMoldGroupProgressChangeType(Mold mold) {
-        PurchaseOrder order = mold.getPurchaseOrder();
-        String resetToStepCode = stepConstant.getStepToResetToStepWhenChangeMoldDetail();
-
-        /* get step need to reset when mold group type changed */
-        Step resetToStep = stepRepository.findFirstByCodeAndProcedureOrderId(resetToStepCode, order.getId()).orElseThrow();
-
-        /* get all step after reset step */
-        List<Step> listStepNeedToReset = order.getProcedure().getListStep().stream()
-                .filter(step ->
-                        step.getSequenceNo().compareTo(resetToStep.getSequenceNo()) >= 0
-                )
-                .collect(Collectors.toList());
-
-        /* reset progress */
-        listStepNeedToReset.forEach(step -> this.resetProgress(step, List.of(mold), true));
     }
 
     public void resetMoldGroupProgressChangeElement(Mold mold) {

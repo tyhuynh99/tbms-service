@@ -1,7 +1,9 @@
 package com.shop.tbms.util;
 
+import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.mold.MoldDeliverProgressType;
+import com.shop.tbms.enumerate.mold.MoldType;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ public class ProgressUtil {
         }).collect(Collectors.toList());
     }
 
-    public static List<MoldProgress> generateMoldProcessForConditionStep(Step step, List<Mold> moldList) {
+    public static List<MoldProgress> generateMoldProcessForMoldGroup(Step step, List<Mold> moldList) {
         return moldList.stream().map(mold -> {
             MoldProgress moldProgress = new MoldProgress();
             moldProgress.setMold(mold);
@@ -37,6 +39,28 @@ public class ProgressUtil {
         List<MoldDeliverProgress> result = new ArrayList<>();
 
         step.getProcedure().getPurchaseOrder().getListMold().stream().forEach(mold -> {
+            MoldDeliverProgress moldDeliverSendProgress = new MoldDeliverProgress();
+            moldDeliverSendProgress.setMold(mold);
+            moldDeliverSendProgress.setStep(step);
+            moldDeliverSendProgress.setIsCompleted(Boolean.FALSE);
+            moldDeliverSendProgress.setType(MoldDeliverProgressType.SEND);
+            result.add(moldDeliverSendProgress);
+
+            MoldDeliverProgress moldDeliverReceiveProgress = new MoldDeliverProgress();
+            moldDeliverReceiveProgress.setMold(mold);
+            moldDeliverReceiveProgress.setStep(step);
+            moldDeliverReceiveProgress.setIsCompleted(Boolean.FALSE);
+            moldDeliverReceiveProgress.setType(MoldDeliverProgressType.RECEIVE);
+            result.add(moldDeliverReceiveProgress);
+        });
+
+        return result;
+    }
+
+    public static List<MoldDeliverProgress> generateMoldDeliverProcessForMoldGroup(Step step, List<Mold> moldList) {
+        List<MoldDeliverProgress> result = new ArrayList<>();
+
+        moldList.stream().forEach(mold -> {
             MoldDeliverProgress moldDeliverSendProgress = new MoldDeliverProgress();
             moldDeliverSendProgress.setMold(mold);
             moldDeliverSendProgress.setStep(step);
@@ -84,21 +108,23 @@ public class ProgressUtil {
         return result;
     }
 
-    public static List<MoldGroupElementProgress> generateMoldGroupElementProgress(Step step, Mold mold) {
+    public static List<MoldGroupElementProgress> generateMoldGroupElementProgress(Step step, List<Mold> moldList) {
         List<MoldGroupElementProgress> result = new ArrayList<>();
 
-        if (Objects.nonNull(mold.getMoldGroup())) {
-            for (MoldGroupElement moldGroupElement : mold.getMoldGroup().getListMoldGroupElement()) {
-                if (Boolean.FALSE.equals(moldGroupElement.getChecked())) continue;
+        for (Mold mold : moldList) {
+            if (Objects.nonNull(mold.getMoldGroup())) {
+                for (MoldGroupElement moldGroupElement : mold.getMoldGroup().getListMoldGroupElement()) {
+                    if (Boolean.FALSE.equals(moldGroupElement.getChecked())) continue;
 
-                MoldGroupElementProgress progress = new MoldGroupElementProgress();
-                progress.setMoldGroupElement(moldGroupElement);
-                progress.setMold(mold);
-                progress.setStep(step);
+                    MoldGroupElementProgress progress = new MoldGroupElementProgress();
+                    progress.setMoldGroupElement(moldGroupElement);
+                    progress.setMold(mold);
+                    progress.setStep(step);
 
-                progress.setIsCompleted(Boolean.FALSE);
+                    progress.setIsCompleted(Boolean.FALSE);
 
-                result.add(progress);
+                    result.add(progress);
+                }
             }
         }
 

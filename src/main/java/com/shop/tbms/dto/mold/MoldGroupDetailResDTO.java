@@ -20,8 +20,6 @@ public class MoldGroupDetailResDTO {
     private MoldStructure structure;
     @NotNull
     private MoldPlatingType platingType;
-    private boolean hasSon;
-    private boolean hasPhuNano;
     private boolean hasBanDien;
     private boolean hasBanLoHoi;
     private int numOfPlate;

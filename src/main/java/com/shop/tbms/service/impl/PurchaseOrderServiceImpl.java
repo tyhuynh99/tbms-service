@@ -1,15 +1,37 @@
 package com.shop.tbms.service.impl;
 
-import com.shop.tbms.component.*;
+import com.shop.tbms.component.ChecklistComponent;
+import com.shop.tbms.component.MoldComponent;
+import com.shop.tbms.component.ProcedureComponent;
+import com.shop.tbms.component.ProgressComponent;
+import com.shop.tbms.component.PurchaseOrderComponent;
+import com.shop.tbms.component.StepComponent;
+import com.shop.tbms.component.StepSequenceComponent;
 import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.constant.NotificationConstant;
 import com.shop.tbms.constant.StepConstant;
+import com.shop.tbms.dto.FileDTO;
+import com.shop.tbms.dto.ListWrapperDTO;
+import com.shop.tbms.dto.PDFDto;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.noti.FBNotificationRequestDTO;
-import com.shop.tbms.dto.order.*;
+import com.shop.tbms.dto.order.OrderCreateReqDTO;
+import com.shop.tbms.dto.order.OrderDetailRespDTO;
+import com.shop.tbms.dto.order.OrderFilterReqDTO;
+import com.shop.tbms.dto.order.OrderListRespDTO;
+import com.shop.tbms.dto.order.OrderUpdateReqDTO;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteRespDTO;
-import com.shop.tbms.entity.*;
+import com.shop.tbms.entity.Account;
+import com.shop.tbms.entity.Checklist;
+import com.shop.tbms.entity.FilePDF;
+import com.shop.tbms.entity.Mold;
+import com.shop.tbms.entity.Procedure;
+import com.shop.tbms.entity.PurchaseOrder;
+import com.shop.tbms.entity.Step;
+import com.shop.tbms.entity.StepSequence;
+import com.shop.tbms.entity.TbmsNotification;
+import com.shop.tbms.entity.TemplateProcedure;
 import com.shop.tbms.enumerate.NotificationType;
 import com.shop.tbms.enumerate.Role;
 import com.shop.tbms.enumerate.order.OrderStatus;
@@ -19,12 +41,24 @@ import com.shop.tbms.enumerate.step.StepType;
 import com.shop.tbms.mapper.order.PurchaseOrderDetailMapper;
 import com.shop.tbms.mapper.order.PurchaseOrderListMapper;
 import com.shop.tbms.mapper.order.PurchaseOrderMapper;
-import com.shop.tbms.repository.*;
+import com.shop.tbms.repository.AccountRepository;
+import com.shop.tbms.repository.ChecklistRepository;
+import com.shop.tbms.repository.FilePDFRepository;
+import com.shop.tbms.repository.NotificationRepository;
+import com.shop.tbms.repository.PurchaseOrderRepository;
+import com.shop.tbms.repository.StepRepository;
+import com.shop.tbms.repository.StepSequenceRepository;
+import com.shop.tbms.service.FileService;
 import com.shop.tbms.service.NotificationService;
 import com.shop.tbms.service.PurchaseOrderService;
 import com.shop.tbms.specification.AccountSpecification;
 import com.shop.tbms.specification.PurchaseOrderSpecification;
-import com.shop.tbms.util.*;
+import com.shop.tbms.util.AuthenticationUtil;
+import com.shop.tbms.util.FileUtil;
+import com.shop.tbms.util.NotificationUtil;
+import com.shop.tbms.util.OrderUtil;
+import com.shop.tbms.util.StepConditionUtil;
+import com.shop.tbms.util.TemplateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,6 +67,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
@@ -95,6 +130,12 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Autowired
     private NotificationConstant notificationConstant;
 
+    @Autowired
+    private FileService fileService;
+
+    @Autowired
+    private FilePDFRepository filePDFRepository;
+
     @Override
     public SuccessRespDTO createOrder(OrderCreateReqDTO orderCreateReqDTO) {
         /* Generate PurchaseOrder entity */
@@ -146,7 +187,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
             /* Generate mold progress */
             if (!StepType.FIXING.equals(step.getType())
                     && !ReportType.BY_MOLD_ELEMENT.equals(step.getReportType())
-                    && !StepConditionUtil.isStepHasConditionProgress(step, stepConstant)) {
+                    && !StepConditionUtil.isStepHasConditionProgress(step)) {
                 progressComponent.generateProgressForStep(step);
             }
         });
@@ -160,11 +201,11 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
     /*
-    * Update normal information
-    * Update mold:
-    * * If remove mold -> update progress of all step
-    * * If add new mold -> update progress of all step
-    * */
+     * Update normal information
+     * Update mold:
+     * * If remove mold -> update progress of all step
+     * * If add new mold -> update progress of all step
+     * */
     @Override
     public SuccessRespDTO updateOrder(OrderUpdateReqDTO orderUpdateReqDTO) {
         PurchaseOrder currentOrder = purchaseOrderRepository.findById(orderUpdateReqDTO.getOrderId())
@@ -338,5 +379,48 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
         log.info("Complete send noti for nearly due order");
         notificationRepository.saveAll(notificationList);
+    }
+
+    @Override
+    public List<FileDTO> uploadPDF(Long orderId, MultipartFile[] files) throws Exception {
+        PurchaseOrder order = purchaseOrderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+        List<FileDTO> fileDTOList = fileService.uploadPDF(orderId, files);
+        List<FilePDF> listPDF = fileDTOList.stream().map(x -> FilePDF.builder()
+                .filename(x.getFilename())
+                .url(x.getUrl())
+                .purchaseOrder(order)
+                .isDelete(false)
+                .build()).collect(Collectors.toList());
+        filePDFRepository.saveAll(listPDF);
+        return fileDTOList;
+    }
+
+    @Override
+    public ListWrapperDTO<PDFDto> getPDF(Long orderId) {
+        List<FilePDF> filePDFList = filePDFRepository.findAllByPurchaseOrderId(orderId);
+        ListWrapperDTO<PDFDto> result = new ListWrapperDTO();
+        result.setData(filePDFList.stream().map(x -> PDFDto.builder()
+                        .id(x.getId())
+                        .filename(x.getFilename())
+                        .url(x.getUrl())
+                        .build())
+                .collect(Collectors.toList()));
+        return result;
+    }
+
+    @Override
+    public SuccessRespDTO deletePDF(Long pdfId) {
+        try {
+            FilePDF pdf = filePDFRepository.findById(pdfId).orElseThrow(Exception::new);
+            String destination = FileUtil.generateDestination(pdf.getPurchaseOrder().getId(), pdf.getFilename());
+            filePDFRepository.deleteById(pdfId);
+            fileService.deleteFile(destination);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return SuccessRespDTO.builder()
+                .message(MessageConstant.DELETE_SUCCESS)
+                .build();
     }
 }
