@@ -91,7 +91,7 @@ public class PurchaseOrderSpecification {
     }
 
     public static Specification<PurchaseOrder> getListLateOrderOtherDay() {
-        /* delivery date = today */
+        /* status = in progress */
         Specification<PurchaseOrder> specification = Specification
                 .where(
                         (root, query, criteriaBuilder) ->
