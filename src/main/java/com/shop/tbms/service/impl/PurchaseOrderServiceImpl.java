@@ -300,9 +300,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     public void checkLateOrder() {
         List<PurchaseOrder> listLateOrder = purchaseOrderRepository.findAll(PurchaseOrderSpecification.getListLateOrderToday());
-        log.info("Set late for orders {}", listLateOrder);
 
         listLateOrder.forEach(order -> order.setIsLate(Boolean.TRUE));
+
+        listLateOrder.addAll(purchaseOrderRepository.findAll(PurchaseOrderSpecification.getListLateOrderOtherDay()));
 
         /* send noti all president and secretary */
         List<Account> listReceiver = accountRepository.findAll(

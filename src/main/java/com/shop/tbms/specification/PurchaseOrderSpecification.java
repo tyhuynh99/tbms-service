@@ -90,6 +90,36 @@ public class PurchaseOrderSpecification {
         return specification;
     }
 
+    public static Specification<PurchaseOrder> getListLateOrderOtherDay() {
+        /* status = in progress */
+        Specification<PurchaseOrder> specification = Specification
+                .where(
+                        (root, query, criteriaBuilder) ->
+                                criteriaBuilder.equal(
+                                        root.get(PurchaseOrder_.STATUS),
+                                        OrderStatus.IN_PROGRESS)
+                );
+
+        /* not deleted */
+        specification = specification
+                .and(
+                        (root, query, criteriaBuilder) ->
+                                criteriaBuilder.equal(
+                                        root.get(PurchaseOrder_.IS_DELETED),
+                                        Boolean.FALSE)
+                );
+
+        /* is late */
+        specification = specification
+                .and(
+                        (root, query, criteriaBuilder) ->
+                                criteriaBuilder.equal(
+                                        root.get(PurchaseOrder_.IS_LATE),
+                                        Boolean.TRUE)
+                );
+        return specification;
+    }
+
     public static Specification<PurchaseOrder> getListNearlyDueOrder() {
         Specification<PurchaseOrder> specification = Specification.where(null);
         LocalDate today = LocalDate.now();
