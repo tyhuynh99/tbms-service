@@ -25,13 +25,16 @@ public class MonitorSchedulerServiceImpl implements MonitorSchedulerService {
 
     @Override
     public void checkLateOrder() {
-        if (!checkExecuteFunction(MonitorSchedulerSpecification.createCheckLateOrder())) {
-            log.info("Start check late order");
-            schedulerExecuteService.exeCheckLateOrder();
-            saveExecuteFunction(SchedulerFunction.CHECK_LATE_ORDER);
-        } else {
-            log.info("Late order has been checked today");
-        }
+        log.info("Start check late order");
+        schedulerExecuteService.exeCheckLateOrder();
+        saveExecuteFunction(SchedulerFunction.CHECK_LATE_ORDER);
+//        if (!checkExecuteFunction(MonitorSchedulerSpecification.createCheckLateOrder())) {
+//            log.info("Start check late order");
+//            schedulerExecuteService.exeCheckLateOrder();
+//            saveExecuteFunction(SchedulerFunction.CHECK_LATE_ORDER);
+//        } else {
+//            log.info("Late order has been checked today");
+//        }
     }
 
     @Override

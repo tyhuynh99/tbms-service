@@ -203,7 +203,7 @@ public class FileServiceImpl implements FileService {
 
         String destination = FileUtil.generateDestination(orderId, filename);
         byte[] bytes = file.getBytes();
-        String contentType = file.getContentType();
+        String contentType = "application/pdf";
 
         List<String> nameConvert = generateFilename(filename, destination);
         filename = nameConvert.get(0);
