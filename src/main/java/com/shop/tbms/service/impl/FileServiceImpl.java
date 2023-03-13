@@ -96,7 +96,6 @@ public class FileServiceImpl implements FileService {
     @Override
     public List<FileDTO> uploadPDF(long orderId, MultipartFile[] multipartFile) throws Exception {
         List<MultipartFile> files = Arrays.asList(multipartFile);
-        // validatePDF(files); // not validate file, FE handle
         List<FileDTO> result = new ArrayList<>();
         files.forEach(x -> {
             try {
@@ -211,10 +210,9 @@ public class FileServiceImpl implements FileService {
 
         // Save to firebase
         Blob result = bucket.create(destination, bytes, contentType);
-        result.createAcl(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
+        result.createAcl(Acl.of(Acl.User.ofAllUsers(), Acl.Role.OWNER));
         // Create view url
-        destination = destination.replaceAll("/", "%2F");
-        String url = String.format(previewUrl, destination);
+        String url = result.getMediaLink();
         return FileDTO.builder()
                 .filename(filename)
                 .url(url)
