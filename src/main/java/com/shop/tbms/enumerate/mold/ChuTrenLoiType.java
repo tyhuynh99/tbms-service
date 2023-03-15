@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 public enum ChuTrenLoiType {
+    KHONG("Không"),
     GIA_CONG_CNC_TRUC_TIEP("Gia công CNC trực tiếp"),
     BAN_DIEN("Bắn điện");
 
