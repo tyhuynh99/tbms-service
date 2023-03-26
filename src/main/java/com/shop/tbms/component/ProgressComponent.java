@@ -49,18 +49,23 @@ public class ProgressComponent {
 
     public void generateProgressForStep(Step step) {
         log.info("Start generate progress for step {}", step);
-        switch (step.getReportType()) {
-            case BY_MOLD:
-                moldProgressRepository.saveAll(ProgressUtil.generateMoldProcess(step));
-                break;
-            case BY_MOLD_SEND_RECEIVE:
-                moldDeliverProgressRepository.saveAll(ProgressUtil.generateMoldDeliverProcess(step));
-                break;
-            case BY_MOLD_ELEMENT:
-                moldGroupElementProgressRepository.saveAll(ProgressUtil.generateMoldGroupElementProgress(step));
-                break;
-            default:
+        if (step.getCode().equals("3D_GO") ) {
+            moldProgressRepository.saveAll(ProgressUtil.generateMoldProcess(step));
+        } else {
+            switch (step.getReportType()) {
+                case BY_MOLD:
+                    moldProgressRepository.saveAll(ProgressUtil.generateMoldProcess(step));
+                    break;
+                case BY_MOLD_SEND_RECEIVE:
+                    moldDeliverProgressRepository.saveAll(ProgressUtil.generateMoldDeliverProcess(step));
+                    break;
+                case BY_MOLD_ELEMENT:
+                    moldGroupElementProgressRepository.saveAll(ProgressUtil.generateMoldGroupElementProgress(step));
+                    break;
+                default:
+            }
         }
+
         log.info("End generate progress for step {}", step);
     }
 

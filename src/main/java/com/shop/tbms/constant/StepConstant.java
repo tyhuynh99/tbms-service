@@ -21,6 +21,9 @@ public class StepConstant {
     public List<String> getListStepNotForFreeFormType() {
         return List.of(code3D_GO, codeCAM_GO, codeCNC_GO_IN, codeGO_TIA_TOT, codeDUC, codeSCAN, codeRAP_KHUON);
     }
+    public List<String> getListStepForLoiDe() {
+        return List.of(code3D_GO);
+    }
 
     @Value("${step.code.2D}")
     private String code2D;

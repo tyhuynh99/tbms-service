@@ -165,7 +165,13 @@ public class StepServiceImpl implements StepService {
                         .collect(Collectors.toList());
 
                 dto.setListMoldElementProgress(moldElementProgressDTOList);
-
+                dto.setListMoldProgress(
+                        progressComponent.setReportAvailabilityForMoldProgress(
+                                preStep,
+                                nextStep,
+                                dto.getListMoldProgress(),
+                                step)
+                );
                 if (!StepStatus.COMPLETED.equals(step.getStatus())) {
                     dto.setListMoldElementProgress(
                             progressComponent.setReportAvailabilityForMoldElementProgress(
