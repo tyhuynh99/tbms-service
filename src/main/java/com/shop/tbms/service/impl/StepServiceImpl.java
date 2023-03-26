@@ -6,6 +6,7 @@ import com.shop.tbms.config.security.TbmsUserDetails;
 import com.shop.tbms.constant.LogConstant;
 import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.constant.NotificationConstant;
+import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.noti.FBNotificationRequestDTO;
@@ -109,6 +110,9 @@ public class StepServiceImpl implements StepService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private StepConstant stepConstant;
+
     @Override
     public StepDTO getStep(Long stepId) {
         Step step = stepRepository.findById(stepId).orElseThrow(EntityNotFoundException::new);
@@ -156,14 +160,19 @@ public class StepServiceImpl implements StepService {
                                         ).listElement(
                                                 moldElementProgressMapper.toDTOs(
                                                         step.getListMoldGroupElementProgresses().stream()
-                                                                .filter(elementProgress ->
-                                                                        mold.getId().equals(elementProgress.getMold().getId()))
+                                                                .filter(elementProgress -> {
+                                                                            if ("3D_GO".equals(step.getCode())) {
+                                                                                return mold.getId().equals(elementProgress.getMold().getId())
+                                                                                        && "Lõi đè".equals(elementProgress.getMoldGroupElement().getName());
+                                                                            }
+                                                                            return mold.getId().equals(elementProgress.getMold().getId());
+                                                                        }
+                                                                )
                                                                 .sorted(Comparator.comparing(MoldGroupElementProgress::getId))
                                                                 .collect(Collectors.toList()))
                                         ).build()
                         )
                         .collect(Collectors.toList());
-
                 dto.setListMoldElementProgress(moldElementProgressDTOList);
 
                 if (!StepStatus.COMPLETED.equals(step.getStatus())) {
