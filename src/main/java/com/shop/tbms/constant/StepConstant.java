@@ -22,7 +22,7 @@ public class StepConstant {
         return List.of(code3D_GO, codeCAM_GO, codeCNC_GO_IN, codeGO_TIA_TOT, codeDUC, codeSCAN, codeRAP_KHUON);
     }
     public List<String> getListStepForLoiDe() {
-        return List.of(code3D_GO);
+        return List.of(code3D_GO, codeCAM_GO, codeCNC_GO_IN, codeGO_TIA_TOT);
     }
 
     @Value("${step.code.2D}")
