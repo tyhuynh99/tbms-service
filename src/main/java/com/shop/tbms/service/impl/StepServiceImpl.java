@@ -351,12 +351,6 @@ public class StepServiceImpl implements StepService {
                 .build();
     }
 
-    private void handleUpdateLoiDe(Step currentStep, ReportStepReqDTO reportStepReqDTO, List<String> logDetail) {
-        if (currentStep.getCode().equals("3D_GO")) {
-            stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
-        }
-    }
-
     @Override
     public List<ReportIssueToStepRespDTO> getListToStepInReportError(Long stepId) {
         List<StepSequence> listStepSequence = stepSequenceRepository.findByStepBeforeId(stepId);

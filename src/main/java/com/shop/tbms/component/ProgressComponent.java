@@ -49,7 +49,7 @@ public class ProgressComponent {
 
     public void generateProgressForStep(Step step) {
         log.info("Start generate progress for step {}", step);
-        if (step.getCode().equals("3D_GO") ) {
+        if (stepConstant.getListStepForLoiDe().contains(step.getCode())) {
             moldProgressRepository.saveAll(ProgressUtil.generateMoldProcess(step));
         } else {
             switch (step.getReportType()) {
