@@ -6,12 +6,16 @@ import com.shop.tbms.config.security.TbmsUserDetails;
 import com.shop.tbms.constant.LogConstant;
 import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.constant.NotificationConstant;
+import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.mold.MoldDTO;
+import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
+import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.dto.noti.FBNotificationRequestDTO;
 import com.shop.tbms.dto.step.ResetMoldStepReqDTO;
 import com.shop.tbms.dto.step.detail.StepDTO;
 import com.shop.tbms.dto.step.detail.progress.MoldElementProgressDTO;
+import com.shop.tbms.dto.step.report.ReportProgressReqDTO;
 import com.shop.tbms.dto.step.report.ReportStepReqDTO;
 import com.shop.tbms.dto.step.report_issue.ReportIssueStepReqDTO;
 import com.shop.tbms.dto.step.report_issue.ReportIssueToStepRespDTO;
@@ -22,9 +26,9 @@ import com.shop.tbms.enumerate.order.OrderPaymentStatus;
 import com.shop.tbms.enumerate.order.OrderStatus;
 import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.enumerate.step.StepType;
-import com.shop.tbms.mapper.mold.MoldMapper;
 import com.shop.tbms.mapper.StepMapper;
 import com.shop.tbms.mapper.StepSequenceMapper;
+import com.shop.tbms.mapper.mold.MoldMapper;
 import com.shop.tbms.mapper.progress.MoldDeliverProgressMapper;
 import com.shop.tbms.mapper.progress.MoldElementProgressMapper;
 import com.shop.tbms.mapper.progress.MoldProgressMapper;
@@ -109,6 +113,9 @@ public class StepServiceImpl implements StepService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private StepConstant stepConstant;
+
     @Override
     public StepDTO getStep(Long stepId) {
         Step step = stepRepository.findById(stepId).orElseThrow(EntityNotFoundException::new);
@@ -143,6 +150,7 @@ public class StepServiceImpl implements StepService {
                 }
                 break;
             case BY_MOLD_ELEMENT:
+                List<Long> moldIds = new ArrayList<>();
                 List<MoldElementProgressDTO> moldElementProgressDTOList = step.getProcedure().getPurchaseOrder()
                         .getListMold().stream()
                         .map(mold ->
@@ -156,16 +164,35 @@ public class StepServiceImpl implements StepService {
                                         ).listElement(
                                                 moldElementProgressMapper.toDTOs(
                                                         step.getListMoldGroupElementProgresses().stream()
-                                                                .filter(elementProgress ->
-                                                                        mold.getId().equals(elementProgress.getMold().getId()))
+                                                                .filter(elementProgress -> {
+                                                                            if (mold.getId().equals(elementProgress.getMold().getId()) && stepConstant.getListStepForLoiDe().contains(step.getCode())) {
+                                                                                moldIds.add(mold.getId());
+                                                                            }
+                                                                            return mold.getId().equals(elementProgress.getMold().getId());
+                                                                        }
+                                                                )
                                                                 .sorted(Comparator.comparing(MoldGroupElementProgress::getId))
                                                                 .collect(Collectors.toList()))
                                         ).build()
                         )
                         .collect(Collectors.toList());
-
                 dto.setListMoldElementProgress(moldElementProgressDTOList);
-
+                if (stepConstant.getListStepForLoiDe().contains(step.getCode())) {
+                    dto.setListMoldProgress(
+                            moldProgressMapper.toDTOs(step.getListMoldProgress())
+                                    .stream().filter(x -> !moldIds.contains(x.getMoldId()))
+                                    .collect(Collectors.toList())
+                    );
+                    if (!StepStatus.COMPLETED.equals(step.getStatus())) {
+                        dto.setListMoldProgress(
+                                progressComponent.setReportAvailabilityForMoldProgress(
+                                        preStep,
+                                        nextStep,
+                                        dto.getListMoldProgress(),
+                                        step)
+                        );
+                    }
+                }
                 if (!StepStatus.COMPLETED.equals(step.getStatus())) {
                     dto.setListMoldElementProgress(
                             progressComponent.setReportAvailabilityForMoldElementProgress(
@@ -228,8 +255,36 @@ public class StepServiceImpl implements StepService {
                 break;
             case BY_MOLD_ELEMENT:
                 log.info("Start update progress of report type = BY_MOLD_ELEMENT");
-                stepComponent.updateMoldElementProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
-                moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
+                if (stepConstant.getListStepForLoiDe().contains(currentStep.getCode())) {
+                    List<Long> moldElementProgressIds = currentMoldElementProgress.stream().map(MoldGroupElementProgress::getId).collect(Collectors.toList());
+                    List<Long> moldProgressIds = currentMoldProgress.stream().map(MoldProgress::getId).collect(Collectors.toList());
+
+                    List<ReportProgressReqDTO> moldElementProgressList = reportStepReqDTO.getProgress().stream().filter(x -> moldElementProgressIds.contains(x.getProgressId())).collect(Collectors.toList());
+                    stepComponent.updateMoldElementProgress(currentStep, moldElementProgressList, logDetail);
+                    moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
+
+                    List<ReportProgressReqDTO> moldProgressList = reportStepReqDTO.getProgress().stream().filter(x -> moldProgressIds.contains(x.getProgressId())).collect(Collectors.toList());
+                    stepComponent.updateMoldProgress(currentStep, moldProgressList, logDetail);
+                    List<MoldProgress> listDeleteProgress1 = currentMoldProgress.stream()
+                            .filter(moldProgress -> Objects.isNull(moldProgress.getIsCompleted()))
+                            .collect(Collectors.toList());
+
+                    /* handle for step SUA KHUON */
+                    if (CollectionUtils.isEmpty(listDeleteProgress1)) {
+                        moldProgressRepository.saveAll(currentMoldProgress
+                                .stream()
+                                .filter(moldProgress -> Objects.nonNull(moldProgress.getIsCompleted()))
+                                .collect(Collectors.toList())
+                        );
+                    } else {
+                        currentStep.getListMoldProgress().removeAll(listDeleteProgress1);
+                        moldProgressRepository.deleteAll(listDeleteProgress1);
+                        moldProgressRepository.flush();
+                    }
+                } else {
+                    stepComponent.updateMoldElementProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
+                    moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
+                }
                 break;
             case BY_MOLD_SEND_RECEIVE:
                 log.info("Start update progress of report type = BY_MOLD_SEND_RECEIVE");

@@ -5,7 +5,6 @@ import com.shop.tbms.dto.mold.MoldGroupDetailReqDTO;
 import com.shop.tbms.dto.mold.MoldGroupReqDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.mold.MoldType;
-import com.shop.tbms.enumerate.step.ReportType;
 import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.enumerate.step.StepType;
 import com.shop.tbms.repository.MoldDeliverProgressRepository;
@@ -23,6 +22,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.shop.tbms.enumerate.step.ReportType.BY_MOLD_ELEMENT;
 
 @Slf4j
 @Component
@@ -47,7 +48,20 @@ public class ProgressMoldGroupComponent {
         boolean isFreeFormType = MoldType.FREEFORM.equals(reqDTO.getMoldGroup().getType());
 
         for (Step step : order.getProcedure().getListStep()) {
-            if (StepType.FIXING.equals(step.getType()) || StepConditionUtil.isStepHasConditionProgress(step)) {
+            if (BY_MOLD_ELEMENT.equals(step.getReportType()) && stepConstant.getListStepForLoiDe().contains(step.getCode())) {
+                // Xử lí lõi đè
+                List<MoldGroupElementProgress> moldGroupElementProgressList = ProgressUtil.generateMoldGroupElementProgress(
+                        step,
+                        listUpdateMold);
+                // Lấy những element nào là lõi đè
+                moldGroupElementProgressList = moldGroupElementProgressList.stream()
+                        .filter(x -> x.getMoldGroupElement().getName().equals("Lõi đè"))
+                        .collect(Collectors.toList());
+
+                step.setListMoldGroupElementProgresses(moldGroupElementProgressList);
+
+                listUpdatedMoldElementProgress.addAll(moldGroupElementProgressList);
+            } else if (StepType.FIXING.equals(step.getType()) || StepConditionUtil.isStepHasConditionProgress(step)) {
                 if (stepConstant.getCodePHONG_DIEN().equalsIgnoreCase(step.getCode())) {
                     /* gen step Phong dien */
                     if (reqDTO.getMoldGroup().isHasBanDien() || isFreeFormType) {
@@ -83,7 +97,10 @@ public class ProgressMoldGroupComponent {
                             List<MoldGroupElementProgress> moldGroupElementProgressList = ProgressUtil.generateMoldGroupElementProgress(
                                     step,
                                     listUpdateMold);
-
+                            // Lấy những element nào không phải là lõi đè
+                            moldGroupElementProgressList = moldGroupElementProgressList.stream()
+                                    .filter(x -> !x.getMoldGroupElement().getName().equals("Lõi đè"))
+                                    .collect(Collectors.toList());
                             step.setListMoldGroupElementProgresses(moldGroupElementProgressList);
 
                             listUpdatedMoldElementProgress.addAll(moldGroupElementProgressList);
@@ -91,11 +108,14 @@ public class ProgressMoldGroupComponent {
                         default:
                     }
                 }
-            } else if (ReportType.BY_MOLD_ELEMENT.equals(step.getReportType())) {
+            } else if (BY_MOLD_ELEMENT.equals(step.getReportType())) {
                 List<MoldGroupElementProgress> moldGroupElementProgressList = ProgressUtil.generateMoldGroupElementProgress(
                         step,
                         listUpdateMold);
-
+                // Lấy những element nào không phải là lõi đè
+                moldGroupElementProgressList = moldGroupElementProgressList.stream()
+                        .filter(x -> !x.getMoldGroupElement().getName().equals("Lõi đè"))
+                        .collect(Collectors.toList());
                 step.setListMoldGroupElementProgresses(moldGroupElementProgressList);
 
                 listUpdatedMoldElementProgress.addAll(moldGroupElementProgressList);

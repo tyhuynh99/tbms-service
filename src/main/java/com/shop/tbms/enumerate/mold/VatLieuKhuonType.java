@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 public enum VatLieuKhuonType {
+    KHONG("Không"),
     NHOM("Nhôm"),
     SAT("Sắt");
 

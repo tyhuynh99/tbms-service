@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 public enum TaoHoaTheoType {
+    KHONG("Không"),
     THEO_MAU_DE("Theo mẫu đế"),
     THEO_BAN_VE("Theo bản vẽ");
 
