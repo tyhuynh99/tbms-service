@@ -35,6 +35,7 @@ public class JWTAuthenticateFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.info("Process JWTAuthenticateFilter");
+        log.info("Uri: {}", request.getRequestURI());
         String jwt = JWTUtil.parseJwt(request);
 
         if (!StringUtils.isBlank(jwt)) {

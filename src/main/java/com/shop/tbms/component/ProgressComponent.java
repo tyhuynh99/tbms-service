@@ -49,18 +49,23 @@ public class ProgressComponent {
 
     public void generateProgressForStep(Step step) {
         log.info("Start generate progress for step {}", step);
-        switch (step.getReportType()) {
-            case BY_MOLD:
-                moldProgressRepository.saveAll(ProgressUtil.generateMoldProcess(step));
-                break;
-            case BY_MOLD_SEND_RECEIVE:
-                moldDeliverProgressRepository.saveAll(ProgressUtil.generateMoldDeliverProcess(step));
-                break;
-            case BY_MOLD_ELEMENT:
-                moldGroupElementProgressRepository.saveAll(ProgressUtil.generateMoldGroupElementProgress(step));
-                break;
-            default:
+        if (stepConstant.getListStepForLoiDe().contains(step.getCode())) {
+            moldProgressRepository.saveAll(ProgressUtil.generateMoldProcess(step));
+        } else {
+            switch (step.getReportType()) {
+                case BY_MOLD:
+                    moldProgressRepository.saveAll(ProgressUtil.generateMoldProcess(step));
+                    break;
+                case BY_MOLD_SEND_RECEIVE:
+                    moldDeliverProgressRepository.saveAll(ProgressUtil.generateMoldDeliverProcess(step));
+                    break;
+                case BY_MOLD_ELEMENT:
+                    moldGroupElementProgressRepository.saveAll(ProgressUtil.generateMoldGroupElementProgress(step));
+                    break;
+                default:
+            }
         }
+
         log.info("End generate progress for step {}", step);
     }
 
@@ -269,6 +274,20 @@ public class ProgressComponent {
                 return progressList.stream().allMatch(moldProgress -> Boolean.FALSE.equals(moldProgress.getIsCompleted()));
             case BY_MOLD_ELEMENT:
                 log.info("Check complete of mold size {} with nextStep mold element progress {}", moldId, nextStep.getListMoldGroupElementProgresses());
+                if (stepConstant.getListStepForLoiDe().contains(nextStep.getCode())) {
+                    log.info("Check complete of mold size {} with nextStep mold progress {}", moldId, nextStep.getListMoldProgress());
+                    List<MoldProgress> progressList1 = nextStep.getListMoldProgress().stream()
+                            .filter(moldProgress -> moldId.equals(moldProgress.getMold().getId()))
+                            .collect(Collectors.toList());
+
+                    if (CollectionUtils.isEmpty(progressList1)) {
+                        if (Boolean.TRUE.equals(nextStep.getHasCondition())) {
+                            log.info("Step hasCondition, and not found progress of mold size {}. Need to check nextStep", moldId);
+                            Step nextOfNextStep = StepUtil.getNextMainStep(nextStep.getListStepBefore());
+                            return canUnCheckCompleteByMoldId(nextOfNextStep, moldId);
+                        }
+                    }
+                }
                 List<MoldGroupElementProgress> elementProgressList = nextStep.getListMoldGroupElementProgresses().stream()
                         .filter(moldGroupElementProgress ->
                                 moldId.equals(moldGroupElementProgress.getMold().getId()))

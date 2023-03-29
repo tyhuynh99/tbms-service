@@ -182,8 +182,13 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         /* Process steps */
         procedure.getListStep().forEach(step -> {
             /* Process steps */
-            if (Boolean.TRUE.equals(step.getIsStart())) step.setStatus(StepStatus.IN_PROGRESS);
-
+            if (Boolean.TRUE.equals(step.getIsStart())) {
+                step.setStatus(StepStatus.IN_PROGRESS);
+            }
+            /* Generate mold progress for steps lõi đè */
+            if (stepConstant.getListStepForLoiDe().contains(step.getCode())) {
+                progressComponent.generateProgressForStep(step);
+            }
             /* Generate mold progress */
             if (!StepType.FIXING.equals(step.getType())
                     && !ReportType.BY_MOLD_ELEMENT.equals(step.getReportType())
