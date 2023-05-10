@@ -10,9 +10,9 @@ server:
 spring:
   profiles: default
   datasource:
-    url: jdbc:postgresql://58.84.1.74:5432/tbms-dev
+    url: jdbc:postgresql://58.84.2.214:5432/tbms-dev
     username: admin
-    password: 123
+    password: Th@ibinhmoldshop123
     sql-script-encoding: UTF-8
     hikari:
       connectionTimeout: 20000
