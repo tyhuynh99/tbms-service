@@ -22,6 +22,7 @@ import com.shop.tbms.dto.step.report_issue.ReportIssueToStepRespDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.NotificationType;
 import com.shop.tbms.enumerate.Role;
+import com.shop.tbms.enumerate.mold.MoldType;
 import com.shop.tbms.enumerate.order.OrderPaymentStatus;
 import com.shop.tbms.enumerate.order.OrderStatus;
 import com.shop.tbms.enumerate.step.StepStatus;
@@ -124,9 +125,33 @@ public class StepServiceImpl implements StepService {
         /* Map progress dto */
         List<Step> preStep = StepUtil.getPreStepToChkProgress(step.getListStepAfter());
         List<Step> nextStep = StepUtil.getNextStepToChkProgress(step.getListStepBefore());
+
+
+        List<MoldProgress> moldProgressList = step.getListMoldProgress();
+        List<MoldDeliverProgress> moldDeliverProgressList = step.getListMoldDeliverProgress();
+        List<Mold> moldPurchaseList = step.getProcedure().getPurchaseOrder().getListMold();
+
+        // lọc khuôn freeform
+        if (!stepConstant.getListStepForFreeform().contains(step.getCode())) {
+            int freefrom = MoldType.FREEFORM.getValue();
+
+            moldProgressList = moldProgressList.stream()
+                    .filter(x -> x.getMold().getMoldGroup().getType().getValue() != freefrom)
+                    .collect(Collectors.toList());
+
+            moldDeliverProgressList = moldDeliverProgressList.stream()
+                    .filter( x-> x.getMold().getMoldGroup().getType().getValue() != freefrom)
+                    .collect(Collectors.toList());
+
+            moldPurchaseList = moldPurchaseList.stream()
+                    .filter(x -> x.getMoldGroup().getType().getValue() != freefrom)
+                    .collect(Collectors.toList());
+        }
+
         switch (step.getReportType()) {
             case BY_MOLD:
-                dto.setListMoldProgress(moldProgressMapper.toDTOs(step.getListMoldProgress()));
+
+                dto.setListMoldProgress(moldProgressMapper.toDTOs(moldProgressList));
                 if (!StepStatus.COMPLETED.equals(step.getStatus())) {
                     dto.setListMoldProgress(
                             progressComponent.setReportAvailabilityForMoldProgress(
@@ -138,7 +163,7 @@ public class StepServiceImpl implements StepService {
                 }
                 break;
             case BY_MOLD_SEND_RECEIVE:
-                dto.setListMoldDeliverProgress(moldDeliverProgressMapper.toDTOs(step.getListMoldDeliverProgress()));
+                dto.setListMoldDeliverProgress(moldDeliverProgressMapper.toDTOs(moldDeliverProgressList));
                 if (!StepStatus.COMPLETED.equals(step.getStatus())) {
                     dto.setListMoldDeliverProgress(
                             progressComponent.setReportAvailabilityForDeliveryProgress(
@@ -151,8 +176,7 @@ public class StepServiceImpl implements StepService {
                 break;
             case BY_MOLD_ELEMENT:
                 List<Long> moldIds = new ArrayList<>();
-                List<MoldElementProgressDTO> moldElementProgressDTOList = step.getProcedure().getPurchaseOrder()
-                        .getListMold().stream()
+                List<MoldElementProgressDTO> moldElementProgressDTOList = moldPurchaseList.stream()
                         .map(mold ->
                                 MoldElementProgressDTO.builder()
                                         .moldSize(mold.getSize())
@@ -179,7 +203,7 @@ public class StepServiceImpl implements StepService {
                 dto.setListMoldElementProgress(moldElementProgressDTOList);
                 if (stepConstant.getListStepForLoiDe().contains(step.getCode())) {
                     dto.setListMoldProgress(
-                            moldProgressMapper.toDTOs(step.getListMoldProgress())
+                            moldProgressMapper.toDTOs(moldProgressList)
                                     .stream().filter(x -> !moldIds.contains(x.getMoldId()))
                                     .collect(Collectors.toList())
                     );

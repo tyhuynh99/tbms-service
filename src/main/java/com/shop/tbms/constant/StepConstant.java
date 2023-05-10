@@ -18,11 +18,17 @@ public class StepConstant {
     public Map<String, String> getListStepNeedUpdateMoldElement() {
         return Map.of(code3D_KHUON, description3D_KHUON);
     }
+
     public List<String> getListStepNotForFreeFormType() {
         return List.of(code3D_GO, codeCAM_GO, codeCNC_GO_IN, codeGO_TIA_TOT, codeDUC, codeSCAN, codeRAP_KHUON);
     }
+
     public List<String> getListStepForLoiDe() {
         return List.of(code3D_GO, codeCAM_GO, codeCNC_GO_IN, codeGO_TIA_TOT);
+    }
+
+    public List<String> getListStepForFreeform() {
+        return List.of(code2D, codeDAT_VAT_TU, code3D_KHUON, codeCAM_KHUON, codeCNC_KHUON, codeHOP_KHUON, codeRAP_KHUON, codeTHU_KHUON, codeSUA_KHUON, codeXI_MA_SON_DANH_BONG, codeKIEM_TRA, codeGIAO_HANG);
     }
 
     @Value("${step.code.2D}")
@@ -164,8 +170,7 @@ public class StepConstant {
     public String getStepToResetToStepWhenChangeMoldDetail(MoldType curMoldType, MoldType reqMoldType) {
         if ((MoldType.FREEFORM.equals(curMoldType) && !MoldType.FREEFORM.equals(reqMoldType))
                 || (!MoldType.FREEFORM.equals(curMoldType) && MoldType.FREEFORM.equals(reqMoldType))
-                || MoldType.FREEFORM.equals(curMoldType))
-        {
+                || MoldType.FREEFORM.equals(curMoldType)) {
             return getCode3D_GO();
         }
         return this.getStepToResetToStepWhenChangeMoldDetail();

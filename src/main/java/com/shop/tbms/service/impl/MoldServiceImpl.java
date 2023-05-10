@@ -83,8 +83,9 @@ public class MoldServiceImpl implements MoldService {
     }
 
     private void createNewMoldGroup(PurchaseOrder order, MoldGroupReqDTO reqDTO) {
+        List<Long> listReqMoldId = reqDTO.getMoldGroup().getMoldIdList();
         List<Mold> listUpdateMold = order.getListMold().stream()
-                .filter(mold -> reqDTO.getMoldGroup().getMoldIdList().contains(mold.getId()))
+                .filter(mold -> listReqMoldId.contains(mold.getId()))
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(listUpdateMold)) {
