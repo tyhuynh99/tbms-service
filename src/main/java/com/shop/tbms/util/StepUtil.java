@@ -1,10 +1,18 @@
 package com.shop.tbms.util;
 
-import com.shop.tbms.entity.*;
+import com.shop.tbms.entity.Mold;
+import com.shop.tbms.entity.MoldDeliverProgress;
+import com.shop.tbms.entity.MoldGroupElementProgress;
+import com.shop.tbms.entity.MoldProgress;
+import com.shop.tbms.entity.PurchaseOrder;
+import com.shop.tbms.entity.Step;
+import com.shop.tbms.entity.StepSequence;
 import com.shop.tbms.enumerate.step.StepType;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -188,15 +196,26 @@ public class StepUtil {
         return (long) (((double) completedMold / totalMold) * 100);
     }
 
+    private static final List<String> STEPS_FOR_LOI_DE = Arrays.asList("3D_GO", "CAM_GO", "CNC_GO_IN", "GO_TIA_TOT");
+
     public static long calPercentByMoldGroupElement(Step step) {
         List<MoldGroupElementProgress> listMoldGroupElementProgresses = step.getListMoldGroupElementProgresses();
+        List<MoldProgress> moldProgressList = new ArrayList<>();
 
-        if (CollectionUtils.isEmpty(listMoldGroupElementProgresses)) return ZERO_LONG;
+        if (STEPS_FOR_LOI_DE.contains(step.getCode())) {
+            moldProgressList = step.getListMoldProgress();
+        }
+
+        if (CollectionUtils.isEmpty(listMoldGroupElementProgresses) && CollectionUtils.isEmpty(moldProgressList)) {
+            return ZERO_LONG;
+        }
 
         long completedElement = listMoldGroupElementProgresses.stream()
                 .filter(moldGroupElementProgress -> Boolean.TRUE.equals(moldGroupElementProgress.getIsCompleted()))
-                .count();
-        long totalElement = listMoldGroupElementProgresses.size();
+                .count()
+                +
+                moldProgressList.stream().filter(x -> Boolean.TRUE.equals(x.getIsCompleted())).count();
+        long totalElement = listMoldGroupElementProgresses.size() + moldProgressList.size();
 
         return totalElement > 0 ? (long) (((double) completedElement / totalElement) * 100) : 0L;
     }

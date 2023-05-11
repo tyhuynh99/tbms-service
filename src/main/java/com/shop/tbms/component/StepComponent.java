@@ -8,6 +8,7 @@ import com.shop.tbms.dto.order.OrderStepRespDTO;
 import com.shop.tbms.dto.step.report.*;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
 import com.shop.tbms.entity.*;
+import com.shop.tbms.enumerate.mold.MoldType;
 import com.shop.tbms.enumerate.order.OrderStatus;
 import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.enumerate.step.StepType;
@@ -121,9 +122,15 @@ public class StepComponent {
 
     public void updateMoldProgress(Step currentStep, List<ReportProgressReqDTO> listReq, List<String> logDetail) {
         List<MoldProgress> progressList = currentStep.getListMoldProgress();
+        // lọc khuôn freeform
+        if (!stepConstant.getListStepForFreeform().contains(currentStep.getCode())) {
+            int freefrom = MoldType.FREEFORM.getValue();
+            progressList = progressList.stream()
+                    .filter(x -> x.getMold().getMoldGroup().getType().getValue() != freefrom)
+                    .collect(Collectors.toList());
+        }
         final List<MoldProgress> listUpdateToComplete = new ArrayList<>();
         final List<MoldProgress> listUpdateToUnComplete = new ArrayList<>();
-
         progressList.stream()
                 .forEach(moldProgress -> {
                     Optional<ReportProgressReqDTO> reqChk = listReq.stream()
