@@ -330,6 +330,9 @@ public class StepServiceImpl implements StepService {
 
         log.info("Start update evidences");
         stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence(), reportLog);
+        StepSequence stepSequence = currentStep.getListStepAfter().get(0);
+        List<Step> nextSteps = StepUtil.getNextStepToChkProgress(Collections.singletonList(stepSequence));
+        if (currentStep.getCode().equals(stepConstant.))
 
         /* set status next step */
         log.info("Start change status for next step");
