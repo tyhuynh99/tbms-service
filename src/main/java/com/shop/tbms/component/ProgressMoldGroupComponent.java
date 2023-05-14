@@ -50,17 +50,40 @@ public class ProgressMoldGroupComponent {
         for (Step step : order.getProcedure().getListStep()) {
             if (BY_MOLD_ELEMENT.equals(step.getReportType()) && stepConstant.getListStepForLoiDe().contains(step.getCode())) {
                 // Xử lí lõi đè
-                List<MoldGroupElementProgress> moldGroupElementProgressList = ProgressUtil.generateMoldGroupElementProgress(
-                        step,
-                        listUpdateMold);
-                // Lấy những element nào là lõi đè
-                moldGroupElementProgressList = moldGroupElementProgressList.stream()
-                        .filter(x -> x.getMoldGroupElement().getName().equals("Lõi đè"))
-                        .collect(Collectors.toList());
+                List<Mold> listMoldForLoiDe = listUpdateMold.stream().filter(x -> {
+                    List<MoldGroupElement> listElements = x.getMoldGroup().getListMoldGroupElement();
+                    listElements = listElements.stream().filter(element -> element.getName().equals("Lõi đè")).collect(Collectors.toList());
+                    return !listElements.isEmpty();
+                }).collect(Collectors.toList());
+                if (!listMoldForLoiDe.isEmpty()) {
+                    List<MoldGroupElementProgress> moldGroupElementProgressList = ProgressUtil.generateMoldGroupElementProgress(
+                            step,
+                            listMoldForLoiDe);
 
-                step.setListMoldGroupElementProgresses(moldGroupElementProgressList);
+                    // Lấy những element nào là lõi đè
+                    moldGroupElementProgressList = moldGroupElementProgressList.stream()
+                            .filter(x -> x.getMoldGroupElement().getName().equals("Lõi đè"))
+                            .collect(Collectors.toList());
+                    step.setListMoldGroupElementProgresses(moldGroupElementProgressList);
+                    listUpdatedMoldElementProgress.addAll(moldGroupElementProgressList);
+                }
 
-                listUpdatedMoldElementProgress.addAll(moldGroupElementProgressList);
+
+                List<Mold> listMoldNotForLoiDe = listUpdateMold.stream().filter(x -> {
+                    List<MoldGroupElement> listElements = x.getMoldGroup().getListMoldGroupElement();
+                    listElements = listElements.stream().filter(element -> !element.getName().equals("Lõi đè")).collect(Collectors.toList());
+                    return !listElements.isEmpty();
+                }).collect(Collectors.toList());
+                if (!listMoldNotForLoiDe.isEmpty()) {
+                    List<MoldProgress> moldProgressListForMoldGroup = ProgressUtil.generateMoldProcessForMoldGroup(
+                            step,
+                            listMoldNotForLoiDe);
+
+                    step.setListMoldProgress(moldProgressListForMoldGroup);
+
+                    listUpdatedMoldProgress.addAll(moldProgressListForMoldGroup);
+                }
+
             } else if (StepType.FIXING.equals(step.getType()) || StepConditionUtil.isStepHasConditionProgress(step)) {
                 if (stepConstant.getCodePHONG_DIEN().equalsIgnoreCase(step.getCode())) {
                     /* gen step Phong dien */

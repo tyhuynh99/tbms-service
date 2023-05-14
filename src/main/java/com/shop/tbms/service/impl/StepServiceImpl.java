@@ -191,7 +191,8 @@ public class StepServiceImpl implements StepService {
                                     preStep,
                                     nextStep,
                                     dto.getListMoldDeliverProgress(),
-                                    step)
+                                    step,
+                                    orderId)
                     );
                 }
                 break;

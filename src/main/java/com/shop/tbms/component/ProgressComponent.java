@@ -209,7 +209,7 @@ public class ProgressComponent {
         }).collect(Collectors.toList());
     }
 
-    public List<MoldDeliverProgressDTO> setReportAvailabilityForDeliveryProgress(List<Step> preStepList, List<Step> nextStepList, List<MoldDeliverProgressDTO> moldDeliverProgressDTOList, Step currentStep) {
+    public List<MoldDeliverProgressDTO> setReportAvailabilityForDeliveryProgress(List<Step> preStepList, List<Step> nextStepList, List<MoldDeliverProgressDTO> moldDeliverProgressDTOList, Step currentStep, Long orderId) {
         List<MoldDeliverProgress> listFreeFromProgress = new ArrayList<>();
         List<Long> listMoldId = new ArrayList<>();
 
@@ -227,7 +227,7 @@ public class ProgressComponent {
                 }
             }
         }
-        return moldDeliverProgressDTOList.stream().map(moldDeliverProgressDTO -> {
+        for (MoldDeliverProgressDTO moldDeliverProgressDTO : moldDeliverProgressDTOList) {
             boolean canCheck = true;
             if (!StepType.FIXING.equals(currentStep.getType())) {
                 for (Step preStep : preStepList) {
@@ -245,9 +245,13 @@ public class ProgressComponent {
             }
             log.info("Set value canUncheck of {} is {}", moldDeliverProgressDTO, canUncheck);
             moldDeliverProgressDTO.setCanUncheck(canUncheck);
-
-            return moldDeliverProgressDTO;
-        }).collect(Collectors.toList());
+            if (!listFreeFromProgress.isEmpty() && !listMoldId.isEmpty()) {
+                if (listMoldId.contains(moldDeliverProgressDTO.getMoldId())) {
+                    handleFreefromForDeliveryProgress(currentStep, orderId, moldDeliverProgressDTO);
+                }
+            }
+        }
+        return moldDeliverProgressDTOList;
     }
 
     private void handleFreefromForDeliveryProgress(Step currentStep, Long orderId, MoldDeliverProgressDTO moldProgressDTO) {
@@ -259,7 +263,7 @@ public class ProgressComponent {
             return;
         }
         if (stepConstant.getCodeXI_MA_SON_DANH_BONG().equals(stepCode)) {
-            Optional<Step> stepBeforeOpt = stepRepository.findFirstByCodeAndProcedureOrderId(stepConstant.getCodeDAT_VAT_TU(), orderId);
+            Optional<Step> stepBeforeOpt = stepRepository.findFirstByCodeAndProcedureOrderId(stepConstant.getCodeTHU_KHUON(), orderId);
             if (stepBeforeOpt.isEmpty()) {
                 return;
             }

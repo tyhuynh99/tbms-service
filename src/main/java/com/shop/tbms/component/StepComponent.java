@@ -322,27 +322,30 @@ public class StepComponent {
                 } else if (Boolean.FALSE.equals(moldDeliverProgress.getIsCompleted()) && Boolean.TRUE.equals(reqDTO.getIsCompleted())) {
                     /* update to complete */
                     log.info("Update progress {} to complete", moldDeliverProgress);
+                    if (!(MoldType.FREEFORM.getValue() == moldDeliverProgress.getMold().getMoldGroup().getType().getValue())) {
+                        /* validate complete in pre-step */
+                        if (Boolean.FALSE.equals(currentStep.getIsStart()) && !StepType.FIXING.equals(currentStep.getType())) {
+                            boolean canCheckComplete = true;
 
-                    /* validate complete in pre-step */
-                    if (Boolean.FALSE.equals(currentStep.getIsStart()) && !StepType.FIXING.equals(currentStep.getType())) {
-                        boolean canCheckComplete = true;
+                            List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
+                            for (Step preStep : preSteps) {
+                                canCheckComplete &= progressComponent.canCheckCompleteByMoldId(
+                                        preStep,
+                                        moldDeliverProgress.getMold().getId()
+                                );
+                            }
 
-                        List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
-                        for (Step preStep : preSteps) {
-                            canCheckComplete &= progressComponent.canCheckCompleteByMoldId(
-                                    preStep,
-                                    moldDeliverProgress.getMold().getId()
-                            );
+                            if (!canCheckComplete) {
+                                log.error("Mold {} is not complete in prestep {}", moldDeliverProgress.getMold(), preSteps);
+                                throw new BusinessException("Mold " + moldDeliverProgress.getMold().getSize() + " is not complete in prestep");
+                            }
                         }
-
-                        if (!canCheckComplete) {
-                            log.error("Mold {} is not complete in prestep {}", moldDeliverProgress.getMold(), preSteps);
-                            throw new BusinessException("Mold " + moldDeliverProgress.getMold().getSize() + " is not complete in prestep");
-                        }
+                        listUpdateToComplete.add(moldDeliverProgress);
+                        moldDeliverProgress.setIsCompleted(Boolean.TRUE);
+                    } else {
+                        listUpdateToComplete.add(moldDeliverProgress);
+                        moldDeliverProgress.setIsCompleted(Boolean.TRUE);
                     }
-
-                    listUpdateToComplete.add(moldDeliverProgress);
-                    moldDeliverProgress.setIsCompleted(Boolean.TRUE);
                 }
             }
         });
