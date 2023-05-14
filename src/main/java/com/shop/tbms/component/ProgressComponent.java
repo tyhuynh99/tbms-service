@@ -8,6 +8,7 @@ import com.shop.tbms.dto.step.detail.progress.MoldElementProgressDetailDTO;
 import com.shop.tbms.dto.step.detail.progress.MoldProgressDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.entity.common.AbstractAuditingEntity;
+import com.shop.tbms.enumerate.mold.MoldType;
 import com.shop.tbms.enumerate.step.ReportType;
 import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.enumerate.step.StepType;
@@ -17,7 +18,6 @@ import com.shop.tbms.repository.MoldProgressRepository;
 import com.shop.tbms.repository.StepRepository;
 import com.shop.tbms.util.MoldUtil;
 import com.shop.tbms.util.ProgressUtil;
-import com.shop.tbms.util.StepConditionUtil;
 import com.shop.tbms.util.StepUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,8 +69,26 @@ public class ProgressComponent {
         log.info("End generate progress for step {}", step);
     }
 
-    public List<MoldProgressDTO> setReportAvailabilityForMoldProgress(List<Step> preStepList, List<Step> nextStepList, List<MoldProgressDTO> moldProgressDTOList, Step currentStep) {
-        return moldProgressDTOList.stream().map(moldProgressDTO -> {
+    public List<MoldProgressDTO> setReportAvailabilityForMoldProgress(List<Step> preStepList, List<Step> nextStepList, List<MoldProgressDTO> moldProgressDTOList, Step currentStep, Long orderId) {
+        List<MoldProgress> listFreeFromProgress = new ArrayList<>();
+        List<Long> listMoldId = new ArrayList<>();
+
+        if (stepConstant.getListStepForFreeform().contains(currentStep.getCode())) {
+            int freefrom = MoldType.FREEFORM.getValue();
+            if (!currentStep.getListMoldProgress().isEmpty()) {
+                listFreeFromProgress = currentStep.getListMoldProgress().stream()
+                        .filter(x -> x.getMold().getMoldGroup() != null && freefrom == x.getMold().getMoldGroup().getType().getValue())
+                        .collect(Collectors.toList());
+                if (!listFreeFromProgress.isEmpty()) {
+                    listMoldId = listFreeFromProgress.stream()
+                            .map(x -> x.getMold().getId())
+                            .collect(Collectors.toList());
+                }
+
+            }
+        }
+
+        for (MoldProgressDTO moldProgressDTO : moldProgressDTOList) {
             boolean canCheck = true;
             if (!StepType.FIXING.equals(currentStep.getType())) {
                 for (Step preStep : preStepList) {
@@ -92,9 +110,72 @@ public class ProgressComponent {
             }
             log.info("Set value canUncheck of {} is {}", moldProgressDTO, canUncheck);
             moldProgressDTO.setCanUncheck(canUncheck);
+            if (!listFreeFromProgress.isEmpty() && !listMoldId.isEmpty()) {
+                if (listMoldId.contains(moldProgressDTO.getMoldId())) {
+                    handleFreefrom(currentStep, orderId, moldProgressDTO);
+                }
+            }
 
-            return moldProgressDTO;
-        }).collect(Collectors.toList());
+        }
+        return moldProgressDTOList;
+    }
+
+    private void handleFreefrom(Step currentStep, Long orderId, MoldProgressDTO moldProgressDTO) {
+        if (Objects.isNull(orderId)) {
+            return;
+        }
+        String stepCode = currentStep.getCode();
+        if (!stepConstant.getCode3D_KHUON().equals(stepCode) &&
+                !stepConstant.getCodeRAP_KHUON().equals(stepCode) &&
+                !stepConstant.getCodeXI_MA_SON_DANH_BONG().equals(stepCode)) {
+            return;
+        }
+        if (stepConstant.getCode3D_KHUON().equals(stepCode)) {
+            Optional<Step> stepBeforeOpt = stepRepository.findFirstByCodeAndProcedureOrderId(stepConstant.getCodeDAT_VAT_TU(), orderId);
+            if (stepBeforeOpt.isEmpty()) {
+                return;
+            }
+            Step stepBefore = stepBeforeOpt.get();
+            List<MoldProgress> listMoldProgress = stepBefore.getListMoldProgress();
+            if (listMoldProgress.isEmpty()) {
+                return;
+            }
+            Optional<MoldProgress> moldProgressOpt = listMoldProgress.stream()
+                    .filter(x -> Objects.equals(x.getMold().getId(), moldProgressDTO.getMoldId()))
+                    .findFirst();
+            if (moldProgressOpt.isEmpty()) {
+                return;
+            }
+            MoldProgress moldProgress = moldProgressOpt.get();
+            if (Boolean.TRUE.equals(moldProgress.getIsCompleted())) {
+                moldProgressDTO.setCanCheck(Boolean.TRUE);
+            } else {
+                moldProgressDTO.setCanCheck(Boolean.FALSE);
+            }
+        }
+        if (stepConstant.getCodeRAP_KHUON().equals(stepCode)) {
+            Optional<Step> stepBeforeOpt = stepRepository.findFirstByCodeAndProcedureOrderId(stepConstant.getCodeHOP_KHUON(), orderId);
+            if (stepBeforeOpt.isEmpty()) {
+                return;
+            }
+            Step stepBefore = stepBeforeOpt.get();
+            List<MoldProgress> listMoldProgress = stepBefore.getListMoldProgress();
+            if (listMoldProgress.isEmpty()) {
+                return;
+            }
+            Optional<MoldProgress> moldProgressOpt = listMoldProgress.stream()
+                    .filter(x -> Objects.equals(x.getMold().getId(), moldProgressDTO.getMoldId()))
+                    .findFirst();
+            if (moldProgressOpt.isEmpty()) {
+                return;
+            }
+            MoldProgress moldProgress = moldProgressOpt.get();
+            if (Boolean.TRUE.equals(moldProgress.getIsCompleted())) {
+                moldProgressDTO.setCanCheck(Boolean.TRUE);
+            } else {
+                moldProgressDTO.setCanCheck(Boolean.FALSE);
+            }
+        }
     }
 
 //    public List<MoldElementProgressDTO> setReportAvailabilityForMoldElementProgress(Step preStep, Step nextStep, List<MoldElementProgressDTO> moldElementProgressDTOList) {
@@ -363,7 +444,7 @@ public class ProgressComponent {
                 listUpdatedProgress.add(moldProgress);
             }
             // TODO: recheck, if it works, remove code
-                /* else set progress complete to false */
+            /* else set progress complete to false */
 
 //                } else {
 //                    log.info("mold progress is not existed. create new mold progress.");
@@ -485,10 +566,10 @@ public class ProgressComponent {
                         .filter(moldGroupElementProgress ->
                                 Objects.nonNull(moldGroupElementProgress)
                                         &&
-                                Objects.nonNull(moldGroupElementProgress.getMoldGroupElement())
+                                        Objects.nonNull(moldGroupElementProgress.getMoldGroupElement())
                                         &&
-                                element.getName().equalsIgnoreCase(
-                                        moldGroupElementProgress.getMoldGroupElement().getName()))
+                                        element.getName().equalsIgnoreCase(
+                                                moldGroupElementProgress.getMoldGroupElement().getName()))
                         .findFirst();
 
                 if (chkProgress.isPresent()) {

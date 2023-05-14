@@ -5,17 +5,17 @@ import com.shop.tbms.constant.LogConstant;
 import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.FileDTO;
 import com.shop.tbms.dto.order.OrderStepRespDTO;
-import com.shop.tbms.dto.step.report.*;
+import com.shop.tbms.dto.step.report.ReportChecklistReqDTO;
+import com.shop.tbms.dto.step.report.ReportEvidenceReqDTO;
+import com.shop.tbms.dto.step.report.ReportProgressReqDTO;
+import com.shop.tbms.dto.step.report.ReportStepReqDTO;
 import com.shop.tbms.dto.step.upd_expect_date.UpdateExpectedCompleteReqDTO;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.mold.MoldType;
 import com.shop.tbms.enumerate.order.OrderStatus;
 import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.enumerate.step.StepType;
-import com.shop.tbms.repository.AccountRepository;
-import com.shop.tbms.repository.EvidenceRepository;
-import com.shop.tbms.repository.MoldProgressRepository;
-import com.shop.tbms.repository.PurchaseOrderRepository;
+import com.shop.tbms.repository.*;
 import com.shop.tbms.service.FileService;
 import com.shop.tbms.util.EvidenceUtil;
 import com.shop.tbms.util.ReportLogUtil;
@@ -26,7 +26,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.shop.tbms.constant.AppConstant.ZERO;
@@ -53,6 +56,9 @@ public class StepComponent {
 
     @Autowired
     private ProgressComponent progressComponent;
+
+    @Autowired
+    private StepRepository stepRepository;
 
     public List<OrderStepRespDTO> setPercentProgress(List<OrderStepRespDTO> listStepDTO, List<Step> listOriginStep) {
         for (OrderStepRespDTO respDTO : listStepDTO) {
@@ -120,10 +126,11 @@ public class StepComponent {
         }
     }
 
-    public void updateMoldProgress(Step currentStep, List<ReportProgressReqDTO> listReq, List<String> logDetail) {
+    public void updateMoldProgress(Step currentStep, List<ReportProgressReqDTO> listReq, List<String> logDetail, PurchaseOrder currentOrder) {
         List<MoldProgress> progressList = currentStep.getListMoldProgress();
+        boolean isStepForFreeFrom = stepConstant.getListStepForFreeform().contains(currentStep.getCode());
         // lọc khuôn freeform
-        if (!stepConstant.getListStepForFreeform().contains(currentStep.getCode())) {
+        if (!isStepForFreeFrom) {
             int freefrom = MoldType.FREEFORM.getValue();
             progressList = progressList.stream()
                     .filter(x -> x.getMold().getMoldGroup().getType().getValue() != freefrom)
@@ -168,28 +175,32 @@ public class StepComponent {
                         } else if (Boolean.FALSE.equals(moldProgress.getIsCompleted()) && Boolean.TRUE.equals(reqDTO.getIsCompleted())) {
                             /* update to complete */
                             log.info("Update progress {} to complete", moldProgress);
+                            if (!(MoldType.FREEFORM.getValue() == moldProgress.getMold().getMoldGroup().getType().getValue())) {
+                                /* validate complete in pre-step */
+                                if (Boolean.FALSE.equals(currentStep.getIsStart()) && !StepType.FIXING.equals(currentStep.getType())) {
+                                    boolean canCheckComplete = true;
 
-                            /* validate complete in pre-step */
-                            if (Boolean.FALSE.equals(currentStep.getIsStart()) && !StepType.FIXING.equals(currentStep.getType())) {
-                                boolean canCheckComplete = true;
+                                    List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
+                                    for (Step preStep : preSteps) {
+                                        canCheckComplete &= progressComponent.canCheckCompleteByMoldId(
+                                                preStep,
+                                                moldProgress.getMold().getId()
+                                        );
+                                    }
 
-                                List<Step> preSteps = StepUtil.getPreStepToChkProgress(currentStep.getListStepAfter());
-                                for (Step preStep : preSteps) {
-                                    canCheckComplete &= progressComponent.canCheckCompleteByMoldId(
-                                            preStep,
-                                            moldProgress.getMold().getId()
-                                    );
+                                    if (!canCheckComplete) {
+                                        log.error("Mold {} is not complete in prestep {}", moldProgress.getMold(), preSteps);
+                                        throw new BusinessException("Mold " + moldProgress.getMold().getSize() + " is not complete in prestep");
+                                    }
+
                                 }
 
-                                if (!canCheckComplete) {
-                                    log.error("Mold {} is not complete in prestep {}", moldProgress.getMold(), preSteps);
-                                    throw new BusinessException("Mold " + moldProgress.getMold().getSize() + " is not complete in prestep");
-                                }
-
+                                listUpdateToComplete.add(moldProgress);
+                                moldProgress.setIsCompleted(Boolean.TRUE);
+                            } else {
+                                listUpdateToComplete.add(moldProgress);
+                                moldProgress.setIsCompleted(Boolean.TRUE);
                             }
-
-                            listUpdateToComplete.add(moldProgress);
-                            moldProgress.setIsCompleted(Boolean.TRUE);
                         }
                     }
                 });

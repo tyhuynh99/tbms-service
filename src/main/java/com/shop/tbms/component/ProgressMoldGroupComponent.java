@@ -107,6 +107,17 @@ public class ProgressMoldGroupComponent {
                             break;
                         default:
                     }
+                } else {
+                    // Xử lý cho trường hợp còn lại
+                    if (stepConstant.getCodeRAP_KHUON().equals(step.getCode())) {
+                        List<MoldProgress> moldProgressListForMoldGroup = ProgressUtil.generateMoldProcessForMoldGroup(
+                                step,
+                                listUpdateMold);
+
+                        step.setListMoldProgress(moldProgressListForMoldGroup);
+
+                        listUpdatedMoldProgress.addAll(moldProgressListForMoldGroup);
+                    }
                 }
             } else if (BY_MOLD_ELEMENT.equals(step.getReportType())) {
                 List<MoldGroupElementProgress> moldGroupElementProgressList = ProgressUtil.generateMoldGroupElementProgress(

@@ -1,17 +1,11 @@
 package com.shop.tbms.util;
 
-import com.shop.tbms.entity.Mold;
-import com.shop.tbms.entity.MoldDeliverProgress;
-import com.shop.tbms.entity.MoldGroupElementProgress;
-import com.shop.tbms.entity.MoldProgress;
-import com.shop.tbms.entity.PurchaseOrder;
-import com.shop.tbms.entity.Step;
-import com.shop.tbms.entity.StepSequence;
+import com.shop.tbms.entity.*;
+import com.shop.tbms.enumerate.mold.MoldType;
 import com.shop.tbms.enumerate.step.StepType;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -186,7 +180,14 @@ public class StepUtil {
 
     public static long calPercentByMold(Step step) {
         List<MoldProgress> listMoldProgress = step.getListMoldProgress();
-
+        if (!STEPS_NOT_LOI_DE.contains(step.getCode())) {
+            listMoldProgress = listMoldProgress.stream().filter(x -> {
+                if (!Objects.isNull(x.getMold().getMoldGroup())) {
+                    return MoldType.FREEFORM.getValue() != x.getMold().getMoldGroup().getType().getValue();
+                }
+                return true;
+            }).collect(Collectors.toList());
+        }
         if (CollectionUtils.isEmpty(listMoldProgress)) return ZERO_LONG;
 
         long completedMold = listMoldProgress.stream()
@@ -196,14 +197,28 @@ public class StepUtil {
         return (long) (((double) completedMold / totalMold) * 100);
     }
 
-    private static final List<String> STEPS_FOR_LOI_DE = Arrays.asList("3D_GO", "CAM_GO", "CNC_GO_IN", "GO_TIA_TOT");
+    private static final List<String> STEPS_NOT_LOI_DE = Arrays.asList("2D", "DAT_VAT_TU", "3D_KHUON", "CAM_KHUON", "CNC_KHUON", "HOP_KHUON", "RAP_KHUON", "THU_KHUON", "SUA_KHUON", "XI_MA_SON_DANH_BONG", "KIEM_TRA", "GIAO_HANG");
 
     public static long calPercentByMoldGroupElement(Step step) {
         List<MoldGroupElementProgress> listMoldGroupElementProgresses = step.getListMoldGroupElementProgresses();
-        List<MoldProgress> moldProgressList = new ArrayList<>();
+        List<MoldProgress> moldProgressList = step.getListMoldProgress();
 
-        if (STEPS_FOR_LOI_DE.contains(step.getCode())) {
-            moldProgressList = step.getListMoldProgress();
+        if (!STEPS_NOT_LOI_DE.contains(step.getCode())) {
+            moldProgressList = moldProgressList.stream()
+                    .filter(x -> {
+                        if (!Objects.isNull(x.getMold().getMoldGroup())) {
+                            return MoldType.FREEFORM.getValue() != x.getMold().getMoldGroup().getType().getValue();
+                        }
+                        return true;
+                    }).collect(Collectors.toList());
+
+            listMoldGroupElementProgresses = listMoldGroupElementProgresses.stream()
+                    .filter(x -> {
+                        if (!Objects.isNull(x.getMold().getMoldGroup())) {
+                            return MoldType.FREEFORM.getValue() != x.getMold().getMoldGroup().getType().getValue();
+                        }
+                        return true;
+                    }).collect(Collectors.toList());
         }
 
         if (CollectionUtils.isEmpty(listMoldGroupElementProgresses) && CollectionUtils.isEmpty(moldProgressList)) {
@@ -222,7 +237,15 @@ public class StepUtil {
 
     public static long calPercentByMoldDeliver(Step step) {
         List<MoldDeliverProgress> listMoldDeliverProgress = step.getListMoldDeliverProgress();
-
+        if (!STEPS_NOT_LOI_DE.contains(step.getCode())) {
+            listMoldDeliverProgress = listMoldDeliverProgress.stream()
+                    .filter(x -> {
+                        if (!Objects.isNull(x.getMold().getMoldGroup())) {
+                            return MoldType.FREEFORM.getValue() != x.getMold().getMoldGroup().getType().getValue();
+                        }
+                        return true;
+                    }).collect(Collectors.toList());
+        }
         if (CollectionUtils.isEmpty(listMoldDeliverProgress)) return ZERO_LONG;
 
         long completedMoldDeliver = listMoldDeliverProgress.stream()

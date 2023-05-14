@@ -7,8 +7,6 @@ import com.shop.tbms.constant.LogConstant;
 import com.shop.tbms.constant.MessageConstant;
 import com.shop.tbms.constant.NotificationConstant;
 import com.shop.tbms.constant.StepConstant;
-import com.shop.tbms.dto.mold.MoldDTO;
-import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.SuccessRespDTO;
 import com.shop.tbms.dto.mold.MoldDTO;
 import com.shop.tbms.dto.noti.FBNotificationRequestDTO;
@@ -131,26 +129,47 @@ public class StepServiceImpl implements StepService {
         List<MoldDeliverProgress> moldDeliverProgressList = step.getListMoldDeliverProgress();
         List<Mold> moldPurchaseList = step.getProcedure().getPurchaseOrder().getListMold();
 
+        Long orderId = null;
+        if (!moldPurchaseList.isEmpty()) {
+            Mold tempMold = moldPurchaseList.stream().findFirst().get();
+            orderId = tempMold.getPurchaseOrder().getId();
+        }
+
         // lọc khuôn freeform
         if (!stepConstant.getListStepForFreeform().contains(step.getCode())) {
             int freefrom = MoldType.FREEFORM.getValue();
 
             moldProgressList = moldProgressList.stream()
-                    .filter(x -> x.getMold().getMoldGroup().getType().getValue() != freefrom)
+                    .filter(x -> {
+                        if (x.getMold().getMoldGroup() != null) {
+                            return x.getMold().getMoldGroup().getType().getValue() != freefrom;
+                        }
+                        return true;
+                    })
                     .collect(Collectors.toList());
 
             moldDeliverProgressList = moldDeliverProgressList.stream()
-                    .filter( x-> x.getMold().getMoldGroup().getType().getValue() != freefrom)
+                    .filter(x -> {
+                        if (x.getMold().getMoldGroup() != null) {
+                            return x.getMold().getMoldGroup().getType().getValue() != freefrom;
+                        }
+                        return true;
+                    })
                     .collect(Collectors.toList());
 
             moldPurchaseList = moldPurchaseList.stream()
-                    .filter(x -> x.getMoldGroup().getType().getValue() != freefrom)
+                    .filter(x -> {
+                        if (x.getMoldGroup() != null) {
+                            return x.getMoldGroup().getType().getValue() != freefrom;
+                        }
+                        return true;
+                    })
                     .collect(Collectors.toList());
         }
 
         switch (step.getReportType()) {
             case BY_MOLD:
-
+                log.info("Get Step with report type BY_MOLD");
                 dto.setListMoldProgress(moldProgressMapper.toDTOs(moldProgressList));
                 if (!StepStatus.COMPLETED.equals(step.getStatus())) {
                     dto.setListMoldProgress(
@@ -158,11 +177,13 @@ public class StepServiceImpl implements StepService {
                                     preStep,
                                     nextStep,
                                     dto.getListMoldProgress(),
-                                    step)
+                                    step,
+                                    orderId)
                     );
                 }
                 break;
             case BY_MOLD_SEND_RECEIVE:
+                log.info("Get Step with report type BY_MOLD_SEND_RECEIVE");
                 dto.setListMoldDeliverProgress(moldDeliverProgressMapper.toDTOs(moldDeliverProgressList));
                 if (!StepStatus.COMPLETED.equals(step.getStatus())) {
                     dto.setListMoldDeliverProgress(
@@ -175,6 +196,7 @@ public class StepServiceImpl implements StepService {
                 }
                 break;
             case BY_MOLD_ELEMENT:
+                log.info("Get Step with report type BY_MOLD_ELEMENT");
                 List<Long> moldIds = new ArrayList<>();
                 List<MoldElementProgressDTO> moldElementProgressDTOList = moldPurchaseList.stream()
                         .map(mold ->
@@ -213,7 +235,8 @@ public class StepServiceImpl implements StepService {
                                         preStep,
                                         nextStep,
                                         dto.getListMoldProgress(),
-                                        step)
+                                        step,
+                                        orderId)
                         );
                     }
                 }
@@ -258,7 +281,7 @@ public class StepServiceImpl implements StepService {
         switch (currentStep.getReportType()) {
             case BY_MOLD:
                 log.info("Start update progress of report type = BY_MOLD");
-                stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress(), logDetail);
+                stepComponent.updateMoldProgress(currentStep, reportStepReqDTO.getProgress(), logDetail, currentOrder);
 
                 List<MoldProgress> listDeleteProgress = currentMoldProgress.stream()
                         .filter(moldProgress -> Objects.isNull(moldProgress.getIsCompleted()))
@@ -288,7 +311,7 @@ public class StepServiceImpl implements StepService {
                     moldGroupElementProgressRepository.saveAll(currentMoldElementProgress);
 
                     List<ReportProgressReqDTO> moldProgressList = reportStepReqDTO.getProgress().stream().filter(x -> moldProgressIds.contains(x.getProgressId())).collect(Collectors.toList());
-                    stepComponent.updateMoldProgress(currentStep, moldProgressList, logDetail);
+                    stepComponent.updateMoldProgress(currentStep, moldProgressList, logDetail, currentOrder);
                     List<MoldProgress> listDeleteProgress1 = currentMoldProgress.stream()
                             .filter(moldProgress -> Objects.isNull(moldProgress.getIsCompleted()))
                             .collect(Collectors.toList());
@@ -330,9 +353,6 @@ public class StepServiceImpl implements StepService {
 
         log.info("Start update evidences");
         stepComponent.updateEvidence(currentStep, reportStepReqDTO.getEvidence(), reportLog);
-        StepSequence stepSequence = currentStep.getListStepAfter().get(0);
-        List<Step> nextSteps = StepUtil.getNextStepToChkProgress(Collections.singletonList(stepSequence));
-        if (currentStep.getCode().equals(stepConstant.))
 
         /* set status next step */
         log.info("Start change status for next step");

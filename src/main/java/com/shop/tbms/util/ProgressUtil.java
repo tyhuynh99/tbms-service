@@ -1,9 +1,7 @@
 package com.shop.tbms.util;
 
-import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.entity.*;
 import com.shop.tbms.enumerate.mold.MoldDeliverProgressType;
-import com.shop.tbms.enumerate.mold.MoldType;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
