@@ -3,7 +3,14 @@ package com.shop.tbms.component;
 import com.shop.tbms.constant.StepConstant;
 import com.shop.tbms.dto.mold.MoldGroupDetailReqDTO;
 import com.shop.tbms.dto.mold.MoldGroupReqDTO;
-import com.shop.tbms.entity.*;
+import com.shop.tbms.entity.Mold;
+import com.shop.tbms.entity.MoldDeliverProgress;
+import com.shop.tbms.entity.MoldGroup;
+import com.shop.tbms.entity.MoldGroupElement;
+import com.shop.tbms.entity.MoldGroupElementProgress;
+import com.shop.tbms.entity.MoldProgress;
+import com.shop.tbms.entity.PurchaseOrder;
+import com.shop.tbms.entity.Step;
 import com.shop.tbms.enumerate.mold.MoldType;
 import com.shop.tbms.enumerate.step.StepStatus;
 import com.shop.tbms.enumerate.step.StepType;
@@ -66,18 +73,10 @@ public class ProgressMoldGroupComponent {
                             .collect(Collectors.toList());
                     step.setListMoldGroupElementProgresses(moldGroupElementProgressList);
                     listUpdatedMoldElementProgress.addAll(moldGroupElementProgressList);
-                }
-
-
-                List<Mold> listMoldNotForLoiDe = listUpdateMold.stream().filter(x -> {
-                    List<MoldGroupElement> listElements = x.getMoldGroup().getListMoldGroupElement();
-                    listElements = listElements.stream().filter(element -> !element.getName().equals("Lõi đè")).collect(Collectors.toList());
-                    return !listElements.isEmpty();
-                }).collect(Collectors.toList());
-                if (!listMoldNotForLoiDe.isEmpty()) {
+                } else {
                     List<MoldProgress> moldProgressListForMoldGroup = ProgressUtil.generateMoldProcessForMoldGroup(
                             step,
-                            listMoldNotForLoiDe);
+                            listUpdateMold);
 
                     step.setListMoldProgress(moldProgressListForMoldGroup);
 
