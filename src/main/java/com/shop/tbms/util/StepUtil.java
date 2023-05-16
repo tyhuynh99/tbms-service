@@ -1,6 +1,12 @@
 package com.shop.tbms.util;
 
-import com.shop.tbms.entity.*;
+import com.shop.tbms.entity.Mold;
+import com.shop.tbms.entity.MoldDeliverProgress;
+import com.shop.tbms.entity.MoldGroupElementProgress;
+import com.shop.tbms.entity.MoldProgress;
+import com.shop.tbms.entity.PurchaseOrder;
+import com.shop.tbms.entity.Step;
+import com.shop.tbms.entity.StepSequence;
 import com.shop.tbms.enumerate.mold.MoldType;
 import com.shop.tbms.enumerate.step.StepType;
 import org.springframework.util.CollectionUtils;
@@ -197,20 +203,28 @@ public class StepUtil {
         return (long) (((double) completedMold / totalMold) * 100);
     }
 
-    private static final List<String> STEPS_NOT_LOI_DE = Arrays.asList("2D", "DAT_VAT_TU", "3D_KHUON", "CAM_KHUON", "CNC_KHUON", "HOP_KHUON", "RAP_KHUON", "THU_KHUON", "SUA_KHUON", "XI_MA_SON_DANH_BONG", "KIEM_TRA", "GIAO_HANG");
+    private static final List<String> STEPS_NOT_LOI_DE = Arrays.asList("2D", "DAT_VAT_TU", "3D_KHUON", "CAM_KHUON", "CNC_KHUON", "HOP_KHUON", "RAP_KHUON", "PHONG_DIEN", "THU_KHUON", "SUA_KHUON", "TAO_HOA", "XI_MA_SON_DANH_BONG", "KIEM_TRA", "GIAO_HANG");
+    private static final List<String> STEPS_FOR_FREEFORM = Arrays.asList("2D", "DAT_VAT_TU", "3D_KHUON", "CAM_KHUON", "CNC_KHUON", "HOP_KHUON", "RAP_KHUON", "THU_KHUON", "SUA_KHUON", "XI_MA_SON_DANH_BONG", "KIEM_TRA", "GIAO_HANG");
 
     public static long calPercentByMoldGroupElement(Step step) {
         List<MoldGroupElementProgress> listMoldGroupElementProgresses = step.getListMoldGroupElementProgresses();
         List<MoldProgress> moldProgressList = step.getListMoldProgress();
 
+        List<Long> duplicateMolds = listMoldGroupElementProgresses.stream().map(x -> x.getMold().getId()).collect(Collectors.toList());
+        if (!duplicateMolds.isEmpty()) {
+            moldProgressList = moldProgressList.stream().filter(x -> !duplicateMolds.contains(x.getMold().getId())).collect(Collectors.toList());
+        }
+
         if (!STEPS_NOT_LOI_DE.contains(step.getCode())) {
-            moldProgressList = moldProgressList.stream()
-                    .filter(x -> {
-                        if (!Objects.isNull(x.getMold().getMoldGroup())) {
-                            return MoldType.FREEFORM.getValue() != x.getMold().getMoldGroup().getType().getValue();
-                        }
-                        return true;
-                    }).collect(Collectors.toList());
+            if (!STEPS_FOR_FREEFORM.contains(step.getCode())) {
+                moldProgressList = moldProgressList.stream()
+                        .filter(x -> {
+                            if (!Objects.isNull(x.getMold().getMoldGroup())) {
+                                return MoldType.FREEFORM.getValue() != x.getMold().getMoldGroup().getType().getValue();
+                            }
+                            return true;
+                        }).collect(Collectors.toList());
+            }
 
             listMoldGroupElementProgresses = listMoldGroupElementProgresses.stream()
                     .filter(x -> {
