@@ -39,9 +39,9 @@ logging:
 
 # firebase
 firebase:
-  admin-key: tbms-firebase-firebase-adminsdk-l0zvj-65bec8e059.json
-  bucket-name: tbms-firebase.appspot.com
-  preview-url: https://firebasestorage.googleapis.com/v0/b/tbms-firebase.appspot.com/o/%s?alt=media
+  admin-key: tbms-a082d-firebase-adminsdk-43tdy-6fc21f54ab.json
+  bucket-name: tbms-a082d.appspot.com
+  preview-url: https://firebasestorage.googleapis.com/v0/b/tbms-a082d.appspot.com/o/%s?alt=media
 
 ---
 
@@ -58,9 +58,9 @@ server:
 spring:
   profiles: dev
   datasource:
-    url: jdbc:postgresql://${DB_SERVER}:${DB_PORT}/tbms-dev
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://61.28.226.121:5432/tbms-dev
+    username: admin
+    password: Th@ibinhmoldshop123
     sql-script-encoding: UTF-8
     hikari:
       connectionTimeout: 20000
@@ -84,6 +84,6 @@ logging:
 
 # firebase
 firebase:
-  admin-key: ${ADMIN_KEY_FILE_PATH}
-  bucket-name: ${BUCKET_NAME}
-  preview-url: ${PREVIEW_URL}
+  admin-key: ~/tbms-a082d-firebase-adminsdk-43tdy-6fc21f54ab.json
+  bucket-name: tbms-a082d.appspot.com
+  preview-url: https://firebasestorage.googleapis.com/v0/b/tbms-a082d.appspot.com/o/%s?alt=media
