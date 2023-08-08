@@ -70,6 +70,7 @@ public class AuthenticateServiceImpl implements AuthenticateService {
         Optional<Device> deviceChk = deviceRepository.findFirstByDeviceId(loginReqDTO.getDeviceToken());
         if (deviceChk.isPresent()) {
             deviceRepository.delete(deviceChk.get());
+            deviceRepository.flush();
         }
         /* insert new device token */
         Device device = new Device();
