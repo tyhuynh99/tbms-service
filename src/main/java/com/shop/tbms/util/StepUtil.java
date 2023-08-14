@@ -186,7 +186,7 @@ public class StepUtil {
 
     public static long calPercentByMold(Step step) {
         List<MoldProgress> listMoldProgress = step.getListMoldProgress();
-        if (!STEPS_NOT_LOI_DE.contains(step.getCode())) {
+        if (!STEPS_FOR_FREEFORM.contains(step.getCode())) {
             listMoldProgress = listMoldProgress.stream().filter(x -> {
                 if (!Objects.isNull(x.getMold().getMoldGroup())) {
                     return MoldType.FREEFORM.getValue() != x.getMold().getMoldGroup().getType().getValue();
@@ -251,7 +251,7 @@ public class StepUtil {
 
     public static long calPercentByMoldDeliver(Step step) {
         List<MoldDeliverProgress> listMoldDeliverProgress = step.getListMoldDeliverProgress();
-        if (!STEPS_NOT_LOI_DE.contains(step.getCode())) {
+        if (!STEPS_FOR_FREEFORM.contains(step.getCode())) {
             listMoldDeliverProgress = listMoldDeliverProgress.stream()
                     .filter(x -> {
                         if (!Objects.isNull(x.getMold().getMoldGroup())) {
