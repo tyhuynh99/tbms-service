@@ -10,7 +10,8 @@ server:
 spring:
   profiles: default
   datasource:
-    url: jdbc:postgresql://61.28.226.121:5432/tbms-dev
+#    url: jdbc:postgresql://61.28.226.121:5432/tbms-dev
+    url: jdbc:postgresql://localhost:5432/tbms-dev
     username: admin
     password: Th@ibinhmoldshop123
     sql-script-encoding: UTF-8
@@ -84,6 +85,6 @@ logging:
 
 # firebase
 firebase:
-  admin-key: ~/tbms-a082d-firebase-adminsdk-43tdy-6fc21f54ab.json
+  admin-key: tbms-a082d-firebase-adminsdk-43tdy-6fc21f54ab.json
   bucket-name: tbms-a082d.appspot.com
   preview-url: https://firebasestorage.googleapis.com/v0/b/tbms-a082d.appspot.com/o/%s?alt=media
