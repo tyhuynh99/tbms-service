@@ -40,9 +40,9 @@ logging:
 
 # firebase
 firebase:
-  admin-key: tbms-a082d-firebase-adminsdk-43tdy-6fc21f54ab.json
-  bucket-name: tbms-a082d.appspot.com
-  preview-url: https://firebasestorage.googleapis.com/v0/b/tbms-a082d.appspot.com/o/%s?alt=media
+  admin-key: tbms-firebase-firebase-adminsdk-l0zvj-65bec8e059.json
+  bucket-name: tbms-firebase.appspot.com
+  preview-url: https://firebasestorage.googleapis.com/v0/b/tbms-firebase.appspot.com/o/%s?alt=media
 
 ---
 
@@ -85,6 +85,6 @@ logging:
 
 # firebase
 firebase:
-  admin-key: tbms-a082d-firebase-adminsdk-43tdy-6fc21f54ab.json
-  bucket-name: tbms-a082d.appspot.com
-  preview-url: https://firebasestorage.googleapis.com/v0/b/tbms-a082d.appspot.com/o/%s?alt=media
+  admin-key: tbms-firebase-firebase-adminsdk-l0zvj-65bec8e059.json
+  bucket-name: tbms-firebase.appspot.com
+  preview-url: https://firebasestorage.googleapis.com/v0/b/tbms-firebase.appspot.com/o/%s?alt=media
