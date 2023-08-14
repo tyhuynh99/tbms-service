@@ -58,7 +58,7 @@ server:
 spring:
   profiles: dev
   datasource:
-    url: jdbc:postgresql://61.28.226.121:5432/tbms-dev
+    url: jdbc:postgresql://localhost:5432/tbms-dev
     username: admin
     password: Th@ibinhmoldshop123
     sql-script-encoding: UTF-8
