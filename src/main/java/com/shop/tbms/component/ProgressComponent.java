@@ -305,12 +305,18 @@ public class ProgressComponent {
                 return progressList.stream().allMatch(moldProgress -> Boolean.TRUE.equals(moldProgress.getIsCompleted()));
             case BY_MOLD_ELEMENT:
                 log.info("Check complete of mold size {} with preStep mold element progress {}", moldId, preStep.getListMoldGroupElementProgresses());
+                List<MoldProgress> moldProgressList = new ArrayList<>();
+                if (stepConstant.getListStepForLoiDe().contains(preStep.getCode())) {
+                    moldProgressList = preStep.getListMoldProgress().stream()
+                            .filter(moldProgress -> moldId.equals(moldProgress.getMold().getId()))
+                            .collect(Collectors.toList());
+                }
                 List<MoldGroupElementProgress> elementProgressesBySize = preStep.getListMoldGroupElementProgresses().stream()
                         .filter(moldGroupElementProgress ->
                                 moldId.equals(moldGroupElementProgress.getMold().getId()))
                         .collect(Collectors.toList());
 
-                if (CollectionUtils.isEmpty(elementProgressesBySize)) {
+                if (CollectionUtils.isEmpty(elementProgressesBySize) && CollectionUtils.isEmpty(moldProgressList)) {
                     if (Boolean.TRUE.equals(preStep.getHasCondition())) {
                         log.info("Step hasCondition, and not found progress of mold size {}. Need to check preStep", moldId);
                         Step preOfPreStep = StepUtil.getPreMainStep(preStep.getListStepAfter());
@@ -319,8 +325,8 @@ public class ProgressComponent {
                     return false;
                 }
 
-                return elementProgressesBySize.stream()
-                        .allMatch(MoldGroupElementProgress::getIsCompleted);
+                return elementProgressesBySize.stream().allMatch(MoldGroupElementProgress::getIsCompleted) ||
+                        moldProgressList.stream().allMatch(MoldProgress::getIsCompleted);
             case BY_MOLD_SEND_RECEIVE:
                 log.info("Check complete of mold size {} with preStep mold deliver progress {}", moldId, preStep.getListMoldDeliverProgress());
                 List<MoldDeliverProgress> deliverProgressList = preStep.getListMoldDeliverProgress().stream()
